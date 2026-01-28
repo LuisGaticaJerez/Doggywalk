@@ -6,13 +6,13 @@ function Home() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
       color: 'white',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '20px'
     }}>
       <h1 style={{ fontSize: '3rem', marginBottom: '1rem', fontWeight: 'bold' }}>
-        🐾 Doggywalk
+        Doggywalk
       </h1>
       <p style={{ fontSize: '1.5rem', opacity: 0.9 }}>
         Pet Services Platform
