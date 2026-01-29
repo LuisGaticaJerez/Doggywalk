@@ -53,8 +53,8 @@ export default function Dashboard() {
           <div style={{
             width: '48px',
             height: '48px',
-            border: '4px solid #e2e8f0',
-            borderTopColor: '#0ea5e9',
+            border: '4px solid #FFE5B4',
+            borderTopColor: '#FF8C42',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px'
@@ -68,36 +68,59 @@ export default function Dashboard() {
   return (
     <Layout>
       <div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          {t.dashboard.welcome}, {profile?.full_name}!
-        </h1>
-        <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          {profile?.role === 'owner' ? 'Manage your pets and bookings' : 'Manage your services and bookings'}
-        </p>
+        <div style={{
+          background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+          padding: '32px',
+          borderRadius: '16px',
+          marginBottom: '32px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(255, 140, 66, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            right: '-20px',
+            top: '-20px',
+            fontSize: '8rem',
+            opacity: 0.15
+          }}>🐾</div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', position: 'relative' }}>
+            {profile?.role === 'owner' ? '🐶' : '👨‍⚕️'} {t.dashboard.welcome}, {profile?.full_name}!
+          </h1>
+          <p style={{ opacity: 0.95, fontSize: '1.125rem' }}>
+            {profile?.role === 'owner' ? '🏠 Manage your pets and bookings' : '💼 Manage your services and bookings'}
+          </p>
+        </div>
 
         {profile?.role === 'owner' ? (
           <div style={{ display: 'grid', gap: '24px' }}>
             <div style={{
               background: 'white',
               padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0'
+              borderRadius: '16px',
+              border: '2px solid #FFE5B4',
+              boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>My Pets</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>🐾 My Pets</h2>
                 <Link
                   to="/pets/new"
                   style={{
-                    padding: '8px 16px',
-                    background: '#0ea5e9',
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
                     color: 'white',
                     textDecoration: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '25px',
                     fontSize: '14px',
-                    fontWeight: '500'
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                    transition: 'transform 0.2s'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  Add Pet
+                  ➕ Add Pet
                 </Link>
               </div>
 
@@ -137,13 +160,22 @@ export default function Dashboard() {
             <div style={{
               background: 'white',
               padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0'
+              borderRadius: '16px',
+              border: '2px solid #E8F5E9',
+              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>Recent Bookings</h2>
-                <Link to="/bookings" style={{ color: '#0ea5e9', textDecoration: 'none', fontSize: '14px' }}>
-                  View All
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>📅 Recent Bookings</h2>
+                <Link to="/bookings" style={{
+                  color: '#4CAF50',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  background: '#E8F5E9'
+                }}>
+                  View All →
                 </Link>
               </div>
 
@@ -191,14 +223,27 @@ export default function Dashboard() {
               <Link
                 to="/search"
                 style={{
-                  background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                  background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)',
                   color: 'white',
                   padding: '32px 24px',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   textDecoration: 'none',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  boxShadow: '0 8px 20px rgba(255, 107, 107, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(255, 107, 107, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(255, 107, 107, 0.3)';
                 }}
               >
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>Find Services</h3>
                 <p style={{ fontSize: '14px', opacity: 0.9 }}>Search for walkers, hotels, and vets</p>
               </Link>
@@ -206,14 +251,27 @@ export default function Dashboard() {
               <Link
                 to="/pets"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
                   color: 'white',
                   padding: '32px 24px',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   textDecoration: 'none',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  boxShadow: '0 8px 20px rgba(76, 175, 80, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(76, 175, 80, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(76, 175, 80, 0.3)';
                 }}
               >
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🐕</div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>My Pets</h3>
                 <p style={{ fontSize: '14px', opacity: 0.9 }}>Manage your pet profiles</p>
               </Link>

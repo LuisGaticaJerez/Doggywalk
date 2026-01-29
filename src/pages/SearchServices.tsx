@@ -65,34 +65,56 @@ export default function SearchServices() {
   return (
     <Layout>
       <div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          {t.search.title}
-        </h1>
-        <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          {t.home.subtitle}
-        </p>
+        <div style={{
+          background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)',
+          padding: '32px',
+          borderRadius: '16px',
+          marginBottom: '32px',
+          color: 'white',
+          boxShadow: '0 8px 24px rgba(255, 107, 107, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            right: '-20px',
+            top: '-20px',
+            fontSize: '8rem',
+            opacity: 0.15
+          }}>🔍</div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', position: 'relative' }}>
+            🔍 {t.search.title}
+          </h1>
+          <p style={{ opacity: 0.95, fontSize: '1.125rem' }}>
+            {t.home.subtitle}
+          </p>
+        </div>
 
         <div style={{
           background: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          marginBottom: '32px'
+          padding: '28px',
+          borderRadius: '20px',
+          border: '2px solid #FFE5B4',
+          marginBottom: '32px',
+          boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
         }}>
           <div style={{ marginBottom: '20px' }}>
             <input
               type="text"
-              placeholder={`${t.common.search}...`}
+              placeholder={`🔎 ${t.common.search}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '12px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
+                padding: '14px 18px',
+                border: '2px solid #FFE5B4',
+                borderRadius: '30px',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
               }}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#FF8C42'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#FFE5B4'}
             />
           </div>
 
@@ -100,62 +122,70 @@ export default function SearchServices() {
             <button
               onClick={() => setServiceType('all')}
               style={{
-                padding: '8px 20px',
-                background: serviceType === 'all' ? '#0ea5e9' : 'white',
+                padding: '10px 24px',
+                background: serviceType === 'all' ? 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)' : 'white',
                 color: serviceType === 'all' ? 'white' : '#64748b',
-                border: `1px solid ${serviceType === 'all' ? '#0ea5e9' : '#e2e8f0'}`,
-                borderRadius: '6px',
+                border: `2px solid ${serviceType === 'all' ? '#FF8C42' : '#e2e8f0'}`,
+                borderRadius: '25px',
                 fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: serviceType === 'all' ? '0 4px 12px rgba(255, 140, 66, 0.3)' : 'none'
               }}
             >
-              {t.provider.services}
+              🌟 {t.provider.services}
             </button>
             <button
               onClick={() => setServiceType('walker')}
               style={{
-                padding: '8px 20px',
-                background: serviceType === 'walker' ? '#0ea5e9' : 'white',
+                padding: '10px 24px',
+                background: serviceType === 'walker' ? 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' : 'white',
                 color: serviceType === 'walker' ? 'white' : '#64748b',
-                border: `1px solid ${serviceType === 'walker' ? '#0ea5e9' : '#e2e8f0'}`,
-                borderRadius: '6px',
+                border: `2px solid ${serviceType === 'walker' ? '#4CAF50' : '#e2e8f0'}`,
+                borderRadius: '25px',
                 fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: serviceType === 'walker' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none'
               }}
             >
-              {t.search.walker}
+              🚶 {t.search.walker}
             </button>
             <button
               onClick={() => setServiceType('hotel')}
               style={{
-                padding: '8px 20px',
-                background: serviceType === 'hotel' ? '#0ea5e9' : 'white',
+                padding: '10px 24px',
+                background: serviceType === 'hotel' ? 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)' : 'white',
                 color: serviceType === 'hotel' ? 'white' : '#64748b',
-                border: `1px solid ${serviceType === 'hotel' ? '#0ea5e9' : '#e2e8f0'}`,
-                borderRadius: '6px',
+                border: `2px solid ${serviceType === 'hotel' ? '#42A5F5' : '#e2e8f0'}`,
+                borderRadius: '25px',
                 fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(66, 165, 245, 0.3)' : 'none'
               }}
             >
-              {t.search.boarding}
+              🏨 {t.search.boarding}
             </button>
             <button
               onClick={() => setServiceType('vet')}
               style={{
-                padding: '8px 20px',
-                background: serviceType === 'vet' ? '#0ea5e9' : 'white',
+                padding: '10px 24px',
+                background: serviceType === 'vet' ? 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)' : 'white',
                 color: serviceType === 'vet' ? 'white' : '#64748b',
-                border: `1px solid ${serviceType === 'vet' ? '#0ea5e9' : '#e2e8f0'}`,
-                borderRadius: '6px',
+                border: `2px solid ${serviceType === 'vet' ? '#FF6B9D' : '#e2e8f0'}`,
+                borderRadius: '25px',
                 fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: serviceType === 'vet' ? '0 4px 12px rgba(255, 107, 157, 0.3)' : 'none'
               }}
             >
-              {t.search.veterinary}
+              🩺 {t.search.veterinary}
             </button>
           </div>
         </div>
@@ -165,8 +195,8 @@ export default function SearchServices() {
             <div style={{
               width: '48px',
               height: '48px',
-              border: '4px solid #e2e8f0',
-              borderTopColor: '#0ea5e9',
+              border: '4px solid #FFE5B4',
+              borderTopColor: '#FF8C42',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
               margin: '0 auto 16px'
@@ -176,11 +206,13 @@ export default function SearchServices() {
           <div style={{
             background: 'white',
             padding: '60px 40px',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            textAlign: 'center'
+            borderRadius: '20px',
+            border: '2px dashed #FFB74D',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(255, 183, 77, 0.1)'
           }}>
-            <p style={{ fontSize: '1.125rem', color: '#64748b' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🔍</div>
+            <p style={{ fontSize: '1.25rem', color: '#64748b', fontWeight: '500' }}>
               {t.search.noResults}
             </p>
           </div>
@@ -190,54 +222,86 @@ export default function SearchServices() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: '24px'
           }}>
-            {filteredProviders.map(provider => (
+            {filteredProviders.map(provider => {
+              const serviceColors = {
+                walker: { bg: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)', badge: '#E8F5E9', badgeText: '#2E7D32' },
+                hotel: { bg: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)', badge: '#E3F2FD', badgeText: '#1565C0' },
+                vet: { bg: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)', badge: '#FCE4EC', badgeText: '#C2185B' }
+              };
+              const colors = serviceColors[provider.service_type as keyof typeof serviceColors] || serviceColors.walker;
+
+              return (
               <div
                 key={provider.id}
                 style={{
                   background: 'white',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  borderRadius: '20px',
+                  border: '2px solid #FFE5B4',
                   overflow: 'hidden',
-                  transition: 'box-shadow 0.2s'
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(255, 140, 66, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.1)';
                 }}
               >
                 <div style={{
-                  height: '120px',
-                  background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                  height: '140px',
+                  background: colors.bg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  fontSize: '3rem'
+                  fontSize: '4rem',
+                  position: 'relative'
                 }}>
-                  {provider.service_type === 'walker' ? '🐕' : provider.service_type === 'hotel' ? '🏠' : '⚕️'}
+                  {provider.service_type === 'walker' ? '🐕' : provider.service_type === 'hotel' ? '🏨' : '🩺'}
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    color: colors.badgeText,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    ⭐ {provider.rating.toFixed(1)}
+                  </div>
                 </div>
 
                 <div style={{ padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
                     <div>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
                         {provider.profiles?.full_name || 'Provider'}
                       </h3>
                       <span style={{
                         display: 'inline-block',
-                        padding: '4px 12px',
-                        background: '#f0f9ff',
-                        color: '#0284c7',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: '500',
+                        padding: '6px 14px',
+                        background: colors.badge,
+                        color: colors.badgeText,
+                        borderRadius: '20px',
+                        fontSize: '13px',
+                        fontWeight: '600',
                         textTransform: 'capitalize'
                       }}>
+                        {provider.service_type === 'walker' ? '🚶 ' : provider.service_type === 'hotel' ? '🏨 ' : '🩺 '}
                         {provider.service_type}
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0ea5e9' }}>
-                        ⭐ {provider.rating.toFixed(1)}
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        {provider.total_walks} services
+                      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                        📊 {provider.total_walks} services
                       </div>
                     </div>
                   </div>
@@ -297,23 +361,31 @@ export default function SearchServices() {
                   <Link
                     to={`/provider/${provider.id}/book`}
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
                       width: '100%',
-                      padding: '12px',
-                      background: '#0ea5e9',
+                      padding: '14px',
+                      background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
                       color: 'white',
                       textDecoration: 'none',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      textAlign: 'center'
+                      borderRadius: '30px',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                      transition: 'transform 0.2s'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   >
-                    {t.provider.bookNow}
+                    📅 {t.provider.bookNow}
                   </Link>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
