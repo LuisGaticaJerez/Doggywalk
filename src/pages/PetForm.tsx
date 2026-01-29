@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 
 export default function PetForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -91,10 +93,10 @@ export default function PetForm() {
     <Layout>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          {id ? 'Edit Pet' : 'Add New Pet'}
+          {id ? t.pets.editPet : t.pets.addPet}
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          {id ? 'Update your pet information' : 'Add a new pet to your profile'}
+          {id ? t.pets.editPet : t.pets.addPet}
         </p>
 
         <form onSubmit={handleSubmit} style={{

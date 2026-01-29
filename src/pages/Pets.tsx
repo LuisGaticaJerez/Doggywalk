@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { Pet } from '../types';
 
 export default function Pets() {
   const { profile } = useAuth();
+  const { t } = useI18n();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +34,7 @@ export default function Pets() {
   };
 
   const handleDelete = async (petId: string) => {
-    if (!confirm('Are you sure you want to delete this pet?')) return;
+    if (!confirm(t.pets.deleteConfirm)) return;
 
     try {
       const { error } = await supabase
@@ -72,9 +74,9 @@ export default function Pets() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
             <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-              My Pets
+              {t.pets.title}
             </h1>
-            <p style={{ color: '#64748b' }}>Manage your pet profiles</p>
+            <p style={{ color: '#64748b' }}>{t.dashboard.myPets}</p>
           </div>
           <Link
             to="/pets/new"
@@ -88,7 +90,7 @@ export default function Pets() {
               fontWeight: '600'
             }}
           >
-            Add New Pet
+            {t.pets.addPet}
           </Link>
         </div>
 
@@ -101,7 +103,7 @@ export default function Pets() {
             textAlign: 'center'
           }}>
             <p style={{ fontSize: '1.125rem', color: '#64748b', marginBottom: '24px' }}>
-              No pets yet. Add your first pet to get started!
+              {t.dashboard.noPets}
             </p>
             <Link
               to="/pets/new"
@@ -116,7 +118,7 @@ export default function Pets() {
                 fontWeight: '600'
               }}
             >
-              Add Your First Pet
+              {t.pets.addPet}
             </Link>
           </div>
         ) : (
@@ -170,7 +172,7 @@ export default function Pets() {
                         textAlign: 'center'
                       }}
                     >
-                      Edit
+                      {t.common.edit}
                     </Link>
                     <button
                       onClick={() => handleDelete(pet.id)}
@@ -186,7 +188,7 @@ export default function Pets() {
                         cursor: 'pointer'
                       }}
                     >
-                      Delete
+                      {t.common.delete}
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
 
@@ -12,6 +13,7 @@ interface PetMasterWithProfile extends PetMaster {
 }
 
 export default function SearchServices() {
+  const { t } = useI18n();
   const [providers, setProviders] = useState<PetMasterWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet'>('all');
@@ -64,10 +66,10 @@ export default function SearchServices() {
     <Layout>
       <div>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          Find Pet Services
+          {t.search.title}
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          Discover trusted pet care providers near you
+          {t.home.subtitle}
         </p>
 
         <div style={{
@@ -80,7 +82,7 @@ export default function SearchServices() {
           <div style={{ marginBottom: '20px' }}>
             <input
               type="text"
-              placeholder="Search by name, bio, or specialties..."
+              placeholder={`${t.common.search}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -95,25 +97,66 @@ export default function SearchServices() {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {['all', 'walker', 'hotel', 'vet'].map(type => (
-              <button
-                key={type}
-                onClick={() => setServiceType(type as any)}
-                style={{
-                  padding: '8px 20px',
-                  background: serviceType === type ? '#0ea5e9' : 'white',
-                  color: serviceType === type ? 'white' : '#64748b',
-                  border: `1px solid ${serviceType === type ? '#0ea5e9' : '#e2e8f0'}`,
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize'
-                }}
-              >
-                {type === 'all' ? 'All Services' : type}
-              </button>
-            ))}
+            <button
+              onClick={() => setServiceType('all')}
+              style={{
+                padding: '8px 20px',
+                background: serviceType === 'all' ? '#0ea5e9' : 'white',
+                color: serviceType === 'all' ? 'white' : '#64748b',
+                border: `1px solid ${serviceType === 'all' ? '#0ea5e9' : '#e2e8f0'}`,
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {t.provider.services}
+            </button>
+            <button
+              onClick={() => setServiceType('walker')}
+              style={{
+                padding: '8px 20px',
+                background: serviceType === 'walker' ? '#0ea5e9' : 'white',
+                color: serviceType === 'walker' ? 'white' : '#64748b',
+                border: `1px solid ${serviceType === 'walker' ? '#0ea5e9' : '#e2e8f0'}`,
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {t.search.walker}
+            </button>
+            <button
+              onClick={() => setServiceType('hotel')}
+              style={{
+                padding: '8px 20px',
+                background: serviceType === 'hotel' ? '#0ea5e9' : 'white',
+                color: serviceType === 'hotel' ? 'white' : '#64748b',
+                border: `1px solid ${serviceType === 'hotel' ? '#0ea5e9' : '#e2e8f0'}`,
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {t.search.boarding}
+            </button>
+            <button
+              onClick={() => setServiceType('vet')}
+              style={{
+                padding: '8px 20px',
+                background: serviceType === 'vet' ? '#0ea5e9' : 'white',
+                color: serviceType === 'vet' ? 'white' : '#64748b',
+                border: `1px solid ${serviceType === 'vet' ? '#0ea5e9' : '#e2e8f0'}`,
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {t.search.veterinary}
+            </button>
           </div>
         </div>
 
@@ -138,7 +181,7 @@ export default function SearchServices() {
             textAlign: 'center'
           }}>
             <p style={{ fontSize: '1.125rem', color: '#64748b' }}>
-              No providers found. Try adjusting your search criteria.
+              {t.search.noResults}
             </p>
           </div>
         ) : (
@@ -236,7 +279,7 @@ export default function SearchServices() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div>
-                      <div style={{ fontSize: '14px', color: '#64748b' }}>Hourly Rate</div>
+                      <div style={{ fontSize: '14px', color: '#64748b' }}>{t.provider.hourlyRate}</div>
                       <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b' }}>
                         ${provider.hourly_rate}/hr
                       </div>
@@ -266,7 +309,7 @@ export default function SearchServices() {
                       textAlign: 'center'
                     }}
                   >
-                    Book Now
+                    {t.provider.bookNow}
                   </Link>
                 </div>
               </div>

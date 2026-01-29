@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { Booking } from '../types';
 
@@ -14,6 +15,7 @@ interface BookingWithDetails extends Booking {
 
 export default function Bookings() {
   const { profile } = useAuth();
+  const { t } = useI18n();
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled'>('all');
@@ -97,7 +99,7 @@ export default function Bookings() {
       <div>
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-            {profile?.role === 'owner' ? 'My Bookings' : 'Service Requests'}
+            {t.bookings.title}
           </h1>
           <p style={{ color: '#64748b' }}>
             {profile?.role === 'owner'

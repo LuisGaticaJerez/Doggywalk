@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ export default function ForgotPassword() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useAuth();
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,14 +51,14 @@ export default function ForgotPassword() {
           color: '#1e293b',
           textAlign: 'center'
         }}>
-          Reset Password
+          {t.auth.resetPasswordTitle}
         </h1>
         <p style={{
           color: '#64748b',
           marginBottom: '32px',
           textAlign: 'center'
         }}>
-          Enter your email to receive reset instructions
+          {t.auth.resetPasswordDescription}
         </p>
 
         {error && (
@@ -81,7 +83,7 @@ export default function ForgotPassword() {
             marginBottom: '20px',
             fontSize: '14px'
           }}>
-            Check your email for password reset instructions
+            {t.auth.resetPasswordSuccess}
           </div>
         )}
 
@@ -94,7 +96,7 @@ export default function ForgotPassword() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Email
+              {t.auth.email}
             </label>
             <input
               type="email"
@@ -131,7 +133,7 @@ export default function ForgotPassword() {
             onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#0284c7')}
             onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#0ea5e9')}
           >
-            {loading ? 'Sending...' : 'Send Reset Link'}
+            {loading ? `${t.common.loading}` : t.auth.resetPassword}
           </button>
         </form>
 
@@ -141,9 +143,9 @@ export default function ForgotPassword() {
           fontSize: '14px',
           color: '#64748b'
         }}>
-          Remember your password?{' '}
+          {t.auth.backToLogin}{' '}
           <Link to="/login" style={{ color: '#0ea5e9', textDecoration: 'none', fontWeight: '600' }}>
-            Sign in
+            {t.auth.signIn}
           </Link>
         </div>
       </div>

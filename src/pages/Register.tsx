@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,14 +59,14 @@ export default function Register() {
           color: '#1e293b',
           textAlign: 'center'
         }}>
-          Create Account
+          {t.auth.register}
         </h1>
         <p style={{
           color: '#64748b',
           marginBottom: '32px',
           textAlign: 'center'
         }}>
-          Join DoggyWalk today
+          {t.auth.signUp}
         </p>
 
         {error && (
@@ -89,7 +91,7 @@ export default function Register() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Full Name
+              {t.auth.fullName}
             </label>
             <input
               type="text"
@@ -117,7 +119,7 @@ export default function Register() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Email
+              {t.auth.email}
             </label>
             <input
               type="email"
@@ -145,7 +147,7 @@ export default function Register() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Password
+              {t.auth.password}
             </label>
             <input
               type="password"
@@ -238,7 +240,7 @@ export default function Register() {
             onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#0284c7')}
             onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#0ea5e9')}
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? `${t.common.loading}` : t.auth.register}
           </button>
         </form>
 
@@ -248,9 +250,9 @@ export default function Register() {
           fontSize: '14px',
           color: '#64748b'
         }}>
-          Already have an account?{' '}
+          {t.auth.alreadyHaveAccount}{' '}
           <Link to="/login" style={{ color: '#0ea5e9', textDecoration: 'none', fontWeight: '600' }}>
-            Sign in
+            {t.auth.signIn}
           </Link>
         </div>
       </div>
