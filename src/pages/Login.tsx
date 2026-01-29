@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,14 +51,14 @@ export default function Login() {
           color: '#1e293b',
           textAlign: 'center'
         }}>
-          Welcome Back
+          {t.auth.login}
         </h1>
         <p style={{
           color: '#64748b',
           marginBottom: '32px',
           textAlign: 'center'
         }}>
-          Sign in to your DoggyWalk account
+          {t.auth.signIn}
         </p>
 
         {error && (
@@ -81,7 +83,7 @@ export default function Login() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Email
+              {t.auth.email}
             </label>
             <input
               type="email"
@@ -110,7 +112,7 @@ export default function Login() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Password
+              {t.auth.password}
             </label>
             <input
               type="password"
@@ -149,7 +151,7 @@ export default function Login() {
             onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#0284c7')}
             onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#0ea5e9')}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? `${t.common.loading}` : t.auth.signIn}
           </button>
         </form>
 
@@ -160,7 +162,7 @@ export default function Login() {
           color: '#64748b'
         }}>
           <Link to="/forgot-password" style={{ color: '#0ea5e9', textDecoration: 'none' }}>
-            Forgot your password?
+            {t.auth.forgotPassword}
           </Link>
         </div>
 
@@ -170,9 +172,9 @@ export default function Login() {
           fontSize: '14px',
           color: '#64748b'
         }}>
-          Don't have an account?{' '}
+          {t.auth.dontHaveAccount}{' '}
           <Link to="/register" style={{ color: '#0ea5e9', textDecoration: 'none', fontWeight: '600' }}>
-            Sign up
+            {t.auth.signUp}
           </Link>
         </div>
       </div>

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { Pet, Booking, PetMaster } from '../types';
 
 export default function Dashboard() {
   const { profile } = useAuth();
+  const { t } = useI18n();
   const [pets, setPets] = useState<Pet[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
@@ -57,7 +59,7 @@ export default function Dashboard() {
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px'
           }} />
-          <p style={{ color: '#64748b' }}>Loading...</p>
+          <p style={{ color: '#64748b' }}>{t.common.loading}</p>
         </div>
       </Layout>
     );
@@ -67,7 +69,7 @@ export default function Dashboard() {
     <Layout>
       <div>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          Welcome back, {profile?.full_name}!
+          {t.dashboard.welcome}, {profile?.full_name}!
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
           {profile?.role === 'owner' ? 'Manage your pets and bookings' : 'Manage your services and bookings'}

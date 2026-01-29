@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 function Home() {
   const { user, loading } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +51,7 @@ function Home() {
         DoggyWalk
       </h1>
       <p style={{ fontSize: '1.5rem', opacity: 0.9, marginBottom: '3rem', textAlign: 'center' }}>
-        Connect with trusted pet care providers
+        {t.home.title}
       </p>
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -66,7 +68,7 @@ function Home() {
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}
         >
-          Get Started
+          {t.home.findServices}
         </Link>
         <Link
           to="/login"
@@ -81,13 +83,13 @@ function Home() {
             border: '2px solid white'
           }}
         >
-          Sign In
+          {t.auth.signIn}
         </Link>
       </div>
 
       <div style={{ marginTop: '4rem', maxWidth: '800px', textAlign: 'center' }}>
         <p style={{ opacity: 0.9, fontSize: '1.125rem', lineHeight: '1.6' }}>
-          Find professional dog walkers, pet hotels, and veterinary services. Book trusted care for your pets with ease.
+          {t.home.subtitle}
         </p>
       </div>
     </div>

@@ -13,11 +13,13 @@ import ProviderProfile from './pages/ProviderProfile'
 import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
+import { I18nProvider } from './contexts/I18nContext'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <I18nProvider>
+        <Router>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -85,6 +87,7 @@ function App() {
           } />
         </Routes>
       </Router>
+      </I18nProvider>
     </AuthProvider>
   )
 }

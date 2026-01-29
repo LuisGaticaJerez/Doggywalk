@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,6 +9,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { profile, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -42,16 +44,16 @@ export default function Layout({ children }: LayoutProps) {
           <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
             {profile?.role === 'owner' ? (
               <>
-                <Link to="/dashboard" style={navLinkStyle}>Dashboard</Link>
-                <Link to="/pets" style={navLinkStyle}>My Pets</Link>
-                <Link to="/search" style={navLinkStyle}>Find Services</Link>
-                <Link to="/bookings" style={navLinkStyle}>Bookings</Link>
+                <Link to="/dashboard" style={navLinkStyle}>{t.nav.dashboard}</Link>
+                <Link to="/pets" style={navLinkStyle}>{t.nav.pets}</Link>
+                <Link to="/search" style={navLinkStyle}>{t.nav.search}</Link>
+                <Link to="/bookings" style={navLinkStyle}>{t.nav.bookings}</Link>
               </>
             ) : (
               <>
-                <Link to="/dashboard" style={navLinkStyle}>Dashboard</Link>
-                <Link to="/profile-setup" style={navLinkStyle}>Profile</Link>
-                <Link to="/my-bookings" style={navLinkStyle}>Bookings</Link>
+                <Link to="/dashboard" style={navLinkStyle}>{t.nav.dashboard}</Link>
+                <Link to="/profile-setup" style={navLinkStyle}>{t.settings.profile}</Link>
+                <Link to="/my-bookings" style={navLinkStyle}>{t.nav.bookings}</Link>
               </>
             )}
 
@@ -74,7 +76,7 @@ export default function Layout({ children }: LayoutProps) {
                 onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#ef4444'}
               >
-                Sign Out
+                {t.auth.logout}
               </button>
             </div>
           </div>

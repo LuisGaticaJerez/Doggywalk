@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Settings() {
   const { profile } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,7 +44,7 @@ export default function Settings() {
 
       if (error) throw error;
 
-      alert('Profile updated successfully!');
+      alert(t.settings.changesSaved);
       window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -55,10 +58,10 @@ export default function Settings() {
     <Layout>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          Account Settings
+          {t.settings.title}
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          Manage your account information
+          {t.settings.profile}
         </p>
 
         <form onSubmit={handleSubmit} style={{
@@ -68,7 +71,7 @@ export default function Settings() {
           border: '1px solid #e2e8f0'
         }}>
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Email</label>
+            <label style={labelStyle}>{t.auth.email}</label>
             <input
               type="email"
               value={profile?.email || ''}
@@ -82,6 +85,10 @@ export default function Settings() {
             <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
               Email cannot be changed
             </p>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <LanguageSwitcher />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
@@ -158,7 +165,7 @@ export default function Settings() {
                 cursor: loading ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? `${t.common.loading}` : t.settings.saveChanges}
             </button>
             <button
               type="button"
@@ -174,7 +181,7 @@ export default function Settings() {
                 cursor: 'pointer'
               }}
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
         </form>
