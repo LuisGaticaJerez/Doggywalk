@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../contexts/I18nContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProviderCardProps {
   provider: any;
@@ -14,6 +15,7 @@ interface ProviderCardProps {
 
 export default function ProviderCard({ provider, colors }: ProviderCardProps) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
   const [hotelAmenities, setHotelAmenities] = useState<any>(null);
   const [vetServices, setVetServices] = useState<any>(null);
@@ -300,7 +302,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
         </div>
 
         <Link
-          to={`/provider/${provider.id}/book`}
+          to={user ? `/provider/${provider.id}/book` : `/login?redirect=/provider/${provider.id}/book`}
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -317,50 +317,58 @@ export default function Register() {
                 fontSize: '14px',
                 fontWeight: '500'
               }}>
-                {t.auth.accountType}
+                {t.auth.providerType}
               </label>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <label style={{
                   flex: 1,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '12px',
+                  flexDirection: 'column',
+                  padding: '16px',
                   border: `2px solid ${accountType === 'individual' ? '#FB923C' : '#e2e8f0'}`,
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
                   background: accountType === 'individual' ? '#FFF7ED' : 'white',
                   transition: 'all 0.2s'
                 }}>
-                  <input
-                    type="radio"
-                    value="individual"
-                    checked={accountType === 'individual'}
-                    onChange={(e) => setAccountType(e.target.value as 'individual')}
-                    style={{ marginRight: '8px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.individual}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <input
+                      type="radio"
+                      value="individual"
+                      checked={accountType === 'individual'}
+                      onChange={(e) => setAccountType(e.target.value as 'individual')}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <span style={{ fontSize: '16px', fontWeight: '600' }}>🚶 {t.auth.walker}</span>
+                  </div>
+                  <span style={{ fontSize: '13px', color: '#64748b', paddingLeft: '28px' }}>
+                    Registro individual para paseadores de mascotas
+                  </span>
                 </label>
                 <label style={{
                   flex: 1,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '12px',
+                  flexDirection: 'column',
+                  padding: '16px',
                   border: `2px solid ${accountType === 'company' ? '#FB923C' : '#e2e8f0'}`,
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
                   background: accountType === 'company' ? '#FFF7ED' : 'white',
                   transition: 'all 0.2s'
                 }}>
-                  <input
-                    type="radio"
-                    value="company"
-                    checked={accountType === 'company'}
-                    onChange={(e) => setAccountType(e.target.value as 'company')}
-                    style={{ marginRight: '8px' }}
-                  />
-                  <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.company}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <input
+                      type="radio"
+                      value="company"
+                      checked={accountType === 'company'}
+                      onChange={(e) => setAccountType(e.target.value as 'company')}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <span style={{ fontSize: '16px', fontWeight: '600' }}>🏨 {t.auth.hotelOrVet}</span>
+                  </div>
+                  <span style={{ fontSize: '13px', color: '#64748b', paddingLeft: '28px' }}>
+                    Registro empresarial para hoteles de mascotas o veterinarias
+                  </span>
                 </label>
               </div>
             </div>

@@ -152,6 +152,10 @@ export const es: Translations = {
     accountType: 'Tipo de Cuenta',
     individual: 'Individual',
     company: 'Empresa',
+    providerType: 'Tipo de Proveedor',
+    walker: 'Paseador de Perros',
+    hotelOrVet: 'Hotel de Mascotas o Veterinaria',
+    selectProviderType: 'Por favor seleccione su tipo de proveedor',
   },
   nav: {
     home: 'Inicio',
@@ -167,6 +171,9 @@ export const es: Translations = {
     findServices: 'Buscar Servicios',
     becomePetOwner: 'Quiero ser Pet Owner',
     becomeProvider: 'Ser Proveedor',
+    searchServices: 'Buscar Servicios',
+    useMyLocation: 'Usar mi ubicación actual',
+    addressPlaceholder: 'Ingresa tu dirección...',
     features: {
       verified: {
         title: 'Profesionales Verificados',

@@ -64,11 +64,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/search" element={
-            <ProtectedRoute requireRole="owner">
-              <SearchServices />
-            </ProtectedRoute>
-          } />
+          <Route path="/search" element={<SearchServices />} />
 
           <Route path="/provider/:providerId/book" element={
             <ProtectedRoute requireRole="owner">

@@ -150,6 +150,10 @@ export const en = {
     accountType: 'Account Type',
     individual: 'Individual',
     company: 'Company',
+    providerType: 'Provider Type',
+    walker: 'Dog Walker',
+    hotelOrVet: 'Pet Hotel or Veterinary',
+    selectProviderType: 'Please select your provider type',
   },
   nav: {
     home: 'Home',
@@ -165,6 +169,9 @@ export const en = {
     findServices: 'Find Services',
     becomePetOwner: 'I Want to be a Pet Owner',
     becomeProvider: 'Become a Provider',
+    searchServices: 'Search for Services',
+    useMyLocation: 'Use my current location',
+    addressPlaceholder: 'Enter your address...',
     features: {
       verified: {
         title: 'Verified Professionals',

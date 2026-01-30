@@ -1,39 +1,24 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 
 function Home() {
-  const { user, loading } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [serviceType, setServiceType] = useState<'walker' | 'hotel' | 'vet'>('walker');
+  const [address, setAddress] = useState('');
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
-  useEffect(() => {
-    if (!loading && user) {
-      navigate('/dashboard');
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    params.append('service', serviceType);
+    if (useCurrentLocation) {
+      params.append('useLocation', 'true');
+    } else if (address) {
+      params.append('address', address);
     }
-  }, [user, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #FF6B6B 0%, #FFA500 50%, #FFD93D 100%)'
-      }}>
-        <div style={{
-          width: '48px',
-          height: '48px',
-          border: '4px solid rgba(255,255,255,0.3)',
-          borderTopColor: 'white',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-      </div>
-    );
-  }
+    navigate(`/search?${params.toString()}`);
+  };
 
   return (
     <div style={{
@@ -82,39 +67,59 @@ function Home() {
         animation: 'float 4.5s ease-in-out infinite'
       }}>🦴</div>
 
-      <Link
-        to="/login"
-        style={{
-          padding: '18px 40px',
-          background: 'rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(10px)',
-          color: 'white',
-          textDecoration: 'none',
-          borderRadius: '50px',
-          fontSize: '20px',
-          fontWeight: '700',
-          border: '3px solid white',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-          transition: 'all 0.2s',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          marginBottom: '2rem',
-          zIndex: 10
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
-          e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
-        }}
-      >
-        <span>👋</span> {t.auth.signIn}
-      </Link>
+      <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '12px', zIndex: 10 }}>
+        <Link
+          to="/login"
+          style={{
+            padding: '12px 24px',
+            background: 'rgba(255,255,255,0.2)',
+            backdropFilter: 'blur(10px)',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '50px',
+            fontSize: '16px',
+            fontWeight: '600',
+            border: '2px solid white',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          {t.auth.signIn}
+        </Link>
+        <Link
+          to="/register"
+          style={{
+            padding: '12px 24px',
+            background: 'white',
+            color: '#FF6B6B',
+            textDecoration: 'none',
+            borderRadius: '50px',
+            fontSize: '16px',
+            fontWeight: '700',
+            border: '2px solid white',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+          }}
+        >
+          {t.auth.register}
+        </Link>
+      </div>
 
       <div style={{
         fontSize: '5rem',
@@ -132,91 +137,133 @@ function Home() {
         🐾 DoggyWalk
       </h1>
       <p style={{
-        fontSize: '1.5rem',
+        fontSize: '1.25rem',
         opacity: 0.95,
-        marginBottom: '3rem',
+        marginBottom: '2rem',
         textAlign: 'center',
         textShadow: '0 2px 4px rgba(0,0,0,0.1)',
         maxWidth: '600px'
       }}>
-        {t.home.title}
+        {t.home.subtitle}
       </p>
 
-      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Link
-          to="/register?role=owner"
-          style={{
-            padding: '16px 32px',
-            background: 'white',
-            color: '#FF6B6B',
-            textDecoration: 'none',
-            borderRadius: '50px',
-            fontSize: '18px',
-            fontWeight: '700',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.25)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
-          }}
-        >
-          <span>🐕‍🦺</span> {t.home.becomePetOwner}
-        </Link>
-        <Link
-          to="/register?role=master"
-          style={{
-            padding: '16px 32px',
-            background: 'white',
-            color: '#FFA500',
-            textDecoration: 'none',
-            borderRadius: '50px',
-            fontSize: '18px',
-            fontWeight: '700',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.25)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
-          }}
-        >
-          <span>⭐</span> {t.home.becomeProvider}
-        </Link>
-      </div>
-
       <div style={{
-        marginTop: '4rem',
-        maxWidth: '800px',
-        textAlign: 'center',
-        background: 'rgba(255,255,255,0.15)',
-        backdropFilter: 'blur(10px)',
-        padding: '30px 40px',
-        borderRadius: '20px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        background: 'white',
+        borderRadius: '16px',
+        padding: '32px',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.2)',
+        maxWidth: '600px',
+        width: '100%',
+        marginBottom: '2rem'
       }}>
-        <p style={{
-          opacity: 0.95,
-          fontSize: '1.125rem',
-          lineHeight: '1.8',
-          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
-        }}>
-          {t.home.subtitle}
-        </p>
+        <h2 style={{ color: '#334155', marginBottom: '24px', fontSize: '1.5rem', fontWeight: '700' }}>
+          {t.home.searchServices}
+        </h2>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '14px', fontWeight: '600' }}>
+            {t.search.serviceType}
+          </label>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {['walker', 'hotel', 'vet'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setServiceType(type as any)}
+                style={{
+                  flex: 1,
+                  minWidth: '150px',
+                  padding: '12px 20px',
+                  border: serviceType === type ? '2px solid #FF6B6B' : '2px solid #e2e8f0',
+                  borderRadius: '8px',
+                  background: serviceType === type ? '#FEF2F2' : 'white',
+                  color: serviceType === type ? '#FF6B6B' : '#64748B',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (serviceType !== type) {
+                    e.currentTarget.style.borderColor = '#CBD5E1';
+                    e.currentTarget.style.background = '#F8FAFC';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (serviceType !== type) {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.background = 'white';
+                  }
+                }}
+              >
+                {type === 'walker' ? '🚶 ' + t.search.walker : type === 'hotel' ? '🏨 ' + t.search.boarding : '🏥 ' + t.search.veterinary}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={useCurrentLocation}
+              onChange={(e) => {
+                setUseCurrentLocation(e.target.checked);
+                if (e.target.checked) setAddress('');
+              }}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ color: '#475569', fontSize: '14px', fontWeight: '600' }}>
+              {t.home.useMyLocation}
+            </span>
+          </label>
+
+          {!useCurrentLocation && (
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder={t.home.addressPlaceholder}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '8px',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#FF6B6B'}
+              onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+            />
+          )}
+        </div>
+
+        <button
+          onClick={handleSearch}
+          style={{
+            width: '100%',
+            padding: '14px',
+            background: 'linear-gradient(135deg, #FF6B6B 0%, #FFA500 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 107, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.3)';
+          }}
+        >
+          {t.common.search} 🔍
+        </button>
       </div>
 
       <style>{`

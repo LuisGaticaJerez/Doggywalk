@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProvidersMap from '../components/ProvidersMap';
 import ProviderCard from '../components/ProviderCard';
 import { useI18n } from '../contexts/I18nContext';
-import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
 import { calculateDistance } from '../utils/distance';
@@ -21,8 +19,6 @@ interface PetMasterWithProfile extends PetMaster {
 
 export default function SearchServices() {
   const { t } = useI18n();
-  const { profile } = useAuth();
-  const navigate = useNavigate();
   const [providers, setProviders] = useState<PetMasterWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet'>('all');
@@ -31,12 +27,6 @@ export default function SearchServices() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(10);
-
-  useEffect(() => {
-    if (profile && profile.role !== 'owner') {
-      navigate('/dashboard');
-    }
-  }, [profile, navigate]);
 
   useEffect(() => {
     getUserLocation();

@@ -152,6 +152,10 @@ export const fr: Translations = {
     accountType: 'Type de Compte',
     individual: 'Individuel',
     company: 'Entreprise',
+    providerType: 'Type de Prestataire',
+    walker: 'Promeneur de Chiens',
+    hotelOrVet: 'Hôtel pour Animaux ou Vétérinaire',
+    selectProviderType: 'Veuillez sélectionner votre type de prestataire',
   },
   nav: {
     home: 'Accueil',
@@ -167,6 +171,9 @@ export const fr: Translations = {
     findServices: 'Trouver des Services',
     becomePetOwner: 'Je Veux Être Propriétaire',
     becomeProvider: 'Devenir Prestataire',
+    searchServices: 'Rechercher des Services',
+    useMyLocation: 'Utiliser ma position actuelle',
+    addressPlaceholder: 'Entrez votre adresse...',
     features: {
       verified: {
         title: 'Professionnels Vérifiés',

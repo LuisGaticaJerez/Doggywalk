@@ -152,6 +152,10 @@ export const zh: Translations = {
     accountType: '账户类型',
     individual: '个人',
     company: '公司',
+    providerType: '提供者类型',
+    walker: '遛狗员',
+    hotelOrVet: '宠物酒店或兽医',
+    selectProviderType: '请选择您的提供者类型',
   },
   nav: {
     home: '首页',
@@ -167,6 +171,9 @@ export const zh: Translations = {
     findServices: '查找服务',
     becomePetOwner: '我想成为宠物主人',
     becomeProvider: '成为服务提供者',
+    searchServices: '搜索服务',
+    useMyLocation: '使用我的当前位置',
+    addressPlaceholder: '输入您的地址...',
     features: {
       verified: {
         title: '经过验证的专业人员',
