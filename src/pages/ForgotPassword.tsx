@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -10,6 +10,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +43,39 @@ export default function ForgotPassword() {
         borderRadius: '12px',
         boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
         width: '100%',
-        maxWidth: '400px'
+        maxWidth: '400px',
+        position: 'relative'
       }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '24px',
+            color: '#64748b',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#f1f5f9';
+            e.currentTarget.style.color = '#1e293b';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#64748b';
+          }}
+          aria-label="Volver"
+        >
+          ←
+        </button>
         <h1 style={{
           fontSize: '2rem',
           fontWeight: 'bold',
