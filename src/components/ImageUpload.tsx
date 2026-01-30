@@ -23,6 +23,7 @@ export default function ImageUpload({
   const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -106,12 +107,28 @@ export default function ImageUpload({
     }
   };
 
+  const handleCameraClick = () => {
+    if (!disabled) {
+      cameraInputRef.current?.click();
+    }
+  };
+
   return (
     <div>
       <input
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/jpg,image/png,image/webp"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+        disabled={disabled}
+      />
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        capture="environment"
         onChange={handleFileSelect}
         style={{ display: 'none' }}
         disabled={disabled}
@@ -210,19 +227,45 @@ export default function ImageUpload({
             <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px' }}>
               {t.common.orClickToSelect}
             </p>
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '10px 20px',
-                background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
-                color: 'white',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '600',
-                boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)'
-              }}
-            >
-              {t.common.selectFile}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClick();
+                }}
+                style={{
+                  display: 'inline-block',
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                  cursor: disabled ? 'not-allowed' : 'pointer'
+                }}
+              >
+                📁 {t.common.selectFile}
+              </div>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCameraClick();
+                }}
+                style={{
+                  display: 'inline-block',
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                  cursor: disabled ? 'not-allowed' : 'pointer'
+                }}
+              >
+                📷 {t.common.takePhoto}
+              </div>
             </div>
             <p
               style={{

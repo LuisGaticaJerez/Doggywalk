@@ -181,7 +181,7 @@ export function Chat() {
             </div>
 
             <Link
-              to={`/bookings/${bookingId}`}
+              to="/bookings"
               className="hover:bg-blue-600 p-2 rounded-full transition-colors"
             >
               <svg

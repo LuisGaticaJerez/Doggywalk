@@ -42,6 +42,7 @@ export const pt: Translations = {
     dragDropImage: 'Arraste e solte sua imagem aqui',
     orClickToSelect: 'ou clique para selecionar do seu dispositivo',
     selectFile: 'Selecionar Arquivo',
+    takePhoto: 'Tirar Foto',
   },
   auth: {
     login: 'Entrar',

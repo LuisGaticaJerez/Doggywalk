@@ -295,7 +295,7 @@ export default function Dashboard() {
                           {pet.breed} • {pet.size} • {pet.age} years old
                         </p>
                       </div>
-                      <Link to={`/pets/${pet.id}`} style={{ color: '#0ea5e9', textDecoration: 'none', fontSize: '14px' }}>
+                      <Link to={`/pets/${pet.id}/edit`} style={{ color: '#0ea5e9', textDecoration: 'none', fontSize: '14px' }}>
                         {t.common.view}
                       </Link>
                     </div>

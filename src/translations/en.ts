@@ -40,6 +40,7 @@ export const en = {
     dragDropImage: 'Drag and drop your image here',
     orClickToSelect: 'or click to select from your device',
     selectFile: 'Select File',
+    takePhoto: 'Take Photo',
   },
   auth: {
     login: 'Login',

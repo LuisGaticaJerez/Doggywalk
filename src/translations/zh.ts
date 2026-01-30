@@ -42,6 +42,7 @@ export const zh: Translations = {
     dragDropImage: '拖放图片到这里',
     orClickToSelect: '或点击从设备选择',
     selectFile: '选择文件',
+    takePhoto: '拍照',
   },
   auth: {
     login: '登录',
