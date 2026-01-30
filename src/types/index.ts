@@ -31,6 +31,11 @@ export interface PetMaster {
   is_available: boolean;
   current_latitude: number | null;
   current_longitude: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  city: string | null;
+  country: string | null;
   rating: number;
   total_walks: number;
   verified: boolean;

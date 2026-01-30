@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import ProvidersMap from '../components/ProvidersMap';
 import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
@@ -10,6 +11,7 @@ interface PetMasterWithProfile extends PetMaster {
     full_name: string;
     avatar_url: string | null;
   };
+  distance?: number;
 }
 
 export default function SearchServices() {
@@ -18,10 +20,52 @@ export default function SearchServices() {
   const [loading, setLoading] = useState(true);
   const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [maxDistance, setMaxDistance] = useState<number>(10);
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   useEffect(() => {
     loadProviders();
   }, [serviceType]);
+
+  const getUserLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setLocationError('Unable to get your location. Using default area.');
+          setUserLocation({ lat: 4.7110, lng: -74.0721 });
+        }
+      );
+    } else {
+      setLocationError('Geolocation not supported by your browser.');
+      setUserLocation({ lat: 4.7110, lng: -74.0721 });
+    }
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
 
   const loadProviders = async () => {
     try {
@@ -35,8 +79,7 @@ export default function SearchServices() {
           )
         `)
         .eq('is_available', true)
-        .eq('verified', true)
-        .order('rating', { ascending: false });
+        .eq('verified', true);
 
       if (serviceType !== 'all') {
         query = query.eq('service_type', serviceType);
@@ -45,7 +88,26 @@ export default function SearchServices() {
       const { data, error } = await query;
 
       if (error) throw error;
-      if (data) setProviders(data);
+
+      if (data && userLocation) {
+        const providersWithDistance = data.map(provider => {
+          if (provider.latitude && provider.longitude) {
+            const distance = calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              provider.latitude,
+              provider.longitude
+            );
+            return { ...provider, distance };
+          }
+          return { ...provider, distance: Infinity };
+        });
+
+        providersWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+        setProviders(providersWithDistance);
+      } else if (data) {
+        setProviders(data);
+      }
     } catch (error) {
       console.error('Error loading providers:', error);
     } finally {
@@ -53,14 +115,37 @@ export default function SearchServices() {
     }
   };
 
+  useEffect(() => {
+    if (userLocation && providers.length > 0) {
+      loadProviders();
+    }
+  }, [userLocation]);
+
   const filteredProviders = providers.filter(provider => {
-    if (!searchTerm) return true;
-    const name = provider.profiles?.full_name?.toLowerCase() || '';
-    const bio = provider.bio?.toLowerCase() || '';
-    const specialties = provider.specialties?.join(' ').toLowerCase() || '';
-    const search = searchTerm.toLowerCase();
-    return name.includes(search) || bio.includes(search) || specialties.includes(search);
+    const matchesSearch = (() => {
+      if (!searchTerm) return true;
+      const name = provider.profiles?.full_name?.toLowerCase() || '';
+      const bio = provider.bio?.toLowerCase() || '';
+      const specialties = provider.specialties?.join(' ').toLowerCase() || '';
+      const search = searchTerm.toLowerCase();
+      return name.includes(search) || bio.includes(search) || specialties.includes(search);
+    })();
+
+    const matchesDistance = (() => {
+      if (!userLocation || !provider.distance) return true;
+      return provider.distance <= maxDistance;
+    })();
+
+    return matchesSearch && matchesDistance;
   });
+
+  const handleProviderClick = (providerId: string) => {
+    const element = document.getElementById(`provider-${providerId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.style.animation = 'highlight 1s ease';
+    }
+  };
 
   return (
     <Layout>
@@ -188,7 +273,114 @@ export default function SearchServices() {
               🩺 {t.search.veterinary}
             </button>
           </div>
+
+          <div style={{
+            marginTop: '24px',
+            paddingTop: '24px',
+            borderTop: '2px solid #FFE5B4',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  padding: '10px 20px',
+                  background: viewMode === 'list' ? 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)' : 'white',
+                  color: viewMode === 'list' ? 'white' : '#64748b',
+                  border: `2px solid ${viewMode === 'list' ? '#FF8C42' : '#e2e8f0'}`,
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: viewMode === 'list' ? '0 4px 12px rgba(255, 140, 66, 0.3)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                📋 List View
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                style={{
+                  padding: '10px 20px',
+                  background: viewMode === 'map' ? 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' : 'white',
+                  color: viewMode === 'map' ? 'white' : '#64748b',
+                  border: `2px solid ${viewMode === 'map' ? '#4CAF50' : '#e2e8f0'}`,
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: viewMode === 'map' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                🗺️ Map View
+              </button>
+            </div>
+
+            {userLocation && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '300px' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
+                  📍 Radius: {maxDistance}km
+                </span>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  value={maxDistance}
+                  onChange={(e) => setMaxDistance(Number(e.target.value))}
+                  style={{
+                    flex: 1,
+                    height: '6px',
+                    borderRadius: '3px',
+                    background: `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+            )}
+
+            {locationError && (
+              <div style={{
+                padding: '8px 16px',
+                background: '#FFF9E6',
+                color: '#8B6914',
+                borderRadius: '20px',
+                fontSize: '13px',
+                fontWeight: '500'
+              }}>
+                ⚠️ {locationError}
+              </div>
+            )}
+          </div>
         </div>
+
+        {viewMode === 'map' && (
+          <div style={{
+            height: '600px',
+            marginBottom: '32px',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 24px rgba(255, 140, 66, 0.2)',
+            border: '3px solid #FFE5B4'
+          }}>
+            <ProvidersMap
+              providers={filteredProviders}
+              userLocation={userLocation}
+              onProviderClick={handleProviderClick}
+            />
+          </div>
+        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -233,6 +425,7 @@ export default function SearchServices() {
               return (
               <div
                 key={provider.id}
+                id={`provider-${provider.id}`}
                 style={{
                   background: 'white',
                   borderRadius: '20px',
@@ -300,11 +493,34 @@ export default function SearchServices() {
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
+                      {provider.distance && provider.distance !== Infinity && (
+                        <div style={{
+                          fontSize: '13px',
+                          fontWeight: '700',
+                          color: '#FF8C42',
+                          marginBottom: '4px'
+                        }}>
+                          📍 {provider.distance.toFixed(1)} km
+                        </div>
+                      )}
                       <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
                         📊 {provider.total_walks} services
                       </div>
                     </div>
                   </div>
+
+                  {provider.address && (
+                    <div style={{
+                      fontSize: '13px',
+                      color: '#64748b',
+                      marginBottom: '12px',
+                      padding: '8px 12px',
+                      background: '#FFF9E6',
+                      borderRadius: '8px'
+                    }}>
+                      🏠 {provider.address}
+                    </div>
+                  )}
 
                   {provider.bio && (
                     <p style={{
