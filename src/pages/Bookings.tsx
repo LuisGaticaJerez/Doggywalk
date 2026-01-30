@@ -467,6 +467,28 @@ export default function Bookings() {
                     {t.bookings.rateService}
                   </Link>
                 )}
+
+                {booking.status !== 'cancelled' && (
+                  <Link
+                    to={`/bookings/${booking.id}/chat`}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'white',
+                      color: '#0ea5e9',
+                      textDecoration: 'none',
+                      border: '1px solid #0ea5e9',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      textAlign: 'center',
+                      marginTop: '8px'
+                    }}
+                  >
+                    💬 {t.chat?.openChat || 'Open Chat'}
+                  </Link>
+                )}
               </div>
             ))}
           </div>

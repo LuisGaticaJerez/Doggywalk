@@ -296,6 +296,27 @@ export const en = {
     ja: '日本語',
     ru: 'Русский',
   },
+  chat: {
+    openChat: 'Open Chat',
+    messages: 'Messages',
+    typeMessage: 'Type a message...',
+    sendMessage: 'Send',
+    noMessages: 'No messages yet',
+    startConversation: 'Start the conversation by sending a message',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    chatWith: 'Chat with',
+    serviceInProgress: 'Service in progress',
+    serviceCompleted: 'Service completed',
+    serviceAccepted: 'Service accepted',
+    servicePending: 'Service pending',
+    bookingCancelled: 'This booking has been cancelled',
+    messageRead: 'Read',
+    messageSent: 'Sent',
+    sendingMessage: 'Sending...',
+    failedToSend: 'Failed to send message',
+    pressEnter: 'Press Enter to send, Shift+Enter for new line',
+  },
 };
 
 export type Translations = typeof en;
