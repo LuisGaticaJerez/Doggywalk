@@ -78,26 +78,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          },
+        },
       });
 
       if (authError) return { error: authError };
       if (!authData.user) return { error: new Error('No user returned') };
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email,
-          full_name: fullName,
-          role,
-        });
-
-      if (profileError) return { error: profileError };
-
       if (role === 'pet_master') {
-        await supabase.from('pet_masters').insert({
+        const { error: petMasterError } = await supabase.from('pet_masters').insert({
           id: authData.user.id,
         });
+        if (petMasterError) return { error: petMasterError };
       }
 
       return { error: null };
