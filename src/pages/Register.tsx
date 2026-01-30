@@ -1,20 +1,30 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 
 export default function Register() {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<'owner' | 'pet_master'>('owner');
+  const [roleFromUrl, setRoleFromUrl] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const { t } = useI18n();
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam === 'owner') {
+      setRole('owner');
+      setRoleFromUrl(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,59 +180,80 @@ export default function Register() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: '#334155',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
-              {t.auth.iAmA}
-            </label>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <label style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '12px',
-                border: `2px solid ${role === 'owner' ? '#0ea5e9' : '#e2e8f0'}`,
+            {roleFromUrl ? (
+              <div style={{
+                padding: '16px',
+                background: '#EEF2FF',
                 borderRadius: '8px',
-                cursor: 'pointer',
-                background: role === 'owner' ? '#f0f9ff' : 'white',
-                transition: 'all 0.2s'
+                border: '2px solid #818CF8'
               }}>
-                <input
-                  type="radio"
-                  value="owner"
-                  checked={role === 'owner'}
-                  onChange={(e) => setRole(e.target.value as 'owner')}
-                  style={{ marginRight: '8px' }}
-                />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.petOwner}</span>
-              </label>
-              <label style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '12px',
-                border: `2px solid ${role === 'pet_master' ? '#0ea5e9' : '#e2e8f0'}`,
-                borderRadius: '8px',
-                cursor: 'pointer',
-                background: role === 'pet_master' ? '#f0f9ff' : 'white',
-                transition: 'all 0.2s'
-              }}>
-                <input
-                  type="radio"
-                  value="pet_master"
-                  checked={role === 'pet_master'}
-                  onChange={(e) => setRole(e.target.value as 'pet_master')}
-                  style={{ marginRight: '8px' }}
-                />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.provider}</span>
-              </label>
-            </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🐕‍🦺</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#4338CA' }}>
+                    Registro para Buscar Servicios
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: '#6366F1', margin: 0 }}>
+                  Te estás registrando como dueño de mascota para buscar y contratar servicios de paseadores, hoteles y veterinarias.
+                </p>
+              </div>
+            ) : (
+              <>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  color: '#334155',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  {t.auth.iAmA}
+                </label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <label style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '12px',
+                    border: `2px solid ${role === 'owner' ? '#0ea5e9' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    background: role === 'owner' ? '#f0f9ff' : 'white',
+                    transition: 'all 0.2s'
+                  }}>
+                    <input
+                      type="radio"
+                      value="owner"
+                      checked={role === 'owner'}
+                      onChange={(e) => setRole(e.target.value as 'owner')}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.petOwner}</span>
+                  </label>
+                  <label style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '12px',
+                    border: `2px solid ${role === 'pet_master' ? '#0ea5e9' : '#e2e8f0'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    background: role === 'pet_master' ? '#f0f9ff' : 'white',
+                    transition: 'all 0.2s'
+                  }}>
+                    <input
+                      type="radio"
+                      value="pet_master"
+                      checked={role === 'pet_master'}
+                      onChange={(e) => setRole(e.target.value as 'pet_master')}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.provider}</span>
+                  </label>
+                </div>
+              </>
+            )}
           </div>
 
           <button

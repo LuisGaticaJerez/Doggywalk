@@ -110,7 +110,7 @@ function Home() {
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <Link
-          to="/register"
+          to="/register?role=owner"
           style={{
             padding: '16px 32px',
             background: 'white',
