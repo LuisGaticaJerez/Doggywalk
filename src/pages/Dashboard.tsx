@@ -8,12 +8,19 @@ import { supabase } from '../lib/supabase';
 import { Pet, Booking, PetMaster } from '../types';
 import { getStatusColor } from '../utils/statusColors';
 
+interface BookingWithDetails extends Booking {
+  pets?: { name: string };
+  pet_masters?: {
+    profiles?: { full_name: string };
+  };
+}
+
 export default function Dashboard() {
   const { profile } = useAuth();
   const { t } = useI18n();
   const { showToast } = useToast();
   const [pets, setPets] = useState<Pet[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
   const [loading, setLoading] = useState(true);
   const [updatingAvailability, setUpdatingAvailability] = useState(false);
@@ -29,7 +36,13 @@ export default function Dashboard() {
       if (profile?.role === 'owner') {
         const [petsRes, bookingsRes] = await Promise.all([
           supabase.from('pets').select('*').eq('owner_id', profile.id).order('created_at', { ascending: false }),
-          supabase.from('bookings').select('*').eq('owner_id', profile.id).order('scheduled_date', { ascending: false }).limit(5)
+          supabase.from('bookings').select(`
+            *,
+            pets (name),
+            pet_masters (
+              profiles (full_name)
+            )
+          `).eq('owner_id', profile.id).order('scheduled_date', { ascending: false }).limit(10)
         ]);
 
         if (petsRes.data) setPets(petsRes.data);
@@ -126,6 +139,86 @@ export default function Dashboard() {
 
         {profile?.role === 'owner' ? (
           <div style={{ display: 'grid', gap: '24px' }}>
+            {bookings.filter(b => b.status === 'in_progress' || b.status === 'accepted').length > 0 && (
+              <div style={{
+                background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                padding: '24px',
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(76, 175, 80, 0.3)',
+                color: 'white'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    background: 'white',
+                    animation: 'pulse 2s infinite'
+                  }} />
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>
+                    🗺️ Live Tracking ({bookings.filter(b => b.status === 'in_progress' || b.status === 'accepted').length})
+                  </h2>
+                </div>
+
+                <div style={{ display: 'grid', gap: '12px' }}>
+                  {bookings.filter(b => b.status === 'in_progress' || b.status === 'accepted').map(booking => (
+                    <Link
+                      key={booking.id}
+                      to={`/bookings/${booking.id}/track`}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '1.25rem' }}>🐕</span>
+                          <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>
+                            {booking.pets?.name}
+                          </h3>
+                          <span style={{
+                            padding: '2px 8px',
+                            background: booking.status === 'in_progress' ? '#10b981' : '#f59e0b',
+                            color: 'white',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            textTransform: 'uppercase'
+                          }}>
+                            {booking.status === 'in_progress' ? 'LIVE' : 'ACCEPTED'}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+                          {booking.pet_masters?.profiles?.full_name}
+                        </p>
+                      </div>
+                      <div style={{
+                        fontSize: '1.5rem',
+                        color: '#4CAF50'
+                      }}>
+                        →
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{
               background: 'white',
               padding: '24px',
@@ -216,7 +309,7 @@ export default function Dashboard() {
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: '12px' }}>
-                  {bookings.map(booking => (
+                  {bookings.slice(0, 5).map(booking => (
                     <div
                       key={booking.id}
                       style={{
@@ -225,17 +318,25 @@ export default function Dashboard() {
                         borderRadius: '8px'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{
-                          padding: '4px 12px',
-                          background: getStatusColor(booking.status).bg,
-                          color: getStatusColor(booking.status).text,
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '500'
-                        }}>
-                          {booking.status}
-                        </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            padding: '4px 12px',
+                            background: getStatusColor(booking.status).bg,
+                            color: getStatusColor(booking.status).text,
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            textTransform: 'capitalize'
+                          }}>
+                            {booking.status}
+                          </span>
+                          {booking.pets?.name && (
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
+                              🐕 {booking.pets.name}
+                            </span>
+                          )}
+                        </div>
                         <span style={{ fontSize: '14px', color: '#64748b' }}>
                           {new Date(booking.scheduled_date).toLocaleDateString()}
                         </span>
@@ -243,6 +344,9 @@ export default function Dashboard() {
                       <p style={{ fontSize: '14px', color: '#334155' }}>{booking.pickup_address}</p>
                       <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>
                         ${booking.total_amount} • {booking.duration_minutes} minutes
+                        {booking.pet_masters?.profiles?.full_name &&
+                          ` • ${booking.pet_masters.profiles.full_name}`
+                        }
                       </p>
                     </div>
                   ))}

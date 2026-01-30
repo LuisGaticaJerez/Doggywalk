@@ -232,16 +232,47 @@ export default function Bookings() {
                   background: 'white',
                   padding: '24px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: (booking.status === 'in_progress' || booking.status === 'accepted') && profile?.role === 'owner'
+                    ? '3px solid #4CAF50'
+                    : '1px solid #e2e8f0',
+                  boxShadow: (booking.status === 'in_progress' || booking.status === 'accepted') && profile?.role === 'owner'
+                    ? '0 4px 12px rgba(76, 175, 80, 0.2)'
+                    : 'none',
+                  position: 'relative'
                 }}
               >
+                {(booking.status === 'in_progress' || booking.status === 'accepted') && profile?.role === 'owner' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    background: '#4CAF50',
+                    animation: 'pulse 2s infinite'
+                  }} />
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+                  <div style={{ flex: 1 }}>
+                    {profile?.role === 'owner' && booking.pets?.name && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '8px'
+                      }}>
+                        <span style={{ fontSize: '1.5rem' }}>🐕</span>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>
+                          {booking.pets.name}
+                        </h3>
+                      </div>
+                    )}
+                    <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>
                       {profile?.role === 'owner'
                         ? booking.pet_masters?.profiles?.full_name || t.bookings.provider
                         : booking.pets?.name || t.bookings.pet}
-                    </h3>
+                    </h4>
                     <span style={{
                       display: 'inline-block',
                       padding: '4px 12px',
