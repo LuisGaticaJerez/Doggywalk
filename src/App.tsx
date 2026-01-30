@@ -19,14 +19,16 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
 import { I18nProvider } from './contexts/I18nContext'
 import { ToastProvider } from './contexts/ToastContext'
+import { NotificationProvider } from './contexts/NotificationContext'
 
 function App() {
   return (
     <AuthProvider>
       <I18nProvider>
         <ToastProvider>
-          <Router>
-        <Routes>
+          <NotificationProvider>
+            <Router>
+              <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -115,8 +117,9 @@ function App() {
               <Settings />
             </ProtectedRoute>
           } />
-        </Routes>
-          </Router>
+              </Routes>
+            </Router>
+          </NotificationProvider>
         </ToastProvider>
       </I18nProvider>
     </AuthProvider>

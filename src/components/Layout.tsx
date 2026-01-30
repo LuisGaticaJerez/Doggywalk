@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { NotificationBell } from './NotificationBell';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface LayoutProps {
   children: ReactNode;
@@ -79,6 +81,8 @@ export default function Layout({ children }: LayoutProps) {
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
+              <LanguageSwitcher />
+              <NotificationBell />
               <Link to="/settings" style={{
                 ...navLinkStyle,
                 padding: '8px 16px',
