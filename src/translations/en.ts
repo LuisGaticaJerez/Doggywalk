@@ -113,6 +113,11 @@ export const en = {
     managePets: 'Manage your pet profiles',
     totalServices: 'Total Services',
     noBookingsProvider: 'No bookings yet. Complete your profile to start receiving bookings!',
+    toggleAvailability: 'Toggle Availability',
+    availabilityDescription: 'Control when you\'re available to accept bookings',
+    availabilityUpdated: 'Availability updated successfully',
+    nowAvailable: 'You are now available for bookings',
+    nowUnavailable: 'You are now unavailable for bookings',
   },
   pets: {
     title: 'My Pets',

@@ -115,6 +115,11 @@ export const fr: Translations = {
     managePets: 'Gérer vos profils d\'animaux',
     totalServices: 'Total des services',
     noBookingsProvider: 'Aucune réservation pour le moment. Complétez votre profil pour commencer à recevoir des réservations!',
+    toggleAvailability: 'Basculer la disponibilité',
+    availabilityDescription: 'Contrôlez quand vous êtes disponible pour accepter des réservations',
+    availabilityUpdated: 'Disponibilité mise à jour avec succès',
+    nowAvailable: 'Vous êtes maintenant disponible pour les réservations',
+    nowUnavailable: 'Vous n\'êtes plus disponible pour les réservations',
   },
   pets: {
     title: 'Mes Animaux',

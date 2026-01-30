@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Pet, Booking, PetMaster } from '../types';
 import { getStatusColor } from '../utils/statusColors';
@@ -10,10 +11,12 @@ import { getStatusColor } from '../utils/statusColors';
 export default function Dashboard() {
   const { profile } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const [pets, setPets] = useState<Pet[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updatingAvailability, setUpdatingAvailability] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -44,6 +47,33 @@ export default function Dashboard() {
       console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleAvailability = async () => {
+    if (!petMaster || !profile) return;
+
+    setUpdatingAvailability(true);
+    try {
+      const newAvailability = !petMaster.is_available;
+
+      const { error } = await supabase
+        .from('pet_masters')
+        .update({ is_available: newAvailability })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setPetMaster({ ...petMaster, is_available: newAvailability });
+      showToast(
+        newAvailability ? t.dashboard.nowAvailable : t.dashboard.nowUnavailable,
+        'success'
+      );
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      showToast(t.common.error, 'error');
+    } finally {
+      setUpdatingAvailability(false);
     }
   };
 
@@ -329,6 +359,54 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+
+            {petMaster && petMaster.service_type !== 'hotel' && petMaster.service_type !== 'vet' && (
+              <div style={{
+                background: 'white',
+                padding: '24px',
+                borderRadius: '16px',
+                border: '2px solid #FFE5B4',
+                boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div style={{ flex: '1', minWidth: '200px' }}>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+                      {t.dashboard.toggleAvailability}
+                    </h3>
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>
+                      {t.dashboard.availabilityDescription}
+                    </p>
+                  </div>
+                  <button
+                    onClick={toggleAvailability}
+                    disabled={updatingAvailability}
+                    style={{
+                      position: 'relative',
+                      width: '60px',
+                      height: '32px',
+                      borderRadius: '16px',
+                      border: 'none',
+                      cursor: updatingAvailability ? 'not-allowed' : 'pointer',
+                      background: petMaster.is_available ? '#10b981' : '#94a3b8',
+                      transition: 'background-color 0.3s',
+                      opacity: updatingAvailability ? 0.6 : 1
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute',
+                      top: '4px',
+                      left: petMaster.is_available ? '32px' : '4px',
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      background: 'white',
+                      transition: 'left 0.3s',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                    }} />
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={{
               background: 'white',

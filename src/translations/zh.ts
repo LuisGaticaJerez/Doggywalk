@@ -115,6 +115,11 @@ export const zh: Translations = {
     managePets: '管理您的宠物资料',
     totalServices: '服务总数',
     noBookingsProvider: '还没有预订。完成您的个人资料以开始接收预订！',
+    toggleAvailability: '切换可用性',
+    availabilityDescription: '控制何时可以接受预订',
+    availabilityUpdated: '可用性已成功更新',
+    nowAvailable: '您现在可以接受预订',
+    nowUnavailable: '您现在无法接受预订',
   },
   pets: {
     title: '我的宠物',

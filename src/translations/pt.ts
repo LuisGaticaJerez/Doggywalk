@@ -115,6 +115,11 @@ export const pt: Translations = {
     managePets: 'Gerenciar perfis dos seus pets',
     totalServices: 'Total de Serviços',
     noBookingsProvider: 'Nenhuma reserva ainda. Complete seu perfil para começar a receber reservas!',
+    toggleAvailability: 'Alternar disponibilidade',
+    availabilityDescription: 'Controle quando você está disponível para aceitar reservas',
+    availabilityUpdated: 'Disponibilidade atualizada com sucesso',
+    nowAvailable: 'Agora você está disponível para reservas',
+    nowUnavailable: 'Agora você está indisponível para reservas',
   },
   pets: {
     title: 'Meus Pets',

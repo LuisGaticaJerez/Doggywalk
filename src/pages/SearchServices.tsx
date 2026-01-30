@@ -67,7 +67,6 @@ export default function SearchServices() {
             avatar_url
           )
         `)
-        .eq('is_available', true)
         .eq('verified', true);
 
       if (serviceType !== 'all') {
@@ -125,7 +124,14 @@ export default function SearchServices() {
       return provider.distance <= maxDistance;
     })();
 
-    return matchesSearch && matchesDistance;
+    const matchesAvailability = (() => {
+      if (provider.service_type === 'hotel' || provider.service_type === 'vet') {
+        return true;
+      }
+      return provider.is_available === true;
+    })();
+
+    return matchesSearch && matchesDistance && matchesAvailability;
   });
 
   const handleProviderClick = (providerId: string) => {
