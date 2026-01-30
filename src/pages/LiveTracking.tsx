@@ -24,6 +24,9 @@ interface BookingWithDetails extends Booking {
   pets?: {
     name: string;
   };
+  booking_pets?: Array<{
+    pets: { name: string; id: string };
+  }>;
 }
 
 function RecenterMap({ center }: { center: [number, number] }) {
@@ -111,6 +114,9 @@ export default function LiveTracking() {
           ),
           pets (
             name
+          ),
+          booking_pets (
+            pets (id, name)
           )
         `)
         .eq('id', bookingId)
@@ -274,10 +280,13 @@ export default function LiveTracking() {
           boxShadow: '0 8px 24px rgba(76, 175, 80, 0.3)'
         }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px' }}>
-            🚶 {t.tracking.liveTracking || 'Live Tracking'}
+            {booking.pet_count > 1 ? '🚶🐕🐕' : '🚶🐕'} {t.tracking.liveTracking || 'Live Tracking'}
           </h1>
           <p style={{ opacity: 0.95, fontSize: '1.125rem' }}>
-            {booking.pets?.name} {t.tracking.withWalker || 'with'} {booking.pet_masters?.profiles?.full_name}
+            {booking.booking_pets && booking.booking_pets.length > 0
+              ? `${booking.booking_pets.map(bp => bp.pets.name).join(', ')}${booking.pet_count > 1 ? ` (${booking.pet_count} pets)` : ''}`
+              : booking.pets?.name
+            } {t.tracking.withWalker || 'with'} {booking.pet_masters?.profiles?.full_name}
           </p>
         </div>
 

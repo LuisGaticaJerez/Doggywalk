@@ -13,6 +13,9 @@ interface BookingWithDetails extends Booking {
   pet_masters?: {
     profiles?: { full_name: string };
   };
+  booking_pets?: Array<{
+    pets: { name: string; id: string };
+  }>;
 }
 
 export default function Dashboard() {
@@ -41,6 +44,9 @@ export default function Dashboard() {
             pets (name),
             pet_masters (
               profiles (full_name)
+            ),
+            booking_pets (
+              pets (id, name)
             )
           `).eq('owner_id', profile.id).order('scheduled_date', { ascending: false }).limit(10)
         ]);
@@ -187,9 +193,14 @@ export default function Dashboard() {
                     >
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '1.25rem' }}>🐕</span>
+                          <span style={{ fontSize: '1.25rem' }}>
+                            {booking.pet_count > 1 ? '🐕🐕' : '🐕'}
+                          </span>
                           <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', margin: 0 }}>
-                            {booking.pets?.name}
+                            {booking.booking_pets && booking.booking_pets.length > 0
+                              ? booking.booking_pets.map(bp => bp.pets.name).join(', ')
+                              : booking.pets?.name
+                            }
                           </h3>
                           <span style={{
                             padding: '2px 8px',
@@ -202,6 +213,18 @@ export default function Dashboard() {
                           }}>
                             {booking.status === 'in_progress' ? 'LIVE' : 'ACCEPTED'}
                           </span>
+                          {booking.pet_count > 1 && (
+                            <span style={{
+                              padding: '2px 6px',
+                              background: '#E8F5E9',
+                              color: '#2E7D32',
+                              borderRadius: '8px',
+                              fontSize: '10px',
+                              fontWeight: '600'
+                            }}>
+                              {booking.pet_count} pets
+                            </span>
+                          )}
                         </div>
                         <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
                           {booking.pet_masters?.profiles?.full_name}
@@ -331,7 +354,23 @@ export default function Dashboard() {
                           }}>
                             {booking.status}
                           </span>
-                          {booking.pets?.name && (
+                          {booking.booking_pets && booking.booking_pets.length > 0 ? (
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
+                              {booking.pet_count > 1 ? '🐕🐕' : '🐕'} {booking.booking_pets.map(bp => bp.pets.name).join(', ')}
+                              {booking.pet_count > 1 && (
+                                <span style={{
+                                  marginLeft: '6px',
+                                  padding: '2px 6px',
+                                  background: '#E8F5E9',
+                                  color: '#2E7D32',
+                                  borderRadius: '8px',
+                                  fontSize: '11px'
+                                }}>
+                                  {booking.pet_count}
+                                </span>
+                              )}
+                            </span>
+                          ) : booking.pets?.name && (
                             <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
                               🐕 {booking.pets.name}
                             </span>

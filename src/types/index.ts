@@ -52,6 +52,7 @@ export interface Booking {
   owner_id: string;
   pet_master_id: string | null;
   pet_id: string;
+  pet_count: number;
   status: 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
   scheduled_date: string;
   duration_minutes: number;
@@ -65,6 +66,13 @@ export interface Booking {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+}
+
+export interface BookingPet {
+  id: string;
+  booking_id: string;
+  pet_id: string;
+  created_at: string;
 }
 
 export interface PaymentMethod {

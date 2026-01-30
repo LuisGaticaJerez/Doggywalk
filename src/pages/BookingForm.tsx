@@ -22,8 +22,8 @@ export default function BookingForm() {
   const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<PetMasterWithProfile | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
+  const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    pet_id: '',
     scheduled_date: '',
     scheduled_time: '',
     duration_minutes: '60',
@@ -63,10 +63,26 @@ export default function BookingForm() {
     }
   };
 
+  const handlePetToggle = (petId: string) => {
+    setSelectedPetIds(prev =>
+      prev.includes(petId)
+        ? prev.filter(id => id !== petId)
+        : [...prev, petId]
+    );
+  };
+
+  const calculateTotal = () => {
+    if (!provider) return 0;
+    const basePrice = (parseFloat(formData.duration_minutes) / 60) * provider.hourly_rate;
+    const petCount = selectedPetIds.length;
+    if (petCount <= 1) return basePrice;
+    return basePrice + (basePrice * 0.5 * (petCount - 1));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.pet_id) {
+    if (selectedPetIds.length === 0) {
       showToast(t.bookings.selectPetRequired, 'error');
       return;
     }
@@ -75,14 +91,15 @@ export default function BookingForm() {
 
     try {
       const scheduledDateTime = `${formData.scheduled_date}T${formData.scheduled_time}:00`;
-      const totalAmount = provider ? (parseFloat(formData.duration_minutes) / 60) * provider.hourly_rate : 0;
+      const totalAmount = calculateTotal();
 
-      const { error } = await supabase
+      const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
           owner_id: profile?.id,
           pet_master_id: providerId,
-          pet_id: formData.pet_id,
+          pet_id: selectedPetIds[0],
+          pet_count: selectedPetIds.length,
           scheduled_date: scheduledDateTime,
           duration_minutes: parseInt(formData.duration_minutes),
           pickup_address: formData.pickup_address,
@@ -91,9 +108,22 @@ export default function BookingForm() {
           total_amount: totalAmount,
           special_instructions: formData.special_instructions || null,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (bookingError) throw bookingError;
+
+      const bookingPets = selectedPetIds.map(petId => ({
+        booking_id: booking.id,
+        pet_id: petId
+      }));
+
+      const { error: petsError } = await supabase
+        .from('booking_pets')
+        .insert(bookingPets);
+
+      if (petsError) throw petsError;
 
       showToast(t.bookings.bookingSuccess, 'success');
       navigate('/bookings');
@@ -186,20 +216,85 @@ export default function BookingForm() {
             border: '1px solid #e2e8f0'
           }}>
             <div style={{ marginBottom: '24px' }}>
-              <label style={labelStyle}>{t.bookings.selectPet}</label>
-              <select
-                value={formData.pet_id}
-                onChange={(e) => setFormData({ ...formData, pet_id: e.target.value })}
-                required
-                style={inputStyle}
-              >
-                <option value="">{t.bookings.choosePet}</option>
+              <label style={labelStyle}>
+                {t.bookings.selectPet}
+                {selectedPetIds.length > 0 && (
+                  <span style={{
+                    marginLeft: '8px',
+                    padding: '2px 8px',
+                    background: '#E8F5E9',
+                    color: '#2E7D32',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '600'
+                  }}>
+                    {selectedPetIds.length} selected
+                  </span>
+                )}
+              </label>
+              <div style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '12px',
+                maxHeight: '240px',
+                overflowY: 'auto'
+              }}>
                 {pets.map(pet => (
-                  <option key={pet.id} value={pet.id}>
-                    {pet.name} ({pet.breed})
-                  </option>
+                  <label
+                    key={pet.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                      transition: 'background 0.2s',
+                      background: selectedPetIds.includes(pet.id) ? '#E8F5E9' : 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selectedPetIds.includes(pet.id)) {
+                        e.currentTarget.style.background = '#f8fafc';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selectedPetIds.includes(pet.id)) {
+                        e.currentTarget.style.background = 'transparent';
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPetIds.includes(pet.id)}
+                      onChange={() => handlePetToggle(pet.id)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginRight: '12px',
+                        cursor: 'pointer',
+                        accentColor: '#4CAF50'
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '2px' }}>
+                        {pet.name}
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#64748b' }}>
+                        {pet.breed} • {pet.size} • {pet.age} years
+                      </div>
+                    </div>
+                  </label>
                 ))}
-              </select>
+              </div>
+              {selectedPetIds.length > 1 && (
+                <p style={{
+                  marginTop: '8px',
+                  fontSize: '13px',
+                  color: '#4CAF50',
+                  fontWeight: '500'
+                }}>
+                  Group walk: {selectedPetIds.length} pets (+50% per additional pet)
+                </p>
+              )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
@@ -280,11 +375,27 @@ export default function BookingForm() {
                 <span style={{ color: '#64748b' }}>{t.bookings.rate}:</span>
                 <span style={{ fontWeight: '600' }}>${provider.hourly_rate}/hr</span>
               </div>
+              {selectedPetIds.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#64748b' }}>Pets:</span>
+                  <span style={{ fontWeight: '600' }}>
+                    {selectedPetIds.length} {selectedPetIds.length === 1 ? 'pet' : 'pets'}
+                  </span>
+                </div>
+              )}
+              {selectedPetIds.length > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: '#64748b', fontSize: '13px' }}>Multi-pet discount:</span>
+                  <span style={{ fontWeight: '600', fontSize: '13px', color: '#4CAF50' }}>
+                    Base + 50% × {selectedPetIds.length - 1}
+                  </span>
+                </div>
+              )}
               <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontWeight: '600', fontSize: '1.125rem' }}>{t.common.total}:</span>
                   <span style={{ fontWeight: 'bold', fontSize: '1.125rem', color: '#0ea5e9' }}>
-                    ${((parseFloat(formData.duration_minutes) / 60) * provider.hourly_rate).toFixed(2)}
+                    ${calculateTotal().toFixed(2)}
                   </span>
                 </div>
               </div>

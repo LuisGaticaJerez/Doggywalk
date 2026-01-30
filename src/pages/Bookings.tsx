@@ -13,6 +13,9 @@ interface BookingWithDetails extends Booking {
   pet_masters?: {
     profiles?: { full_name: string };
   };
+  booking_pets?: Array<{
+    pets: { name: string; id: string };
+  }>;
 }
 
 export default function Bookings() {
@@ -36,6 +39,9 @@ export default function Bookings() {
           pets (name),
           pet_masters (
             profiles (full_name)
+          ),
+          booking_pets (
+            pets (id, name)
           )
         `)
         .order('scheduled_date', { ascending: false });
@@ -255,7 +261,36 @@ export default function Bookings() {
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                   <div style={{ flex: 1 }}>
-                    {profile?.role === 'owner' && booking.pets?.name && (
+                    {profile?.role === 'owner' && booking.booking_pets && booking.booking_pets.length > 0 && (
+                      <div style={{ marginBottom: '8px' }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '4px'
+                        }}>
+                          <span style={{ fontSize: '1.5rem' }}>
+                            {booking.pet_count > 1 ? '🐕🐕' : '🐕'}
+                          </span>
+                          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>
+                            {booking.booking_pets.map(bp => bp.pets.name).join(', ')}
+                          </h3>
+                          {booking.pet_count > 1 && (
+                            <span style={{
+                              padding: '2px 8px',
+                              background: '#E8F5E9',
+                              color: '#2E7D32',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '600'
+                            }}>
+                              Group: {booking.pet_count} pets
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {profile?.role === 'owner' && (!booking.booking_pets || booking.booking_pets.length === 0) && booking.pets?.name && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -271,7 +306,9 @@ export default function Bookings() {
                     <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>
                       {profile?.role === 'owner'
                         ? booking.pet_masters?.profiles?.full_name || t.bookings.provider
-                        : booking.pets?.name || t.bookings.pet}
+                        : booking.booking_pets && booking.booking_pets.length > 0
+                          ? booking.booking_pets.map(bp => bp.pets.name).join(', ')
+                          : booking.pets?.name || t.bookings.pet}
                     </h4>
                     <span style={{
                       display: 'inline-block',
