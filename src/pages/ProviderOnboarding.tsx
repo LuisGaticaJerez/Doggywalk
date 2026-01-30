@@ -24,7 +24,7 @@ interface ServiceData {
 }
 
 export default function ProviderOnboarding() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -117,13 +117,15 @@ export default function ProviderOnboarding() {
         if (businessError) throw businessError;
       }
 
-      await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           business_type: businessType,
           onboarding_completed: true,
         })
         .eq('id', profile?.id);
+
+      if (profileError) throw profileError;
 
       const { error: masterError } = await supabase.from('pet_masters').upsert({
         id: profile?.id,
@@ -137,8 +139,10 @@ export default function ProviderOnboarding() {
 
       if (masterError) throw masterError;
 
-      showToast('Configuración completada', 'success');
-      navigate('/dashboard');
+      await refreshProfile();
+
+      showToast('¡Configuración completada con éxito!', 'success');
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Error:', error);
       showToast('Error al guardar', 'error');

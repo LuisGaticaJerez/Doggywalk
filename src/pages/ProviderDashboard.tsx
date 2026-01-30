@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -25,6 +25,7 @@ interface ServiceStats {
 
 export default function ProviderDashboard() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const { t } = useI18n();
   const { showToast } = useToast();
   const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
@@ -40,10 +41,14 @@ export default function ProviderDashboard() {
   const [updatingAvailability, setUpdatingAvailability] = useState(false);
 
   useEffect(() => {
+    if (profile && !profile.onboarding_completed) {
+      navigate('/provider-onboarding', { replace: true });
+      return;
+    }
     if (profile) {
       loadDashboardData();
     }
-  }, [profile]);
+  }, [profile, navigate]);
 
   const loadDashboardData = async () => {
     try {
