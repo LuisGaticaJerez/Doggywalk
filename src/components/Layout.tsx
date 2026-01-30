@@ -10,7 +10,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <Link to="/dashboard" style={{
+          <Link to={user ? "/dashboard" : "/"} style={{
             fontSize: '1.75rem',
             fontWeight: 'bold',
             background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
@@ -51,35 +51,110 @@ export default function Layout({ children }: LayoutProps) {
             <span>🐾</span> DoggyWalk
           </Link>
 
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <LanguageSwitcher />
-              <NotificationBell />
-            </div>
-
-            <div style={{ position: 'relative' }}>
+          {!user ? (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => navigate(-1)}
                 style={{
                   padding: '10px 20px',
-                  background: 'linear-gradient(135deg, #FFE5B4 0%, #FFD93D 100%)',
-                  color: '#8B6914',
+                  background: '#f1f5f9',
+                  color: '#475569',
                   border: 'none',
                   borderRadius: '25px',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(255, 221, 61, 0.3)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
+              >
+                ← {t.common.back}
+              </button>
+
+              <LanguageSwitcher />
+
+              <Link
+                to="/login"
+                style={{
+                  padding: '10px 20px',
+                  background: 'white',
+                  color: '#FF8C42',
+                  border: '2px solid #FF8C42',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textDecoration: 'none',
                   transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  display: 'inline-block'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#FFF7ED';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'white';
                 }}
               >
-                <span>⚙️</span>
-                <span>{profile?.full_name || 'Menu'}</span>
-                <span style={{ fontSize: '12px' }}>{menuOpen ? '▲' : '▼'}</span>
-              </button>
+                {t.auth.login}
+              </Link>
+
+              <Link
+                to="/register"
+                style={{
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                  transition: 'all 0.2s',
+                  display: 'inline-block'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 140, 66, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.3)';
+                }}
+              >
+                {t.auth.register}
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <LanguageSwitcher />
+                <NotificationBell />
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, #FFE5B4 0%, #FFD93D 100%)',
+                    color: '#8B6914',
+                    border: 'none',
+                    borderRadius: '25px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(255, 221, 61, 0.3)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>⚙️</span>
+                  <span>{profile?.full_name || 'Menu'}</span>
+                  <span style={{ fontSize: '12px' }}>{menuOpen ? '▲' : '▼'}</span>
+                </button>
 
               {menuOpen && (
                 <>
@@ -241,8 +316,9 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
                 </>
               )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </nav>
 

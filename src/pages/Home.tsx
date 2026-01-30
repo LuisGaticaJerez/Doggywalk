@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 function Home() {
   const { t } = useI18n();
@@ -67,7 +68,8 @@ function Home() {
         animation: 'float 4.5s ease-in-out infinite'
       }}>🦴</div>
 
-      <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '12px', zIndex: 10 }}>
+      <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '12px', alignItems: 'center', zIndex: 10 }}>
+        <LanguageSwitcher />
         <Link
           to="/login"
           style={{
