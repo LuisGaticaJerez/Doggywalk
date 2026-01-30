@@ -32,6 +32,11 @@ export default function ProviderOnboarding() {
 
   const [businessType, setBusinessType] = useState<BusinessType>('individual');
   const [selectedServices, setSelectedServices] = useState<ServiceType[]>([]);
+
+  const handleBusinessTypeChange = (type: BusinessType) => {
+    setBusinessType(type);
+    setSelectedServices([]);
+  };
   const [servicesData, setServicesData] = useState<Record<ServiceType, Partial<ServiceData>>>({
     walker: {},
     hotel: {},
@@ -50,9 +55,14 @@ export default function ProviderOnboarding() {
   }, [profile, navigate]);
 
   const toggleService = (service: ServiceType) => {
-    setSelectedServices((prev) =>
-      prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]
-    );
+    setSelectedServices([service]);
+  };
+
+  const getAvailableServices = (): ServiceType[] => {
+    if (businessType === 'individual') {
+      return ['walker'];
+    }
+    return ['hotel', 'vet'];
   };
 
   const updateServiceData = (service: ServiceType, data: Partial<ServiceData>) => {
@@ -235,7 +245,7 @@ export default function ProviderOnboarding() {
                   type="radio"
                   value="individual"
                   checked={businessType === 'individual'}
-                  onChange={(e) => setBusinessType(e.target.value as BusinessType)}
+                  onChange={(e) => handleBusinessTypeChange(e.target.value as BusinessType)}
                   style={{ marginRight: '12px' }}
                 />
                 <span style={{ fontSize: '1.5rem', marginRight: '12px' }}>👤</span>
@@ -259,7 +269,7 @@ export default function ProviderOnboarding() {
                   type="radio"
                   value="business"
                   checked={businessType === 'business'}
-                  onChange={(e) => setBusinessType(e.target.value as BusinessType)}
+                  onChange={(e) => handleBusinessTypeChange(e.target.value as BusinessType)}
                   style={{ marginRight: '12px' }}
                 />
                 <span style={{ fontSize: '1.5rem', marginRight: '12px' }}>🏢</span>
@@ -346,12 +356,16 @@ export default function ProviderOnboarding() {
         {step === 2 && (
           <div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '16px', color: '#1e293b' }}>
-              ¿Qué servicios ofrecerás?
+              {businessType === 'individual' ? 'Servicio de Paseador' : '¿Qué servicio ofrecerás?'}
             </h2>
-            <p style={{ color: '#64748b', marginBottom: '24px' }}>Puedes seleccionar varios</p>
+            <p style={{ color: '#64748b', marginBottom: '24px' }}>
+              {businessType === 'individual'
+                ? 'Como persona individual, solo puedes ofrecer servicios de paseador de mascotas'
+                : 'Selecciona un servicio para tu negocio'}
+            </p>
 
             <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
-              {(['walker', 'hotel', 'vet'] as ServiceType[]).map((service) => (
+              {getAvailableServices().map((service) => (
                 <label
                   key={service}
                   style={{
@@ -364,7 +378,7 @@ export default function ProviderOnboarding() {
                   }}
                 >
                   <input
-                    type="checkbox"
+                    type="radio"
                     checked={selectedServices.includes(service)}
                     onChange={() => toggleService(service)}
                     style={{ marginRight: '12px' }}

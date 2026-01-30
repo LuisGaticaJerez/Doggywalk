@@ -46,6 +46,11 @@ export default function ManageServices() {
 
   useEffect(() => {
     loadData();
+    if (profile?.business_type === 'business') {
+      setNewServiceType('hotel');
+    } else {
+      setNewServiceType('walker');
+    }
   }, [profile]);
 
   const loadData = async () => {
@@ -89,6 +94,22 @@ export default function ManageServices() {
         .eq('id', serviceId);
 
       if (error) throw error;
+
+      if (editData.latitude !== undefined || editData.longitude !== undefined || editData.address || editData.city) {
+        const updateData: any = {};
+        if (editData.address) updateData.address = editData.address;
+        if (editData.city) updateData.city = editData.city;
+        if (editData.country) updateData.country = editData.country;
+        if (editData.latitude !== undefined) updateData.latitude = editData.latitude;
+        if (editData.longitude !== undefined) updateData.longitude = editData.longitude;
+
+        if (Object.keys(updateData).length > 0) {
+          await supabase
+            .from('pet_masters')
+            .update(updateData)
+            .eq('id', profile?.id);
+        }
+      }
 
       showToast('Servicio actualizado', 'success');
       setEditingService(null);
@@ -350,22 +371,41 @@ export default function ManageServices() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>💼 Mis Servicios</h2>
-            <button
-              onClick={() => setShowAddService(true)}
+            {services.length === 0 && (
+              <button
+                onClick={() => setShowAddService(true)}
+                style={{
+                  padding: '10px 20px',
+                  background: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                }}
+              >
+                + Agregar Servicio
+              </button>
+            )}
+          </div>
+
+          {services.length > 0 && (
+            <div
               style={{
-                padding: '10px 20px',
-                background: '#10b981',
-                color: 'white',
-                border: 'none',
+                padding: '12px',
+                background: '#EEF2FF',
                 borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
+                marginBottom: '16px',
               }}
             >
-              + Agregar Servicio
-            </button>
-          </div>
+              <p style={{ fontSize: '14px', color: '#4338CA' }}>
+                {profile?.business_type === 'individual'
+                  ? '📢 Como persona individual, solo puedes tener un servicio activo de paseador.'
+                  : '📢 Como empresa, solo puedes tener un servicio activo (hotel o veterinaria).'}
+              </p>
+            </div>
+          )}
 
           {showAddService && (
             <div
@@ -395,9 +435,14 @@ export default function ManageServices() {
                       fontSize: '14px',
                     }}
                   >
-                    <option value="walker">🚶 Paseador</option>
-                    <option value="hotel">🏨 Hotel</option>
-                    <option value="vet">⚕️ Veterinaria</option>
+                    {profile?.business_type === 'individual' ? (
+                      <option value="walker">🚶 Paseador</option>
+                    ) : (
+                      <>
+                        <option value="hotel">🏨 Hotel</option>
+                        <option value="vet">⚕️ Veterinaria</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
