@@ -53,6 +53,11 @@ export async function deletePhoto(photoUrl: string): Promise<void> {
   }
 }
 
+export async function storePhoto(file: File): Promise<string> {
+  const compressed = await compressImage(file);
+  return uploadPhoto('service-photos', compressed);
+}
+
 export function compressImage(file: File, maxWidth = 1920): Promise<File> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
