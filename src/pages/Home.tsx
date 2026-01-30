@@ -82,6 +82,40 @@ function Home() {
         animation: 'float 4.5s ease-in-out infinite'
       }}>🦴</div>
 
+      <Link
+        to="/login"
+        style={{
+          padding: '18px 40px',
+          background: 'rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(10px)',
+          color: 'white',
+          textDecoration: 'none',
+          borderRadius: '50px',
+          fontSize: '20px',
+          fontWeight: '700',
+          border: '3px solid white',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+          transition: 'all 0.2s',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginBottom: '2rem',
+          zIndex: 10
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
+          e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0) scale(1)';
+          e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+          e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
+        }}
+      >
+        <span>👋</span> {t.auth.signIn}
+      </Link>
+
       <div style={{
         fontSize: '5rem',
         marginBottom: '0.5rem',
@@ -137,33 +171,31 @@ function Home() {
           <span>🐕‍🦺</span> {t.home.findServices}
         </Link>
         <Link
-          to="/login"
+          to="/register?role=master"
           style={{
             padding: '16px 32px',
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(10px)',
-            color: 'white',
+            background: 'white',
+            color: '#FFA500',
             textDecoration: 'none',
             borderRadius: '50px',
             fontSize: '18px',
             fontWeight: '700',
-            border: '3px solid white',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-            transition: 'all 0.2s',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
+            e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.25)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
           }}
         >
-          <span>👋</span> {t.auth.signIn}
+          <span>⭐</span> {t.home.becomeProvider}
         </Link>
       </div>
 
