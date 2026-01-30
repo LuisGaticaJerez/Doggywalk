@@ -147,6 +147,9 @@ export const en = {
     provider: 'Provider',
     memberSince: 'Member Since',
     verificationStatus: 'Verification Status',
+    accountType: 'Account Type',
+    individual: 'Individual',
+    company: 'Company',
   },
   nav: {
     home: 'Home',
@@ -160,6 +163,7 @@ export const en = {
     title: 'Find the Perfect Care for Your Pet',
     subtitle: 'Professional pet walkers, sitters, and boarding services',
     findServices: 'Find Services',
+    becomePetOwner: 'I Want to be a Pet Owner',
     becomeProvider: 'Become a Provider',
     features: {
       verified: {

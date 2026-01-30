@@ -168,7 +168,7 @@ function Home() {
             e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
           }}
         >
-          <span>🐕‍🦺</span> {t.home.findServices}
+          <span>🐕‍🦺</span> {t.home.becomePetOwner}
         </Link>
         <Link
           to="/register?role=master"

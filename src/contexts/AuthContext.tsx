@@ -8,7 +8,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string, role: 'owner' | 'pet_master') => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role: 'owner' | 'pet_master', accountType?: 'individual' | 'company') => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   refreshProfile: () => Promise<void>;
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'owner' | 'pet_master') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'owner' | 'pet_master', accountType: 'individual' | 'company' = 'individual') => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -92,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (role === 'pet_master') {
         const { error: petMasterError } = await supabase.from('pet_masters').insert({
           id: authData.user.id,
+          account_type: accountType,
         });
         if (petMasterError) return { error: petMasterError };
       }

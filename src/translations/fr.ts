@@ -149,6 +149,9 @@ export const fr: Translations = {
     provider: 'Prestataire',
     memberSince: 'Membre depuis',
     verificationStatus: 'Statut de vérification',
+    accountType: 'Type de Compte',
+    individual: 'Individuel',
+    company: 'Entreprise',
   },
   nav: {
     home: 'Accueil',
@@ -162,6 +165,7 @@ export const fr: Translations = {
     title: 'Trouvez les Soins Parfaits pour votre Animal',
     subtitle: 'Promeneurs professionnels, gardiens et services de pension',
     findServices: 'Trouver des Services',
+    becomePetOwner: 'Je Veux Être Propriétaire',
     becomeProvider: 'Devenir Prestataire',
     features: {
       verified: {

@@ -149,6 +149,9 @@ export const pt: Translations = {
     provider: 'Provedor',
     memberSince: 'Membro desde',
     verificationStatus: 'Status de Verificação',
+    accountType: 'Tipo de Conta',
+    individual: 'Individual',
+    company: 'Empresa',
   },
   nav: {
     home: 'Início',
@@ -162,6 +165,7 @@ export const pt: Translations = {
     title: 'Encontre o Cuidado Perfeito para seu Pet',
     subtitle: 'Passeadores profissionais, babás e serviços de hospedagem',
     findServices: 'Buscar Serviços',
+    becomePetOwner: 'Quero ser Dono de Pet',
     becomeProvider: 'Tornar-se Provedor',
     features: {
       verified: {

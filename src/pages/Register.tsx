@@ -10,6 +10,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<'owner' | 'pet_master'>('owner');
+  const [accountType, setAccountType] = useState<'individual' | 'company'>('individual');
   const [roleFromUrl, setRoleFromUrl] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,9 @@ export default function Register() {
     const roleParam = searchParams.get('role');
     if (roleParam === 'owner') {
       setRole('owner');
+      setRoleFromUrl(true);
+    } else if (roleParam === 'master') {
+      setRole('pet_master');
       setRoleFromUrl(true);
     }
   }, [searchParams]);
@@ -37,7 +41,7 @@ export default function Register() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName, role);
+    const { error } = await signUp(email, password, fullName, role, accountType);
 
     if (error) {
       setError(error.message);
@@ -211,7 +215,7 @@ export default function Register() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            {roleFromUrl ? (
+            {roleFromUrl && role === 'owner' ? (
               <div style={{
                 padding: '16px',
                 background: '#EEF2FF',
@@ -221,11 +225,28 @@ export default function Register() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '1.5rem' }}>🐕‍🦺</span>
                   <span style={{ fontSize: '14px', fontWeight: '600', color: '#4338CA' }}>
-                    Registro para Buscar Servicios
+                    {t.home.becomePetOwner}
                   </span>
                 </div>
                 <p style={{ fontSize: '13px', color: '#6366F1', margin: 0 }}>
                   Te estás registrando como dueño de mascota para buscar y contratar servicios de paseadores, hoteles y veterinarias.
+                </p>
+              </div>
+            ) : roleFromUrl && role === 'pet_master' ? (
+              <div style={{
+                padding: '16px',
+                background: '#FFF7ED',
+                borderRadius: '8px',
+                border: '2px solid #FB923C'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '1.5rem' }}>⭐</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#C2410C' }}>
+                    {t.home.becomeProvider}
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: '#EA580C', margin: 0 }}>
+                  Te estás registrando como proveedor de servicios para ofrecer cuidado de mascotas.
                 </p>
               </div>
             ) : (
@@ -286,6 +307,64 @@ export default function Register() {
               </>
             )}
           </div>
+
+          {role === 'pet_master' && (
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                color: '#334155',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                {t.auth.accountType}
+              </label>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <label style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '12px',
+                  border: `2px solid ${accountType === 'individual' ? '#FB923C' : '#e2e8f0'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: accountType === 'individual' ? '#FFF7ED' : 'white',
+                  transition: 'all 0.2s'
+                }}>
+                  <input
+                    type="radio"
+                    value="individual"
+                    checked={accountType === 'individual'}
+                    onChange={(e) => setAccountType(e.target.value as 'individual')}
+                    style={{ marginRight: '8px' }}
+                  />
+                  <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.individual}</span>
+                </label>
+                <label style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '12px',
+                  border: `2px solid ${accountType === 'company' ? '#FB923C' : '#e2e8f0'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: accountType === 'company' ? '#FFF7ED' : 'white',
+                  transition: 'all 0.2s'
+                }}>
+                  <input
+                    type="radio"
+                    value="company"
+                    checked={accountType === 'company'}
+                    onChange={(e) => setAccountType(e.target.value as 'company')}
+                    style={{ marginRight: '8px' }}
+                  />
+                  <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.company}</span>
+                </label>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

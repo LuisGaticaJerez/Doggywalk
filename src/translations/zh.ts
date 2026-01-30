@@ -149,6 +149,9 @@ export const zh: Translations = {
     provider: '提供者',
     memberSince: '注册时间',
     verificationStatus: '验证状态',
+    accountType: '账户类型',
+    individual: '个人',
+    company: '公司',
   },
   nav: {
     home: '首页',
@@ -162,6 +165,7 @@ export const zh: Translations = {
     title: '为您的宠物找到完美的照顾',
     subtitle: '专业的宠物遛狗员、保姆和寄养服务',
     findServices: '查找服务',
+    becomePetOwner: '我想成为宠物主人',
     becomeProvider: '成为服务提供者',
     features: {
       verified: {
