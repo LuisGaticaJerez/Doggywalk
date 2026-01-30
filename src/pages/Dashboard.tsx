@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
-import { Pet, Booking, PetMaster } from '../types';
+import { Pet, Booking } from '../types';
 import { getStatusColor } from '../utils/statusColors';
+import ProviderDashboard from './ProviderDashboard';
 
 interface BookingWithDetails extends Booking {
   pets?: { name: string };
@@ -21,12 +21,9 @@ interface BookingWithDetails extends Booking {
 export default function Dashboard() {
   const { profile } = useAuth();
   const { t } = useI18n();
-  const { showToast } = useToast();
   const [pets, setPets] = useState<Pet[]>([]);
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
-  const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updatingAvailability, setUpdatingAvailability] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -36,32 +33,22 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      if (profile?.role === 'owner') {
-        const [petsRes, bookingsRes] = await Promise.all([
-          supabase.from('pets').select('*').eq('owner_id', profile.id).order('created_at', { ascending: false }),
-          supabase.from('bookings').select(`
-            *,
-            pets (name),
-            pet_masters (
-              profiles (full_name)
-            ),
-            booking_pets (
-              pets (id, name)
-            )
-          `).eq('owner_id', profile.id).order('scheduled_date', { ascending: false }).limit(10)
-        ]);
+      const [petsRes, bookingsRes] = await Promise.all([
+        supabase.from('pets').select('*').eq('owner_id', profile!.id).order('created_at', { ascending: false }),
+        supabase.from('bookings').select(`
+          *,
+          pets (name),
+          pet_masters (
+            profiles (full_name)
+          ),
+          booking_pets (
+            pets (id, name)
+          )
+        `).eq('owner_id', profile!.id).order('scheduled_date', { ascending: false }).limit(10)
+      ]);
 
-        if (petsRes.data) setPets(petsRes.data);
-        if (bookingsRes.data) setBookings(bookingsRes.data);
-      } else if (profile?.role === 'pet_master') {
-        const [masterRes, bookingsRes] = await Promise.all([
-          supabase.from('pet_masters').select('*').eq('id', profile.id).maybeSingle(),
-          supabase.from('bookings').select('*').eq('pet_master_id', profile.id).order('scheduled_date', { ascending: false }).limit(5)
-        ]);
-
-        if (masterRes.data) setPetMaster(masterRes.data);
-        if (bookingsRes.data) setBookings(bookingsRes.data);
-      }
+      if (petsRes.data) setPets(petsRes.data);
+      if (bookingsRes.data) setBookings(bookingsRes.data);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -69,32 +56,9 @@ export default function Dashboard() {
     }
   };
 
-  const toggleAvailability = async () => {
-    if (!petMaster || !profile) return;
-
-    setUpdatingAvailability(true);
-    try {
-      const newAvailability = !petMaster.is_available;
-
-      const { error } = await supabase
-        .from('pet_masters')
-        .update({ is_available: newAvailability })
-        .eq('id', profile.id);
-
-      if (error) throw error;
-
-      setPetMaster({ ...petMaster, is_available: newAvailability });
-      showToast(
-        newAvailability ? t.dashboard.nowAvailable : t.dashboard.nowUnavailable,
-        'success'
-      );
-    } catch (error) {
-      console.error('Error updating availability:', error);
-      showToast(t.common.error, 'error');
-    } finally {
-      setUpdatingAvailability(false);
-    }
-  };
+  if (profile?.role === 'pet_master') {
+    return <ProviderDashboard />;
+  }
 
   if (loading) {
     return (
@@ -136,15 +100,14 @@ export default function Dashboard() {
             opacity: 0.15
           }}>🐾</div>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', position: 'relative' }}>
-            {profile?.role === 'owner' ? '🐶' : '👨‍⚕️'} {t.dashboard.welcome}, {profile?.full_name}!
+            🐶 {t.dashboard.welcome}, {profile?.full_name}!
           </h1>
           <p style={{ opacity: 0.95, fontSize: '1.125rem' }}>
-            {profile?.role === 'owner' ? '🏠 Manage your pets and bookings' : '💼 Manage your services and bookings'}
+            🏠 Manage your pets and bookings
           </p>
         </div>
 
-        {profile?.role === 'owner' ? (
-          <div style={{ display: 'grid', gap: '24px' }}>
+        <div style={{ display: 'grid', gap: '24px' }}>
             {bookings.filter(b => b.status === 'in_progress' || b.status === 'accepted').length > 0 && (
               <div style={{
                 background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
@@ -451,157 +414,6 @@ export default function Dashboard() {
               </Link>
             </div>
           </div>
-        ) : (
-          <div style={{ display: 'grid', gap: '24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.rating}</p>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b' }}>
-                  {petMaster?.rating.toFixed(1) || '0.0'}
-                </p>
-              </div>
-
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.dashboard.totalServices}</p>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b' }}>
-                  {petMaster?.total_walks || 0}
-                </p>
-              </div>
-
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.status}</p>
-                <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: petMaster?.is_available ? '#10b981' : '#ef4444' }}>
-                  {petMaster?.is_available ? t.common.available : t.common.unavailable}
-                </p>
-              </div>
-
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.verified}</p>
-                <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: petMaster?.verified ? '#10b981' : '#f59e0b' }}>
-                  {petMaster?.verified ? t.common.yes : t.common.pending}
-                </p>
-              </div>
-            </div>
-
-            {petMaster && petMaster.service_type !== 'hotel' && petMaster.service_type !== 'vet' && (
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '16px',
-                border: '2px solid #FFE5B4',
-                boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                  <div style={{ flex: '1', minWidth: '200px' }}>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
-                      {t.dashboard.toggleAvailability}
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#64748b' }}>
-                      {t.dashboard.availabilityDescription}
-                    </p>
-                  </div>
-                  <button
-                    onClick={toggleAvailability}
-                    disabled={updatingAvailability}
-                    style={{
-                      position: 'relative',
-                      width: '60px',
-                      height: '32px',
-                      borderRadius: '16px',
-                      border: 'none',
-                      cursor: updatingAvailability ? 'not-allowed' : 'pointer',
-                      background: petMaster.is_available ? '#10b981' : '#94a3b8',
-                      transition: 'background-color 0.3s',
-                      opacity: updatingAvailability ? 0.6 : 1
-                    }}
-                  >
-                    <div style={{
-                      position: 'absolute',
-                      top: '4px',
-                      left: petMaster.is_available ? '32px' : '4px',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      background: 'white',
-                      transition: 'left 0.3s',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-                    }} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div style={{
-              background: 'white',
-              padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0'
-            }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '20px' }}>
-                {t.dashboard.recentBookings}
-              </h2>
-
-              {bookings.length === 0 ? (
-                <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>
-                  {t.dashboard.noBookingsProvider}
-                </p>
-              ) : (
-                <div style={{ display: 'grid', gap: '12px' }}>
-                  {bookings.map(booking => (
-                    <div
-                      key={booking.id}
-                      style={{
-                        padding: '16px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{
-                          padding: '4px 12px',
-                          background: getStatusColor(booking.status).bg,
-                          color: getStatusColor(booking.status).text,
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '500'
-                        }}>
-                          {booking.status}
-                        </span>
-                        <span style={{ fontSize: '14px', color: '#64748b' }}>
-                          {new Date(booking.scheduled_date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '14px', color: '#334155' }}>{booking.pickup_address}</p>
-                      <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>
-                        ${booking.total_amount} • {booking.duration_minutes} minutes
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );
