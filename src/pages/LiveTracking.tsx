@@ -88,6 +88,13 @@ const startIcon = L.divIcon({
   iconAnchor: [16, 16]
 });
 
+interface PhotoMessage {
+  id: string;
+  image_url: string;
+  created_at: string;
+  message: string;
+}
+
 export default function LiveTracking() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
@@ -96,6 +103,7 @@ export default function LiveTracking() {
   const [booking, setBooking] = useState<BookingWithDetails | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [route, setRoute] = useState<RouteCoordinate[]>([]);
+  const [photos, setPhotos] = useState<PhotoMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,6 +157,17 @@ export default function LiveTracking() {
           setCurrentLocation({ lat: latest.lat, lng: latest.lng });
         }
       }
+
+      const { data: photoMessages } = await supabase
+        .from('chat_messages')
+        .select('id, image_url, created_at, message')
+        .eq('booking_id', bookingId)
+        .not('image_url', 'is', null)
+        .order('created_at', { ascending: false });
+
+      if (photoMessages) {
+        setPhotos(photoMessages as PhotoMessage[]);
+      }
     } catch (err) {
       console.error('Error loading tracking data:', err);
       setError(t.common.error);
@@ -180,6 +199,21 @@ export default function LiveTracking() {
           if (coords.length > 0) {
             const latest = coords[coords.length - 1];
             setCurrentLocation({ lat: latest.lat, lng: latest.lng });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `booking_id=eq.${bookingId}`
+        },
+        (payload) => {
+          const newMessage = payload.new;
+          if (newMessage.image_url) {
+            setPhotos((prev) => [newMessage as PhotoMessage, ...prev]);
           }
         }
       )
@@ -386,6 +420,59 @@ export default function LiveTracking() {
             )}
           </MapContainer>
         </div>
+
+        {photos.length > 0 && (
+          <div style={{ marginTop: '24px' }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: '#1e293b',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              📸 Walk Photos ({photos.length})
+            </h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '16px'
+            }}>
+              {photos.map((photo) => (
+                <div
+                  key={photo.id}
+                  style={{
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    border: '2px solid #E8F5E9',
+                    background: 'white'
+                  }}
+                >
+                  <img
+                    src={photo.image_url}
+                    alt={photo.message}
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => window.open(photo.image_url, '_blank')}
+                  />
+                  <div style={{
+                    padding: '12px',
+                    fontSize: '12px',
+                    color: '#64748b'
+                  }}>
+                    {new Date(photo.created_at).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {booking.status === 'in_progress' && (
           <div style={{

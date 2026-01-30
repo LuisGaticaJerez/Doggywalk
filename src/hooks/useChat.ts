@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { uploadPhoto, compressImage } from '../utils/photoStorage';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface ChatMessage {
@@ -57,16 +58,24 @@ export function useChat(bookingId: string | null) {
     }
   }, [bookingId, user?.id]);
 
-  const sendMessage = async (message: string, imageUrl?: string) => {
-    if (!bookingId || !user?.id || !message.trim()) return;
+  const sendMessage = async (message: string, photoFile?: File) => {
+    if (!bookingId || !user?.id) return;
+    if (!message.trim() && !photoFile) return;
 
     setSending(true);
     try {
+      let imageUrl: string | null = null;
+
+      if (photoFile) {
+        const compressed = await compressImage(photoFile);
+        imageUrl = await uploadPhoto(bookingId, compressed);
+      }
+
       const { error } = await supabase.from('chat_messages').insert({
         booking_id: bookingId,
         sender_id: user.id,
-        message: message.trim(),
-        image_url: imageUrl || null,
+        message: message.trim() || (photoFile ? 'Photo' : ''),
+        image_url: imageUrl,
       });
 
       if (error) throw error;

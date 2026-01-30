@@ -92,9 +92,9 @@ export function Chat() {
     loadBooking();
   }, [bookingId, user?.id, navigate, showToast]);
 
-  const handleSendMessage = async (message: string) => {
+  const handleSendMessage = async (message: string, photoFile?: File) => {
     try {
-      await sendMessage(message);
+      await sendMessage(message, photoFile);
     } catch (error) {
       showToast('Failed to send message', 'error');
       throw error;
