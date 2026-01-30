@@ -6,14 +6,15 @@ import { useI18n } from '../contexts/I18nContext';
 
 interface Provider {
   id: string;
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
   profiles?: {
     full_name: string;
   };
   service_type: string;
-  rating: number;
-  hourly_rate: number;
+  rating?: number;
+  avg_rating?: number;
+  hourly_rate: number | string;
 }
 
 interface ProvidersMapProps {
@@ -109,7 +110,15 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
   };
 
   const validProviders = useMemo(
-    () => providers.filter(p => p.latitude && p.longitude),
+    () => providers.filter(p => {
+      const lat = typeof p.latitude === 'string' ? parseFloat(p.latitude) : p.latitude;
+      const lng = typeof p.longitude === 'string' ? parseFloat(p.longitude) : p.longitude;
+      return lat && lng && !isNaN(lat) && !isNaN(lng);
+    }).map(p => ({
+      ...p,
+      latitude: typeof p.latitude === 'string' ? parseFloat(p.latitude) : p.latitude,
+      longitude: typeof p.longitude === 'string' ? parseFloat(p.longitude) : p.longitude,
+    })),
     [providers]
   );
 
@@ -141,10 +150,13 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
 
         {validProviders.map((provider) => {
           const iconData = getProviderIcon(provider.service_type);
+          const lat = typeof provider.latitude === 'number' ? provider.latitude : parseFloat(String(provider.latitude));
+          const lng = typeof provider.longitude === 'number' ? provider.longitude : parseFloat(String(provider.longitude));
+
           return (
             <Marker
               key={provider.id}
-              position={[provider.latitude!, provider.longitude!]}
+              position={[lat, lng]}
               icon={iconData.icon}
               eventHandlers={{
                 click: () => onProviderClick(provider.id)
@@ -180,10 +192,10 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
                     marginTop: '8px'
                   }}>
                     <span style={{ fontSize: '14px', color: '#64748b' }}>
-                      ⭐ {provider.rating.toFixed(1)}
+                      ⭐ {(provider.avg_rating || provider.rating || 0).toFixed(1)}
                     </span>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: '#FF8C42' }}>
-                      ${provider.hourly_rate}/hr
+                      ${typeof provider.hourly_rate === 'string' ? parseFloat(provider.hourly_rate) : provider.hourly_rate}/hr
                     </span>
                   </div>
                   <button

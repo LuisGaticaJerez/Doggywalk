@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -13,6 +13,7 @@ export default function Layout({ children }: LayoutProps) {
   const { profile, signOut } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -50,80 +51,196 @@ export default function Layout({ children }: LayoutProps) {
             <span>🐾</span> DoggyWalk
           </Link>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {profile?.role === 'owner' ? (
-              <>
-                <Link to="/dashboard" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>🏠</span> {t.nav.dashboard}
-                </Link>
-                <Link to="/pets" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>🐕</span> {t.nav.pets}
-                </Link>
-                <Link to="/search" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>🔍</span> {t.nav.search}
-                </Link>
-                <Link to="/bookings" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>📅</span> {t.nav.bookings}
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/dashboard" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>🏠</span> {t.nav.dashboard}
-                </Link>
-                <Link to="/profile-setup" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>👤</span> {t.settings.profile}
-                </Link>
-                <Link to="/my-bookings" style={{...navLinkStyle, display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <span>📅</span> {t.nav.bookings}
-                </Link>
-              </>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <LanguageSwitcher />
               <NotificationBell />
-              <Link to="/settings" style={{
-                ...navLinkStyle,
-                padding: '8px 16px',
-                background: 'linear-gradient(135deg, #FFE5B4 0%, #FFD93D 100%)',
-                borderRadius: '25px',
-                fontWeight: '600',
-                color: '#8B6914',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <span>⚙️</span> {profile?.full_name}
-              </Link>
+            </div>
+
+            <div style={{ position: 'relative' }}>
               <button
-                onClick={handleSignOut}
+                onClick={() => setMenuOpen(!menuOpen)}
                 style={{
                   padding: '10px 20px',
-                  background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
-                  color: 'white',
+                  background: 'linear-gradient(135deg, #FFE5B4 0%, #FFD93D 100%)',
+                  color: '#8B6914',
                   border: 'none',
                   borderRadius: '25px',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)',
-                  transition: 'transform 0.2s',
+                  boxShadow: '0 4px 12px rgba(255, 221, 61, 0.3)',
+                  transition: 'all 0.2s',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #FF5252 0%, #E53935 100%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)';
+                  gap: '8px'
                 }}
               >
-                <span>👋</span> {t.auth.logout}
+                <span>⚙️</span>
+                <span>{profile?.full_name || 'Menu'}</span>
+                <span style={{ fontSize: '12px' }}>{menuOpen ? '▲' : '▼'}</span>
               </button>
+
+              {menuOpen && (
+                <>
+                  <div
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      zIndex: 998
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    right: 0,
+                    background: 'white',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                    border: '2px solid #FFE5B4',
+                    minWidth: '240px',
+                    padding: '12px',
+                    zIndex: 999
+                  }}>
+                    {profile?.role === 'owner' ? (
+                      <>
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>🏠</span> {t.nav.dashboard}
+                        </Link>
+                        <Link
+                          to="/pets"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>🐕</span> {t.nav.pets}
+                        </Link>
+                        <Link
+                          to="/search"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>🔍</span> {t.nav.search}
+                        </Link>
+                        <Link
+                          to="/bookings"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>📅</span> {t.nav.bookings}
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>🏠</span> {t.nav.dashboard}
+                        </Link>
+                        <Link
+                          to="/profile-setup"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>👤</span> {t.settings.profile}
+                        </Link>
+                        <Link
+                          to="/my-bookings"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>📅</span> {t.nav.bookings}
+                        </Link>
+                      </>
+                    )}
+
+                    <div style={{
+                      height: '1px',
+                      background: '#FFE5B4',
+                      margin: '8px 0'
+                    }} />
+
+                    <Link
+                      to="/settings"
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        ...menuItemStyle,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}
+                    >
+                      <span>⚙️</span> {t.nav.settings}
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleSignOut();
+                      }}
+                      style={{
+                        ...menuItemStyle,
+                        background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
+                        color: 'white',
+                        border: 'none',
+                        marginTop: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <span>👋</span> {t.auth.logout}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -140,12 +257,14 @@ export default function Layout({ children }: LayoutProps) {
   );
 }
 
-const navLinkStyle: React.CSSProperties = {
-  color: '#334155',
+const menuItemStyle: React.CSSProperties = {
+  width: '100%',
   textDecoration: 'none',
+  color: '#334155',
+  padding: '12px 16px',
+  borderRadius: '12px',
   fontSize: '15px',
-  fontWeight: '600',
-  padding: '8px 16px',
-  borderRadius: '25px',
-  transition: 'all 0.2s'
+  fontWeight: '500',
+  transition: 'all 0.2s',
+  cursor: 'pointer'
 };
