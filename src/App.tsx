@@ -1,25 +1,28 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ForgotPassword from './pages/ForgotPassword'
-import Dashboard from './pages/Dashboard'
-import Pets from './pages/Pets'
-import PetForm from './pages/PetForm'
-import SearchServices from './pages/SearchServices'
-import BookingForm from './pages/BookingForm'
-import Bookings from './pages/Bookings'
-import LiveTracking from './pages/LiveTracking'
-import ActiveWalk from './pages/ActiveWalk'
-import ProviderProfile from './pages/ProviderProfile'
-import Settings from './pages/Settings'
-import RateBooking from './pages/RateBooking'
-import { Chat } from './pages/Chat'
 import ProtectedRoute from './components/ProtectedRoute'
+import LoadingFallback from './components/LoadingFallback'
 import { AuthProvider } from './contexts/AuthContext'
 import { I18nProvider } from './contexts/I18nContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { NotificationProvider } from './contexts/NotificationContext'
+
+const Home = lazy(() => import('./pages/Home'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Pets = lazy(() => import('./pages/Pets'))
+const PetForm = lazy(() => import('./pages/PetForm'))
+const SearchServices = lazy(() => import('./pages/SearchServices'))
+const BookingForm = lazy(() => import('./pages/BookingForm'))
+const Bookings = lazy(() => import('./pages/Bookings'))
+const LiveTracking = lazy(() => import('./pages/LiveTracking'))
+const ActiveWalk = lazy(() => import('./pages/ActiveWalk'))
+const ProviderProfile = lazy(() => import('./pages/ProviderProfile'))
+const Settings = lazy(() => import('./pages/Settings'))
+const RateBooking = lazy(() => import('./pages/RateBooking'))
+const Chat = lazy(() => import('./pages/Chat').then(module => ({ default: module.Chat })))
 
 function App() {
   return (
@@ -28,7 +31,8 @@ function App() {
         <ToastProvider>
           <NotificationProvider>
             <Router>
-              <Routes>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -117,7 +121,8 @@ function App() {
               <Settings />
             </ProtectedRoute>
           } />
-              </Routes>
+                </Routes>
+              </Suspense>
             </Router>
           </NotificationProvider>
         </ToastProvider>
