@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
@@ -117,12 +118,12 @@ export default function Settings() {
 
           <div style={{ marginBottom: '24px' }}>
             <label style={labelStyle}>{t.settings.avatarUrl}</label>
-            <input
-              type="url"
-              value={formData.avatar_url}
-              onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-              placeholder={t.settings.avatarPlaceholder}
-              style={inputStyle}
+            <ImageUpload
+              currentImageUrl={formData.avatar_url}
+              onUploadComplete={(url) => setFormData({ ...formData, avatar_url: url })}
+              folder="avatars"
+              maxSizeMB={3}
+              disabled={loading}
             />
           </div>
 

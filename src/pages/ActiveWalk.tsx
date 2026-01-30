@@ -4,11 +4,11 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Layout from '../components/Layout';
+import PhotoCapture from '../components/PhotoCapture';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
-import { uploadPhoto, compressImage } from '../utils/photoStorage';
 import { Booking } from '../types';
 
 interface RouteCoordinate {
@@ -89,9 +89,7 @@ export default function ActiveWalk() {
   const [route, setRoute] = useState<RouteCoordinate[]>([]);
   const [loading, setLoading] = useState(true);
   const [tracking, setTracking] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const watchIdRef = useRef<number | null>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const loadBookingData = useCallback(async () => {
     if (!bookingId) return;
@@ -246,15 +244,10 @@ export default function ActiveWalk() {
     }
   };
 
-  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !bookingId || !profile?.id) return;
+  const handlePhotoUploaded = async (imageUrl: string) => {
+    if (!bookingId || !profile?.id) return;
 
-    setUploadingPhoto(true);
     try {
-      const compressed = await compressImage(file);
-      const imageUrl = await uploadPhoto(bookingId, compressed);
-
       await supabase.from('chat_messages').insert({
         booking_id: bookingId,
         sender_id: profile.id,
@@ -263,15 +256,9 @@ export default function ActiveWalk() {
       });
 
       showToast('Photo sent successfully!', 'success');
-
-      if (photoInputRef.current) {
-        photoInputRef.current.value = '';
-      }
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      console.error('Error saving photo message:', error);
       showToast('Failed to send photo', 'error');
-    } finally {
-      setUploadingPhoto(false);
     }
   };
 
@@ -493,55 +480,10 @@ export default function ActiveWalk() {
           </button>
         </div>
 
-        <input
-          ref={photoInputRef}
-          type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp"
-          capture="environment"
-          onChange={handlePhotoCapture}
-          style={{ display: 'none' }}
+        <PhotoCapture
+          onPhotoUploaded={handlePhotoUploaded}
+          folder={bookingId || 'walks'}
         />
-
-        <button
-          onClick={() => photoInputRef.current?.click()}
-          disabled={uploadingPhoto}
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: uploadingPhoto
-              ? 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'
-              : 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
-            color: 'white',
-            border: 'none',
-            fontSize: '28px',
-            cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
-            boxShadow: '0 8px 24px rgba(59, 130, 246, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          title="Take a photo"
-        >
-          {uploadingPhoto ? (
-            <div
-              style={{
-                width: '28px',
-                height: '28px',
-                border: '3px solid rgba(255, 255, 255, 0.3)',
-                borderTopColor: 'white',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-              }}
-            />
-          ) : (
-            '📸'
-          )}
-        </button>
       </div>
     </Layout>
   );

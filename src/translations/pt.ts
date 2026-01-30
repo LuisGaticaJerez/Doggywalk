@@ -37,6 +37,11 @@ export const pt: Translations = {
     listView: 'Visualização em lista',
     mapView: 'Visualização em mapa',
     viewDetails: 'Ver detalhes',
+    uploading: 'Enviando',
+    clickToChange: 'Clique para alterar',
+    dragDropImage: 'Arraste e solte sua imagem aqui',
+    orClickToSelect: 'ou clique para selecionar do seu dispositivo',
+    selectFile: 'Selecionar Arquivo',
   },
   auth: {
     login: 'Entrar',

@@ -35,6 +35,11 @@ export const en = {
     listView: 'List View',
     mapView: 'Map View',
     viewDetails: 'View Details',
+    uploading: 'Uploading',
+    clickToChange: 'Click to change',
+    dragDropImage: 'Drag and drop your image here',
+    orClickToSelect: 'or click to select from your device',
+    selectFile: 'Select File',
   },
   auth: {
     login: 'Login',

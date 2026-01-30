@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
@@ -223,19 +224,12 @@ export default function PetForm() {
             }}>
               {t.pets.photoUrl}
             </label>
-            <input
-              type="url"
-              value={formData.photo_url}
-              onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-              placeholder={t.pets.photoPlaceholder}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
+            <ImageUpload
+              currentImageUrl={formData.photo_url}
+              onUploadComplete={(url) => setFormData({ ...formData, photo_url: url })}
+              folder="pets"
+              maxSizeMB={5}
+              disabled={loading}
             />
           </div>
 

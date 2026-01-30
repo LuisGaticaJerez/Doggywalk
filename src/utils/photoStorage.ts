@@ -4,11 +4,12 @@ const BUCKET_NAME = 'pet-service-photos';
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export async function uploadPhoto(
-  bookingId: string,
-  file: File
+  folderPath: string,
+  file: File,
+  maxSize: number = MAX_FILE_SIZE
 ): Promise<string> {
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error('File size must be less than 5MB');
+  if (file.size > maxSize) {
+    throw new Error(`File size must be less than ${maxSize / (1024 * 1024)}MB`);
   }
 
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -19,7 +20,7 @@ export async function uploadPhoto(
   const fileExt = file.name.split('.').pop();
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 9);
-  const fileName = `bookings/${bookingId}/${timestamp}-${random}.${fileExt}`;
+  const fileName = `${folderPath}/${timestamp}-${random}.${fileExt}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET_NAME)

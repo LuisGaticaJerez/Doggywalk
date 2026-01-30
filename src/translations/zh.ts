@@ -37,6 +37,11 @@ export const zh: Translations = {
     listView: '列表视图',
     mapView: '地图视图',
     viewDetails: '查看详情',
+    uploading: '上传中',
+    clickToChange: '点击更改',
+    dragDropImage: '拖放图片到这里',
+    orClickToSelect: '或点击从设备选择',
+    selectFile: '选择文件',
   },
   auth: {
     login: '登录',
