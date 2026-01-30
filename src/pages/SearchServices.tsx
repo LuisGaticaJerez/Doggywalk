@@ -13,6 +13,8 @@ interface PetMasterWithProfile extends PetMaster {
     avatar_url: string | null;
   };
   distance?: number;
+  avg_rating?: number;
+  review_count?: number;
 }
 
 export default function SearchServices() {
@@ -91,8 +93,35 @@ export default function SearchServices() {
           provider => !activeProviderIds.has(provider.id)
         );
 
+        const { data: ratingsData } = await supabase
+          .from('ratings')
+          .select('pet_master_id, rating');
+
+        const ratingsByProvider = new Map<string, { total: number; count: number; avg: number }>();
+        if (ratingsData) {
+          ratingsData.forEach(r => {
+            const current = ratingsByProvider.get(r.pet_master_id) || { total: 0, count: 0, avg: 0 };
+            const newTotal = current.total + r.rating;
+            const newCount = current.count + 1;
+            ratingsByProvider.set(r.pet_master_id, {
+              total: newTotal,
+              count: newCount,
+              avg: newTotal / newCount
+            });
+          });
+        }
+
+        let processedProviders = availableProviders.map(provider => {
+          const stats = ratingsByProvider.get(provider.id);
+          return {
+            ...provider,
+            avg_rating: stats?.avg || 0,
+            review_count: stats?.count || 0
+          };
+        });
+
         if (userLocation) {
-          const providersWithDistance = availableProviders.map(provider => {
+          processedProviders = processedProviders.map(provider => {
             if (provider.latitude && provider.longitude) {
               const distance = calculateDistance(
                 userLocation.lat,
@@ -105,11 +134,10 @@ export default function SearchServices() {
             return { ...provider, distance: Infinity };
           });
 
-          providersWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-          setProviders(providersWithDistance);
-        } else {
-          setProviders(availableProviders);
+          processedProviders.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
         }
+
+        setProviders(processedProviders);
       }
     } catch (error) {
       console.error('Error loading providers:', error);
@@ -464,22 +492,24 @@ export default function SearchServices() {
                   position: 'relative'
                 }}>
                   {provider.service_type === 'walker' ? '🐕' : provider.service_type === 'hotel' ? '🏨' : '🩺'}
-                  <div style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    color: colors.badgeText,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    ⭐ {provider.rating.toFixed(1)}
-                  </div>
+                  {(provider.avg_rating && provider.avg_rating > 0) && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      color: colors.badgeText,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      ⭐ {provider.avg_rating.toFixed(1)} ({provider.review_count})
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ padding: '20px' }}>

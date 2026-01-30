@@ -13,6 +13,7 @@ import LiveTracking from './pages/LiveTracking'
 import ActiveWalk from './pages/ActiveWalk'
 import ProviderProfile from './pages/ProviderProfile'
 import Settings from './pages/Settings'
+import RateBooking from './pages/RateBooking'
 import { Chat } from './pages/Chat'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
@@ -82,6 +83,12 @@ function App() {
           <Route path="/bookings/:bookingId/chat" element={
             <ProtectedRoute>
               <Chat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/bookings/:bookingId/rate" element={
+            <ProtectedRoute requireRole="owner">
+              <RateBooking />
             </ProtectedRoute>
           } />
 

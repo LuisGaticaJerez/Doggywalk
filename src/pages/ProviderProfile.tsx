@@ -6,6 +6,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
+import { ReviewsList } from '../components/ReviewsList';
 
 export default function ProviderProfile() {
   const { profile } = useAuth();
@@ -290,6 +291,21 @@ export default function ProviderProfile() {
             </button>
           </div>
         </form>
+
+        {profile?.id && (
+          <div style={{
+            background: 'white',
+            padding: '32px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            marginTop: '24px'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '24px' }}>
+              Your Reviews
+            </h2>
+            <ReviewsList petMasterId={profile.id} />
+          </div>
+        )}
       </div>
     </Layout>
   );
