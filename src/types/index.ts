@@ -7,6 +7,8 @@ export interface Profile {
   avatar_url: string | null;
   identity_verified: boolean;
   identity_verification_status: string;
+  onboarding_completed: boolean;
+  business_type: 'individual' | 'business';
   created_at: string;
   updated_at: string;
 }

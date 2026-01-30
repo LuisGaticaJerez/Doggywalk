@@ -566,7 +566,7 @@ export default function ProviderDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
               <Link
-                to="/settings"
+                to="/manage-services"
                 style={{
                   background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)',
                   color: 'white',
@@ -586,9 +586,37 @@ export default function ProviderDashboard() {
                   e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 107, 0.3)';
                 }}
               >
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⚙️</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '4px' }}>
+                  Gestión de Servicios
+                </h3>
+                <p style={{ fontSize: '13px', opacity: 0.9 }}>Administra tus servicios</p>
+              </Link>
+
+              <Link
+                to="/settings"
+                style={{
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                  color: 'white',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 16px rgba(139, 92, 246, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(139, 92, 246, 0.3)';
+                }}
+              >
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👤</div>
                 <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Editar Perfil
+                  Perfil
                 </h3>
                 <p style={{ fontSize: '13px', opacity: 0.9 }}>Configura tu información</p>
               </Link>

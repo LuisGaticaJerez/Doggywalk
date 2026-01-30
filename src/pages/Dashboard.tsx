@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -20,10 +20,17 @@ interface BookingWithDetails extends Booking {
 
 export default function Dashboard() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const { t } = useI18n();
   const [pets, setPets] = useState<Pet[]>([]);
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (profile?.role === 'pet_master' && profile?.onboarding_completed === false) {
+      navigate('/provider-onboarding');
+    }
+  }, [profile, navigate]);
 
   useEffect(() => {
     if (profile) {
