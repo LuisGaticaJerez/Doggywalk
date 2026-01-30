@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { PetMaster } from '../types';
 
 export default function ProviderProfile() {
   const { profile } = useAuth();
@@ -111,7 +112,7 @@ export default function ProviderProfile() {
             <label style={labelStyle}>Service Type *</label>
             <select
               value={formData.service_type}
-              onChange={(e) => setFormData({ ...formData, service_type: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, service_type: e.target.value as PetMaster['service_type'] })}
               required
               style={inputStyle}
             >

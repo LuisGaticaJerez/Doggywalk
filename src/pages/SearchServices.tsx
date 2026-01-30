@@ -5,6 +5,7 @@ import ProvidersMap from '../components/ProvidersMap';
 import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
+import { calculateDistance } from '../utils/distance';
 
 interface PetMasterWithProfile extends PetMaster {
   profiles?: {
@@ -53,18 +54,6 @@ export default function SearchServices() {
       setLocationError('Geolocation not supported by your browser.');
       setUserLocation({ lat: 4.7110, lng: -74.0721 });
     }
-  };
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
   };
 
   const loadProviders = async () => {

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import { Booking } from '../types';
+import { getStatusColor } from '../utils/statusColors';
 
 interface BookingWithDetails extends Booking {
   pets?: { name: string };
@@ -64,7 +65,7 @@ export default function Bookings() {
       if (error) throw error;
 
       setBookings(bookings.map(b =>
-        b.id === bookingId ? { ...b, status: newStatus as any } : b
+        b.id === bookingId ? { ...b, status: newStatus as Booking['status'] } : b
       ));
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -116,10 +117,10 @@ export default function Bookings() {
           marginBottom: '24px'
         }}>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {['all', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled'].map(status => (
+            {(['all', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled'] as const).map(status => (
               <button
                 key={status}
-                onClick={() => setFilter(status as any)}
+                onClick={() => setFilter(status)}
                 style={{
                   padding: '8px 20px',
                   background: filter === status ? '#0ea5e9' : 'white',
@@ -327,15 +328,4 @@ export default function Bookings() {
       </div>
     </Layout>
   );
-}
-
-function getStatusColor(status: string) {
-  const colors = {
-    pending: { bg: '#fef3c7', text: '#92400e' },
-    accepted: { bg: '#dbeafe', text: '#1e40af' },
-    in_progress: { bg: '#e0e7ff', text: '#3730a3' },
-    completed: { bg: '#d1fae5', text: '#065f46' },
-    cancelled: { bg: '#fee2e2', text: '#991b1b' }
-  };
-  return colors[status as keyof typeof colors] || colors.pending;
 }

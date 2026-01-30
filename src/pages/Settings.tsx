@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Settings() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,11 +46,11 @@ export default function Settings() {
 
       if (error) throw error;
 
-      alert(t.settings.changesSaved);
-      window.location.reload();
+      await refreshProfile();
+      showToast(t.settings.changesSaved, 'success');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile');
+      showToast('Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }

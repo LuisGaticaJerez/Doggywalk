@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -86,20 +86,30 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
     ? [userLocation.lat, userLocation.lng]
     : [4.7110, -74.0721];
 
+  const providerIcons = useMemo(() => ({
+    walker: createCustomIcon('🚶', 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)'),
+    hotel: createCustomIcon('🏨', 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)'),
+    vet: createCustomIcon('🩺', 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)'),
+    default: createCustomIcon('🐾', 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)')
+  }), []);
+
   const getProviderIcon = (serviceType: string) => {
     switch (serviceType) {
       case 'walker':
-        return { emoji: '🚶', color: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' };
+        return { emoji: '🚶', color: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)', icon: providerIcons.walker };
       case 'hotel':
-        return { emoji: '🏨', color: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)' };
+        return { emoji: '🏨', color: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)', icon: providerIcons.hotel };
       case 'vet':
-        return { emoji: '🩺', color: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)' };
+        return { emoji: '🩺', color: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)', icon: providerIcons.vet };
       default:
-        return { emoji: '🐾', color: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)' };
+        return { emoji: '🐾', color: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)', icon: providerIcons.default };
     }
   };
 
-  const validProviders = providers.filter(p => p.latitude && p.longitude);
+  const validProviders = useMemo(
+    () => providers.filter(p => p.latitude && p.longitude),
+    [providers]
+  );
 
   return (
     <div style={{ width: '100%', height: '100%', borderRadius: '20px', overflow: 'hidden', position: 'relative' }}>
@@ -133,7 +143,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
             <Marker
               key={provider.id}
               position={[provider.latitude!, provider.longitude!]}
-              icon={createCustomIcon(iconData.emoji, iconData.color)}
+              icon={iconData.icon}
               eventHandlers={{
                 click: () => onProviderClick(provider.id)
               }}
