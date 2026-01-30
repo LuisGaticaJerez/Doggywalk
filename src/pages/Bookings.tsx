@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Booking } from '../types';
 import { getStatusColor } from '../utils/statusColors';
@@ -17,6 +18,7 @@ interface BookingWithDetails extends Booking {
 export default function Bookings() {
   const { profile } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled'>('all');
@@ -69,7 +71,7 @@ export default function Bookings() {
       ));
     } catch (error) {
       console.error('Error updating booking:', error);
-      alert('Failed to update booking status');
+      showToast('Failed to update booking status', 'error');
     }
   };
 
@@ -104,8 +106,8 @@ export default function Bookings() {
           </h1>
           <p style={{ color: '#64748b' }}>
             {profile?.role === 'owner'
-              ? 'View and manage your service bookings'
-              : 'Manage your incoming service requests'}
+              ? t.bookings.subtitle
+              : t.bookings.subtitleProvider}
           </p>
         </div>
 
@@ -148,7 +150,7 @@ export default function Bookings() {
             textAlign: 'center'
           }}>
             <p style={{ fontSize: '1.125rem', color: '#64748b', marginBottom: '24px' }}>
-              No bookings found
+              {t.bookings.noBookings}
             </p>
             {profile?.role === 'owner' && (
               <Link
@@ -164,7 +166,7 @@ export default function Bookings() {
                   fontWeight: '600'
                 }}
               >
-                Find Services
+                {t.nav.search}
               </Link>
             )}
           </div>
@@ -184,8 +186,8 @@ export default function Bookings() {
                   <div>
                     <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
                       {profile?.role === 'owner'
-                        ? booking.pet_masters?.profiles?.full_name || 'Provider'
-                        : booking.pets?.name || 'Pet'}
+                        ? booking.pet_masters?.profiles?.full_name || t.bookings.provider
+                        : booking.pets?.name || t.bookings.pet}
                     </h3>
                     <span style={{
                       display: 'inline-block',
@@ -212,18 +214,18 @@ export default function Bookings() {
 
                 <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
                   <p style={{ marginBottom: '4px' }}>
-                    <strong>Date:</strong> {new Date(booking.scheduled_date).toLocaleString()}
+                    <strong>{t.common.date}:</strong> {new Date(booking.scheduled_date).toLocaleString()}
                   </p>
                   <p style={{ marginBottom: '4px' }}>
-                    <strong>Location:</strong> {booking.pickup_address}
+                    <strong>{t.common.location}:</strong> {booking.pickup_address}
                   </p>
                   {booking.special_instructions && (
                     <p style={{ marginBottom: '4px' }}>
-                      <strong>Instructions:</strong> {booking.special_instructions}
+                      <strong>{t.bookings.instructions}:</strong> {booking.special_instructions}
                     </p>
                   )}
                   <p>
-                    <strong>Payment:</strong> <span style={{ textTransform: 'capitalize' }}>{booking.payment_status}</span>
+                    <strong>{t.bookings.payment}:</strong> <span style={{ textTransform: 'capitalize' }}>{booking.payment_status}</span>
                   </p>
                 </div>
 
@@ -243,7 +245,7 @@ export default function Bookings() {
                         cursor: 'pointer'
                       }}
                     >
-                      Accept
+                      {t.bookings.accept}
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(booking.id, 'cancelled')}
@@ -259,7 +261,7 @@ export default function Bookings() {
                         cursor: 'pointer'
                       }}
                     >
-                      Decline
+                      {t.bookings.decline}
                     </button>
                   </div>
                 )}
@@ -279,7 +281,7 @@ export default function Bookings() {
                       cursor: 'pointer'
                     }}
                   >
-                    Start Service
+                    {t.bookings.startService}
                   </button>
                 )}
 
@@ -298,7 +300,7 @@ export default function Bookings() {
                       cursor: 'pointer'
                     }}
                   >
-                    Complete Service
+                    {t.bookings.completeService}
                   </button>
                 )}
 
@@ -318,7 +320,7 @@ export default function Bookings() {
                       textAlign: 'center'
                     }}
                   >
-                    Rate Service
+                    {t.bookings.rateService}
                   </Link>
                 )}
               </div>

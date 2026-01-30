@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Pet, PetMaster } from '../types';
 
@@ -15,6 +17,8 @@ export default function BookingForm() {
   const { providerId } = useParams();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { t } = useI18n();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<PetMasterWithProfile | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
@@ -63,7 +67,7 @@ export default function BookingForm() {
     e.preventDefault();
 
     if (!formData.pet_id) {
-      alert('Please select a pet');
+      showToast(t.bookings.selectPetRequired, 'error');
       return;
     }
 
@@ -91,11 +95,11 @@ export default function BookingForm() {
 
       if (error) throw error;
 
-      alert('Booking created successfully!');
+      showToast(t.bookings.bookingSuccess, 'success');
       navigate('/bookings');
     } catch (error) {
       console.error('Error creating booking:', error);
-      alert('Failed to create booking');
+      showToast(t.bookings.bookingError, 'error');
     } finally {
       setLoading(false);
     }
@@ -123,10 +127,10 @@ export default function BookingForm() {
     <Layout>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          Book Service
+          {t.bookings.bookService}
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          Book a service with {provider.profiles?.full_name}
+          {t.bookings.bookService} {provider.profiles?.full_name}
         </p>
 
         <div style={{
@@ -137,13 +141,13 @@ export default function BookingForm() {
           marginBottom: '24px'
         }}>
           <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '12px' }}>
-            Provider Details
+            {t.bookings.providerDetails}
           </h3>
           <div style={{ fontSize: '14px', color: '#64748b' }}>
-            <p><strong>Name:</strong> {provider.profiles?.full_name}</p>
-            <p><strong>Service Type:</strong> {provider.service_type}</p>
-            <p><strong>Hourly Rate:</strong> ${provider.hourly_rate}/hr</p>
-            <p><strong>Rating:</strong> ⭐ {provider.rating.toFixed(1)}</p>
+            <p><strong>{t.common.name}:</strong> {provider.profiles?.full_name}</p>
+            <p><strong>{t.bookings.serviceType}:</strong> {provider.service_type}</p>
+            <p><strong>{t.bookings.hourlyRate}:</strong> ${provider.hourly_rate}/hr</p>
+            <p><strong>{t.common.rating}:</strong> ⭐ {provider.rating.toFixed(1)}</p>
           </div>
         </div>
 
@@ -156,7 +160,7 @@ export default function BookingForm() {
             textAlign: 'center'
           }}>
             <p style={{ color: '#92400e', marginBottom: '12px' }}>
-              You need to add a pet before making a booking
+              {t.bookings.needPetFirst}
             </p>
             <button
               onClick={() => navigate('/pets/new')}
@@ -171,7 +175,7 @@ export default function BookingForm() {
                 cursor: 'pointer'
               }}
             >
-              Add Pet
+              {t.bookings.addPetFirst}
             </button>
           </div>
         ) : (
@@ -182,14 +186,14 @@ export default function BookingForm() {
             border: '1px solid #e2e8f0'
           }}>
             <div style={{ marginBottom: '24px' }}>
-              <label style={labelStyle}>Select Pet *</label>
+              <label style={labelStyle}>{t.bookings.selectPet}</label>
               <select
                 value={formData.pet_id}
                 onChange={(e) => setFormData({ ...formData, pet_id: e.target.value })}
                 required
                 style={inputStyle}
               >
-                <option value="">Choose a pet</option>
+                <option value="">{t.bookings.choosePet}</option>
                 {pets.map(pet => (
                   <option key={pet.id} value={pet.id}>
                     {pet.name} ({pet.breed})
@@ -200,7 +204,7 @@ export default function BookingForm() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
               <div>
-                <label style={labelStyle}>Date *</label>
+                <label style={labelStyle}>{t.common.date}</label>
                 <input
                   type="date"
                   value={formData.scheduled_date}
@@ -212,7 +216,7 @@ export default function BookingForm() {
               </div>
 
               <div>
-                <label style={labelStyle}>Time *</label>
+                <label style={labelStyle}>{t.common.time}</label>
                 <input
                   type="time"
                   value={formData.scheduled_time}
@@ -224,40 +228,40 @@ export default function BookingForm() {
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={labelStyle}>Duration (minutes) *</label>
+              <label style={labelStyle}>{t.bookings.durationMinutes}</label>
               <select
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
                 required
                 style={inputStyle}
               >
-                <option value="30">30 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="90">1.5 hours</option>
-                <option value="120">2 hours</option>
-                <option value="180">3 hours</option>
+                <option value="30">{t.bookings.minutes30}</option>
+                <option value="60">{t.bookings.hour1}</option>
+                <option value="90">{t.bookings.hour1_5}</option>
+                <option value="120">{t.bookings.hour2}</option>
+                <option value="180">{t.bookings.hour3}</option>
               </select>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={labelStyle}>Pickup Address *</label>
+              <label style={labelStyle}>{t.bookings.pickupAddress}</label>
               <input
                 type="text"
                 value={formData.pickup_address}
                 onChange={(e) => setFormData({ ...formData, pickup_address: e.target.value })}
                 required
-                placeholder="123 Main St, City, State"
+                placeholder={t.bookings.addressPlaceholder}
                 style={inputStyle}
               />
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={labelStyle}>Special Instructions</label>
+              <label style={labelStyle}>{t.bookings.specialInstructions}</label>
               <textarea
                 value={formData.special_instructions}
                 onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
                 rows={4}
-                placeholder="Any special instructions for the provider..."
+                placeholder={t.bookings.instructionsPlaceholder}
                 style={{ ...inputStyle, resize: 'vertical' }}
               />
             </div>
@@ -269,16 +273,16 @@ export default function BookingForm() {
               marginBottom: '24px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ color: '#64748b' }}>Duration:</span>
+                <span style={{ color: '#64748b' }}>{t.common.duration}:</span>
                 <span style={{ fontWeight: '600' }}>{formData.duration_minutes} minutes</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ color: '#64748b' }}>Rate:</span>
+                <span style={{ color: '#64748b' }}>{t.bookings.rate}:</span>
                 <span style={{ fontWeight: '600' }}>${provider.hourly_rate}/hr</span>
               </div>
               <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '8px', marginTop: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontWeight: '600', fontSize: '1.125rem' }}>Total:</span>
+                  <span style={{ fontWeight: '600', fontSize: '1.125rem' }}>{t.common.total}:</span>
                   <span style={{ fontWeight: 'bold', fontSize: '1.125rem', color: '#0ea5e9' }}>
                     ${((parseFloat(formData.duration_minutes) / 60) * provider.hourly_rate).toFixed(2)}
                   </span>
@@ -302,7 +306,7 @@ export default function BookingForm() {
                   cursor: loading ? 'not-allowed' : 'pointer'
                 }}
               >
-                {loading ? 'Creating Booking...' : 'Book Now'}
+                {loading ? t.bookings.creatingBooking : t.bookings.bookNow}
               </button>
               <button
                 type="button"
@@ -318,7 +322,7 @@ export default function BookingForm() {
                   cursor: 'pointer'
                 }}
               >
-                Cancel
+                {t.common.cancel}
               </button>
             </div>
           </form>

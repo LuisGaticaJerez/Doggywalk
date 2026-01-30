@@ -46,12 +46,12 @@ export default function SearchServices() {
         },
         (error) => {
           console.error('Error getting location:', error);
-          setLocationError('Unable to get your location. Using default area.');
+          setLocationError(t.search.geolocationError);
           setUserLocation({ lat: 4.7110, lng: -74.0721 });
         }
       );
     } else {
-      setLocationError('Geolocation not supported by your browser.');
+      setLocationError(t.search.geolocationNotSupported);
       setUserLocation({ lat: 4.7110, lng: -74.0721 });
     }
   };
@@ -292,7 +292,7 @@ export default function SearchServices() {
                   gap: '6px'
                 }}
               >
-                📋 List View
+                {t.common.listView}
               </button>
               <button
                 onClick={() => setViewMode('map')}
@@ -312,14 +312,14 @@ export default function SearchServices() {
                   gap: '6px'
                 }}
               >
-                🗺️ Map View
+                {t.common.mapView}
               </button>
             </div>
 
             {userLocation && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '300px' }}>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
-                  📍 Radius: {maxDistance}km
+                  {t.search.radiusLabel} {maxDistance}km
                 </span>
                 <input
                   type="range"

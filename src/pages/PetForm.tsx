@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 
 export default function PetForm() {
@@ -10,6 +11,7 @@ export default function PetForm() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -83,7 +85,7 @@ export default function PetForm() {
       navigate('/pets');
     } catch (error) {
       console.error('Error saving pet:', error);
-      alert('Failed to save pet');
+      showToast('Failed to save pet', 'error');
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Name *
+              {t.common.name}
             </label>
             <input
               type="text"
@@ -139,7 +141,7 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Breed
+              {t.pets.breed}
             </label>
             <input
               type="text"
@@ -164,7 +166,7 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Size *
+              {t.pets.size}
             </label>
             <select
               value={formData.size}
@@ -179,9 +181,9 @@ export default function PetForm() {
                 outline: 'none'
               }}
             >
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
+              <option value="small">{t.pets.small}</option>
+              <option value="medium">{t.pets.medium}</option>
+              <option value="large">{t.pets.large}</option>
             </select>
           </div>
 
@@ -193,7 +195,7 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Age (years)
+              {t.pets.ageYears}
             </label>
             <input
               type="number"
@@ -219,13 +221,13 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Photo URL
+              {t.pets.photoUrl}
             </label>
             <input
               type="url"
               value={formData.photo_url}
               onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-              placeholder="https://example.com/photo.jpg"
+              placeholder={t.pets.photoPlaceholder}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -245,13 +247,13 @@ export default function PetForm() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              Special Notes
+              {t.pets.specialNotes}
             </label>
             <textarea
               value={formData.special_notes}
               onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })}
               rows={4}
-              placeholder="Allergies, behavior notes, special needs..."
+              placeholder={t.pets.specialNotesPlaceholder}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -280,7 +282,7 @@ export default function PetForm() {
                 cursor: loading ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Saving...' : (id ? 'Update Pet' : 'Add Pet')}
+              {loading ? t.pets.saving : (id ? t.pets.updatePet : t.pets.addPet)}
             </button>
             <button
               type="button"
@@ -296,7 +298,7 @@ export default function PetForm() {
                 cursor: 'pointer'
               }}
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
         </form>

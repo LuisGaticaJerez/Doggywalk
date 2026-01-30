@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Provider {
   id: string;
@@ -80,6 +81,7 @@ const userIcon = L.divIcon({
 });
 
 export default function ProvidersMap({ providers, userLocation, onProviderClick }: ProvidersMapProps) {
+  const { t } = useI18n();
   const mapRef = useRef<L.Map>(null);
 
   const defaultCenter: [number, number] = userLocation
@@ -131,7 +133,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
             <Popup>
               <div style={{ textAlign: 'center', padding: '8px' }}>
                 <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>📍</div>
-                <strong>Your Location</strong>
+                <strong>{t.provider.yourLocation}</strong>
               </div>
             </Popup>
           </Marker>
@@ -199,7 +201,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
                       cursor: 'pointer'
                     }}
                   >
-                    View Details
+                    {t.common.viewDetails}
                   </button>
                 </div>
               </Popup>
@@ -223,7 +225,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🗺️</div>
           <p style={{ color: '#64748b', fontWeight: '500' }}>
-            No providers with location data available
+            {t.provider.noLocationData}
           </p>
         </div>
       )}

@@ -85,7 +85,7 @@ export default function Settings() {
               }}
             />
             <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-              Email cannot be changed
+              {t.settings.emailCannotChange}
             </p>
           </div>
 
@@ -94,7 +94,7 @@ export default function Settings() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Full Name *</label>
+            <label style={labelStyle}>{t.auth.fullName}</label>
             <input
               type="text"
               value={formData.full_name}
@@ -105,23 +105,23 @@ export default function Settings() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Phone</label>
+            <label style={labelStyle}>{t.settings.phoneLabel}</label>
             <input
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+1 (555) 123-4567"
+              placeholder={t.settings.phonePlaceholder}
               style={inputStyle}
             />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Avatar URL</label>
+            <label style={labelStyle}>{t.settings.avatarUrl}</label>
             <input
               type="url"
               value={formData.avatar_url}
               onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-              placeholder="https://example.com/avatar.jpg"
+              placeholder={t.settings.avatarPlaceholder}
               style={inputStyle}
             />
           </div>
@@ -134,18 +134,18 @@ export default function Settings() {
           }}>
             <div style={{ fontSize: '14px', color: '#64748b' }}>
               <p style={{ marginBottom: '8px' }}>
-                <strong>Role:</strong> {profile?.role === 'owner' ? 'Pet Owner' : 'Service Provider'}
+                <strong>{t.auth.role}:</strong> {profile?.role === 'owner' ? t.auth.petOwner : t.auth.serviceProvider}
               </p>
               <p style={{ marginBottom: '8px' }}>
-                <strong>Member Since:</strong> {new Date(profile?.created_at || '').toLocaleDateString()}
+                <strong>{t.auth.memberSince}:</strong> {new Date(profile?.created_at || '').toLocaleDateString()}
               </p>
               <p>
-                <strong>Verification Status:</strong>{' '}
+                <strong>{t.auth.verificationStatus}:</strong>{' '}
                 <span style={{
                   color: profile?.identity_verified ? '#10b981' : '#f59e0b',
                   fontWeight: '500'
                 }}>
-                  {profile?.identity_verified ? 'Verified' : 'Not Verified'}
+                  {profile?.identity_verified ? t.common.verified : t.common.notVerified}
                 </span>
               </p>
             </div>

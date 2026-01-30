@@ -104,7 +104,7 @@ export default function Dashboard() {
               boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>🐾 My Pets</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>🐾 {t.dashboard.myPets}</h2>
                 <Link
                   to="/pets/new"
                   style={{
@@ -121,13 +121,13 @@ export default function Dashboard() {
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  ➕ Add Pet
+                  ➕ {t.dashboard.addPet}
                 </Link>
               </div>
 
               {pets.length === 0 ? (
                 <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>
-                  No pets yet. Add your first pet to get started!
+                  {t.dashboard.noPetsGetStarted}
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: '12px' }}>
@@ -150,7 +150,7 @@ export default function Dashboard() {
                         </p>
                       </div>
                       <Link to={`/pets/${pet.id}`} style={{ color: '#0ea5e9', textDecoration: 'none', fontSize: '14px' }}>
-                        View
+                        {t.common.view}
                       </Link>
                     </div>
                   ))}
@@ -166,7 +166,7 @@ export default function Dashboard() {
               boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>📅 Recent Bookings</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>📅 {t.dashboard.recentBookings}</h2>
                 <Link to="/bookings" style={{
                   color: '#4CAF50',
                   textDecoration: 'none',
@@ -176,13 +176,13 @@ export default function Dashboard() {
                   borderRadius: '20px',
                   background: '#E8F5E9'
                 }}>
-                  View All →
+                  {t.dashboard.viewAllBookings}
                 </Link>
               </div>
 
               {bookings.length === 0 ? (
                 <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>
-                  No bookings yet. Search for services to book!
+                  {t.dashboard.noBookingsGetStarted}
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: '12px' }}>
@@ -245,8 +245,8 @@ export default function Dashboard() {
                 }}
               >
                 <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>Find Services</h3>
-                <p style={{ fontSize: '14px', opacity: 0.9 }}>Search for walkers, hotels, and vets</p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>{t.dashboard.findServices}</h3>
+                <p style={{ fontSize: '14px', opacity: 0.9 }}>{t.dashboard.searchForServices}</p>
               </Link>
 
               <Link
@@ -273,8 +273,8 @@ export default function Dashboard() {
                 }}
               >
                 <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🐕</div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>My Pets</h3>
-                <p style={{ fontSize: '14px', opacity: 0.9 }}>Manage your pet profiles</p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>{t.dashboard.myPets}</h3>
+                <p style={{ fontSize: '14px', opacity: 0.9 }}>{t.dashboard.managePets}</p>
               </Link>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function Dashboard() {
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0'
               }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Rating</p>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.rating}</p>
                 <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b' }}>
                   {petMaster?.rating.toFixed(1) || '0.0'}
                 </p>
@@ -299,7 +299,7 @@ export default function Dashboard() {
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0'
               }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Total Services</p>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.dashboard.totalServices}</p>
                 <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b' }}>
                   {petMaster?.total_walks || 0}
                 </p>
@@ -311,9 +311,9 @@ export default function Dashboard() {
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0'
               }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Status</p>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.status}</p>
                 <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: petMaster?.is_available ? '#10b981' : '#ef4444' }}>
-                  {petMaster?.is_available ? 'Available' : 'Unavailable'}
+                  {petMaster?.is_available ? t.common.available : t.common.unavailable}
                 </p>
               </div>
 
@@ -323,9 +323,9 @@ export default function Dashboard() {
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0'
               }}>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Verified</p>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>{t.common.verified}</p>
                 <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: petMaster?.verified ? '#10b981' : '#f59e0b' }}>
-                  {petMaster?.verified ? 'Yes' : 'Pending'}
+                  {petMaster?.verified ? t.common.yes : t.common.pending}
                 </p>
               </div>
             </div>
@@ -337,12 +337,12 @@ export default function Dashboard() {
               border: '1px solid #e2e8f0'
             }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '20px' }}>
-                Recent Bookings
+                {t.dashboard.recentBookings}
               </h2>
 
               {bookings.length === 0 ? (
                 <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>
-                  No bookings yet. Complete your profile to start receiving bookings!
+                  {t.dashboard.noBookingsProvider}
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: '12px' }}>

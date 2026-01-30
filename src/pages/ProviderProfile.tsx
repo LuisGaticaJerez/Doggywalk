@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { PetMaster } from '../types';
 
 export default function ProviderProfile() {
   const { profile } = useAuth();
+  const { t } = useI18n();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -82,11 +86,11 @@ export default function ProviderProfile() {
 
       if (error) throw error;
 
-      alert('Profile updated successfully!');
+      showToast('Profile updated successfully!', 'success');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile');
+      showToast('Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }
@@ -96,10 +100,10 @@ export default function ProviderProfile() {
     <Layout>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          Provider Profile
+          {t.provider.profile}
         </h1>
         <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          Complete your profile to start receiving bookings
+          {t.provider.completeProfile}
         </p>
 
         <form onSubmit={handleSubmit} style={{
@@ -109,33 +113,33 @@ export default function ProviderProfile() {
           border: '1px solid #e2e8f0'
         }}>
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Service Type *</label>
+            <label style={labelStyle}>{t.provider.serviceType}</label>
             <select
               value={formData.service_type}
               onChange={(e) => setFormData({ ...formData, service_type: e.target.value as PetMaster['service_type'] })}
               required
               style={inputStyle}
             >
-              <option value="walker">Dog Walker</option>
-              <option value="hotel">Pet Hotel</option>
-              <option value="vet">Veterinarian</option>
+              <option value="walker">{t.provider.dogWalker}</option>
+              <option value="hotel">{t.provider.petHotel}</option>
+              <option value="vet">{t.provider.veterinarian}</option>
             </select>
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Bio</label>
+            <label style={labelStyle}>{t.provider.bio}</label>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               rows={4}
-              placeholder="Tell pet owners about yourself and your services..."
+              placeholder={t.provider.bioPlaceholder}
               style={{ ...inputStyle, resize: 'vertical' }}
             />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
-              <label style={labelStyle}>Hourly Rate ($) *</label>
+              <label style={labelStyle}>{t.provider.hourlyRateLabel}</label>
               <input
                 type="number"
                 value={formData.hourly_rate}
@@ -149,7 +153,7 @@ export default function ProviderProfile() {
 
             {formData.service_type === 'hotel' && (
               <div>
-                <label style={labelStyle}>Price per Night ($)</label>
+                <label style={labelStyle}>{t.provider.pricePerNight}</label>
                 <input
                   type="number"
                   value={formData.price_per_night}
@@ -164,7 +168,7 @@ export default function ProviderProfile() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
-              <label style={labelStyle}>Service Radius (meters) *</label>
+              <label style={labelStyle}>{t.provider.serviceRadius}</label>
               <input
                 type="number"
                 value={formData.service_radius}
@@ -176,7 +180,7 @@ export default function ProviderProfile() {
             </div>
 
             <div>
-              <label style={labelStyle}>Capacity *</label>
+              <label style={labelStyle}>{t.provider.capacity}</label>
               <input
                 type="number"
                 value={formData.capacity}
@@ -189,23 +193,23 @@ export default function ProviderProfile() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Specialties (comma separated)</label>
+            <label style={labelStyle}>{t.provider.specialties}</label>
             <input
               type="text"
               value={formData.specialties}
               onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
-              placeholder="e.g., Large dogs, Puppies, Senior care"
+              placeholder={t.provider.specialtiesPlaceholder}
               style={inputStyle}
             />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>Facilities (comma separated)</label>
+            <label style={labelStyle}>{t.provider.facilities}</label>
             <input
               type="text"
               value={formData.facilities}
               onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
-              placeholder="e.g., Indoor play area, Outdoor yard, Pool"
+              placeholder={t.provider.facilitiesPlaceholder}
               style={inputStyle}
             />
           </div>
@@ -224,7 +228,7 @@ export default function ProviderProfile() {
                 style={{ width: '18px', height: '18px' }}
               />
               <span style={{ fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                Currently Available
+                {t.provider.currentlyAvailable}
               </span>
             </label>
           </div>
@@ -244,7 +248,7 @@ export default function ProviderProfile() {
                   style={{ width: '18px', height: '18px' }}
                 />
                 <span style={{ fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                  24/7 Emergency Service
+                  {t.provider.emergencyService}
                 </span>
               </label>
             </div>
@@ -266,7 +270,7 @@ export default function ProviderProfile() {
                 cursor: loading ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Saving...' : 'Save Profile'}
+              {loading ? t.common.loading : t.provider.saveProfile}
             </button>
             <button
               type="button"
@@ -282,7 +286,7 @@ export default function ProviderProfile() {
                 cursor: 'pointer'
               }}
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
         </form>

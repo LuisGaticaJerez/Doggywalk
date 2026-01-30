@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +22,7 @@ export default function Register() {
     setLoading(true);
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      showToast(t.auth.passwordMinLength, 'error');
       setLoading(false);
       return;
     }
@@ -175,7 +177,7 @@ export default function Register() {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-              I am a
+              {t.auth.iAmA}
             </label>
             <div style={{ display: 'flex', gap: '12px' }}>
               <label style={{
@@ -197,7 +199,7 @@ export default function Register() {
                   onChange={(e) => setRole(e.target.value as 'owner')}
                   style={{ marginRight: '8px' }}
                 />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>Pet Owner</span>
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.petOwner}</span>
               </label>
               <label style={{
                 flex: 1,
@@ -218,7 +220,7 @@ export default function Register() {
                   onChange={(e) => setRole(e.target.value as 'pet_master')}
                   style={{ marginRight: '8px' }}
                 />
-                <span style={{ fontSize: '14px', fontWeight: '500' }}>Provider</span>
+                <span style={{ fontSize: '14px', fontWeight: '500' }}>{t.auth.provider}</span>
               </label>
             </div>
           </div>
