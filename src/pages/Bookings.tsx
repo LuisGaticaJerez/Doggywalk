@@ -61,14 +61,67 @@ export default function Bookings() {
     try {
       const { error } = await supabase
         .from('bookings')
-        .update({ status: newStatus })
+        .update({
+          status: newStatus,
+          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
+        })
         .eq('id', bookingId);
 
       if (error) throw error;
 
+      if (newStatus === 'in_progress') {
+        const { data: existingRoute } = await supabase
+          .from('routes')
+          .select('id')
+          .eq('booking_id', bookingId)
+          .maybeSingle();
+
+        if (!existingRoute) {
+          await supabase
+            .from('routes')
+            .insert({
+              booking_id: bookingId,
+              coordinates: [],
+              started_at: new Date().toISOString()
+            });
+        }
+
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(async (position) => {
+            const initialCoord = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              timestamp: new Date().toISOString()
+            };
+
+            await supabase
+              .from('routes')
+              .update({ coordinates: [initialCoord] })
+              .eq('booking_id', bookingId);
+          });
+        }
+      }
+
+      if (newStatus === 'completed') {
+        const { data: route } = await supabase
+          .from('routes')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .maybeSingle();
+
+        if (route) {
+          await supabase
+            .from('routes')
+            .update({ ended_at: new Date().toISOString() })
+            .eq('booking_id', bookingId);
+        }
+      }
+
       setBookings(bookings.map(b =>
         b.id === bookingId ? { ...b, status: newStatus as Booking['status'] } : b
       ));
+
+      showToast('Booking status updated', 'success');
     } catch (error) {
       console.error('Error updating booking:', error);
       showToast('Failed to update booking status', 'error');
@@ -286,22 +339,45 @@ export default function Bookings() {
                 )}
 
                 {profile?.role === 'pet_master' && booking.status === 'in_progress' && (
-                  <button
-                    onClick={() => handleStatusUpdate(booking.id, 'completed')}
+                  <Link
+                    to={`/my-bookings/${booking.id}/walk`}
                     style={{
+                      display: 'block',
                       width: '100%',
                       padding: '10px',
-                      background: '#10b981',
+                      background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
                       color: 'white',
-                      border: 'none',
+                      textDecoration: 'none',
                       borderRadius: '6px',
                       fontSize: '14px',
                       fontWeight: '500',
-                      cursor: 'pointer'
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
                     }}
                   >
-                    {t.bookings.completeService}
-                  </button>
+                    🗺️ Manage Walk
+                  </Link>
+                )}
+
+                {profile?.role === 'owner' && (booking.status === 'in_progress' || booking.status === 'accepted') && (
+                  <Link
+                    to={`/bookings/${booking.id}/track`}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                    }}
+                  >
+                    🗺️ {t.tracking.trackWalk}
+                  </Link>
                 )}
 
                 {profile?.role === 'owner' && booking.status === 'completed' && !booking.has_rating && (

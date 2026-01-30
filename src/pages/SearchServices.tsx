@@ -77,24 +77,39 @@ export default function SearchServices() {
 
       if (error) throw error;
 
-      if (data && userLocation) {
-        const providersWithDistance = data.map(provider => {
-          if (provider.latitude && provider.longitude) {
-            const distance = calculateDistance(
-              userLocation.lat,
-              userLocation.lng,
-              provider.latitude,
-              provider.longitude
-            );
-            return { ...provider, distance };
-          }
-          return { ...provider, distance: Infinity };
-        });
+      if (data) {
+        const { data: activeBookings } = await supabase
+          .from('bookings')
+          .select('pet_master_id')
+          .in('status', ['in_progress', 'accepted']);
 
-        providersWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-        setProviders(providersWithDistance);
-      } else if (data) {
-        setProviders(data);
+        const activeProviderIds = new Set(
+          activeBookings?.map(b => b.pet_master_id).filter(Boolean) || []
+        );
+
+        const availableProviders = data.filter(
+          provider => !activeProviderIds.has(provider.id)
+        );
+
+        if (userLocation) {
+          const providersWithDistance = availableProviders.map(provider => {
+            if (provider.latitude && provider.longitude) {
+              const distance = calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                provider.latitude,
+                provider.longitude
+              );
+              return { ...provider, distance };
+            }
+            return { ...provider, distance: Infinity };
+          });
+
+          providersWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+          setProviders(providersWithDistance);
+        } else {
+          setProviders(availableProviders);
+        }
       }
     } catch (error) {
       console.error('Error loading providers:', error);

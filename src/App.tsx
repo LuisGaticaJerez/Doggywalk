@@ -9,6 +9,8 @@ import PetForm from './pages/PetForm'
 import SearchServices from './pages/SearchServices'
 import BookingForm from './pages/BookingForm'
 import Bookings from './pages/Bookings'
+import LiveTracking from './pages/LiveTracking'
+import ActiveWalk from './pages/ActiveWalk'
 import ProviderProfile from './pages/ProviderProfile'
 import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -70,9 +72,21 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/bookings/:bookingId/track" element={
+            <ProtectedRoute requireRole="owner">
+              <LiveTracking />
+            </ProtectedRoute>
+          } />
+
           <Route path="/my-bookings" element={
             <ProtectedRoute requireRole="pet_master">
               <Bookings />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/my-bookings/:bookingId/walk" element={
+            <ProtectedRoute requireRole="pet_master">
+              <ActiveWalk />
             </ProtectedRoute>
           } />
 
