@@ -253,6 +253,26 @@ export default function ManageOfferings() {
     }
   };
 
+  const handleToggleOffering = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('provider_service_offerings')
+        .update({ is_active: !currentStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setOfferings(prev => prev.map(o =>
+        o.id === id ? { ...o, is_active: !currentStatus } : o
+      ));
+
+      showToast(currentStatus ? 'Servicio desactivado' : 'Servicio activado', 'success');
+    } catch (error) {
+      console.error('Error toggling offering:', error);
+      showToast('Error al actualizar el estado', 'error');
+    }
+  };
+
   const handleSelectCatalogService = (service: ServiceCatalog) => {
     setSelectedCatalogId(service.id);
     setFormData({
@@ -446,16 +466,51 @@ export default function ManageOfferings() {
                         </div>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'start' }}>
+                      <button
+                        onClick={() => handleToggleOffering(offering.id, offering.is_active)}
+                        style={{
+                          padding: '10px 20px',
+                          background: offering.is_active
+                            ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+                            : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          boxShadow: offering.is_active
+                            ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                            : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                          transition: 'all 0.2s',
+                          whiteSpace: 'nowrap'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = offering.is_active
+                            ? '0 6px 16px rgba(239, 68, 68, 0.4)'
+                            : '0 6px 16px rgba(16, 185, 129, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = offering.is_active
+                            ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                            : '0 4px 12px rgba(16, 185, 129, 0.3)';
+                        }}
+                      >
+                        {offering.is_active ? '❌ Desactivar' : '✅ Activar'}
+                      </button>
                       <button
                         onClick={() => handleEditOffering(offering)}
                         style={{
-                          padding: '8px 16px',
+                          padding: '10px 16px',
                           background: '#f1f5f9',
                           border: 'none',
                           borderRadius: '8px',
                           cursor: 'pointer',
-                          fontSize: '14px'
+                          fontSize: '14px',
+                          fontWeight: '600'
                         }}
                       >
                         ✏️ Editar
@@ -463,13 +518,14 @@ export default function ManageOfferings() {
                       <button
                         onClick={() => handleDeleteOffering(offering.id)}
                         style={{
-                          padding: '8px 16px',
+                          padding: '10px 16px',
                           background: '#fee2e2',
                           color: '#991b1b',
                           border: 'none',
                           borderRadius: '8px',
                           cursor: 'pointer',
-                          fontSize: '14px'
+                          fontSize: '14px',
+                          fontWeight: '600'
                         }}
                       >
                         🗑️

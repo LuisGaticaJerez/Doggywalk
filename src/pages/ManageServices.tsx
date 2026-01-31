@@ -8,6 +8,26 @@ import ImageUpload from '../components/ImageUpload';
 
 type ServiceType = 'walker' | 'hotel' | 'vet';
 
+interface ServiceCatalog {
+  id: string;
+  name: string;
+  category: string;
+  subcategory: string;
+  description: string;
+}
+
+interface ProviderOffering {
+  id: string;
+  service_catalog_id: string | null;
+  custom_name: string | null;
+  description: string;
+  duration_minutes: number;
+  price_clp: number;
+  is_active: boolean;
+  max_capacity: number;
+  service_catalog?: ServiceCatalog;
+}
+
 interface ProviderService {
   id: string;
   service_type: ServiceType;
@@ -39,6 +59,7 @@ export default function ManageServices() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [services, setServices] = useState<ProviderService[]>([]);
+  const [offerings, setOfferings] = useState<ProviderOffering[]>([]);
   const [businessVerification, setBusinessVerification] = useState<BusinessVerification | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingService, setEditingService] = useState<string | null>(null);
@@ -57,13 +78,18 @@ export default function ManageServices() {
 
   const loadData = async () => {
     try {
-      const [servicesRes, businessRes] = await Promise.all([
+      const [servicesRes, businessRes, offeringsRes] = await Promise.all([
         supabase.from('provider_services').select('*').eq('provider_id', profile?.id),
         supabase.from('business_verifications').select('*').eq('provider_id', profile?.id).maybeSingle(),
+        supabase.from('provider_service_offerings').select(`
+          *,
+          service_catalog:service_catalog_id(*)
+        `).eq('provider_id', profile?.id).order('is_active', { ascending: false }).order('created_at', { ascending: false })
       ]);
 
       if (servicesRes.data) setServices(servicesRes.data);
       if (businessRes.data) setBusinessVerification(businessRes.data);
+      if (offeringsRes.data) setOfferings(offeringsRes.data);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -77,6 +103,23 @@ export default function ManageServices() {
         .from('provider_services')
         .update({ is_active: !currentStatus })
         .eq('id', serviceId);
+
+      if (error) throw error;
+
+      showToast(currentStatus ? 'Servicio desactivado' : 'Servicio activado', 'success');
+      loadData();
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al actualizar', 'error');
+    }
+  };
+
+  const toggleOfferingStatus = async (offeringId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('provider_service_offerings')
+        .update({ is_active: !currentStatus })
+        .eq('id', offeringId);
 
       if (error) throw error;
 
@@ -859,6 +902,153 @@ export default function ManageServices() {
               >
                 + Agregar tu Primer Servicio
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Sección de Todos los Servicios Específicos */}
+        <div
+          style={{
+            background: 'white',
+            padding: '24px',
+            borderRadius: '16px',
+            border: '2px solid #FEF3C7',
+            boxShadow: '0 4px 12px rgba(251, 191, 36, 0.1)',
+          }}
+        >
+          <div style={{ marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+              📋 Todos Mis Servicios Específicos
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b' }}>
+              Activa o desactiva tus servicios según tu disponibilidad. Los usuarios solo verán los servicios activos.
+            </p>
+          </div>
+
+          {offerings.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+              <p style={{ fontSize: '1rem', marginBottom: '8px' }}>No tienes servicios específicos configurados</p>
+              <p style={{ fontSize: '14px', marginBottom: '16px' }}>
+                Ve a "Gestionar Mis Servicios" en el menú para agregar servicios específicos
+              </p>
+              <button
+                onClick={() => navigate('/manage-offerings')}
+                style={{
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                }}
+              >
+                Ir a Gestión de Servicios
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {offerings.map((offering) => {
+                const serviceName = offering.custom_name || offering.service_catalog?.name || 'Servicio sin nombre';
+                const description = offering.description || offering.service_catalog?.description || '';
+
+                return (
+                  <div
+                    key={offering.id}
+                    style={{
+                      padding: '16px',
+                      background: offering.is_active ? '#F0FDF4' : '#F8FAFC',
+                      border: `2px solid ${offering.is_active ? '#BBF7D0' : '#E2E8F0'}`,
+                      borderRadius: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '16px',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>
+                          {serviceName}
+                        </h3>
+                        {offering.is_active ? (
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#10B981',
+                            color: 'white',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                          }}>
+                            ACTIVO
+                          </span>
+                        ) : (
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#94A3B8',
+                            color: 'white',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                          }}>
+                            INACTIVO
+                          </span>
+                        )}
+                      </div>
+
+                      {description && (
+                        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>
+                          {description}
+                        </p>
+                      )}
+
+                      <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#64748b' }}>
+                        <span>⏱️ {offering.duration_minutes} min</span>
+                        <span>💰 ${offering.price_clp.toLocaleString('es-CL')} CLP</span>
+                        <span>👥 Capacidad: {offering.max_capacity}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => toggleOfferingStatus(offering.id, offering.is_active)}
+                      style={{
+                        padding: '10px 20px',
+                        background: offering.is_active
+                          ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+                          : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        boxShadow: offering.is_active
+                          ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                          : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = offering.is_active
+                          ? '0 6px 16px rgba(239, 68, 68, 0.4)'
+                          : '0 6px 16px rgba(16, 185, 129, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = offering.is_active
+                          ? '0 4px 12px rgba(239, 68, 68, 0.3)'
+                          : '0 4px 12px rgba(16, 185, 129, 0.3)';
+                      }}
+                    >
+                      {offering.is_active ? '❌ Desactivar' : '✅ Activar'}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
