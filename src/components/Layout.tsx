@@ -247,6 +247,18 @@ export default function Layout({ children }: LayoutProps) {
                           <span>🏠</span> {t.nav.dashboard}
                         </Link>
                         <Link
+                          to="/manage-offerings"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            ...menuItemStyle,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span>📋</span> Mis Servicios
+                        </Link>
+                        <Link
                           to="/profile-setup"
                           onClick={() => setMenuOpen(false)}
                           style={{

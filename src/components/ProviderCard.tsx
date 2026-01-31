@@ -284,22 +284,76 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>{t.provider.hourlyRate}</div>
-            <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b' }}>
-              ${provider.hourly_rate}/hr
+        {provider.provider_service_offerings && provider.provider_service_offerings.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+              Servicios Disponibles:
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {provider.provider_service_offerings
+                .filter((s: any) => s.is_active)
+                .slice(0, 3)
+                .map((service: any, idx: number) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '10px 12px',
+                      background: '#FFF9E6',
+                      borderRadius: '8px',
+                      border: '1px solid #FFE5B4',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                        {service.custom_name || service.service_catalog?.name || 'Servicio'}
+                      </div>
+                      {service.duration_minutes && (
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>
+                          ⏱️ {service.duration_minutes < 60
+                            ? `${service.duration_minutes} min`
+                            : `${Math.floor(service.duration_minutes / 60)}h${service.duration_minutes % 60 > 0 ? ` ${service.duration_minutes % 60}min` : ''}`}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#FF8C42' }}>
+                      {new Intl.NumberFormat('es-CL', {
+                        style: 'currency',
+                        currency: 'CLP',
+                        minimumFractionDigits: 0
+                      }).format(service.price_clp)}
+                    </div>
+                  </div>
+                ))}
+              {provider.provider_service_offerings.filter((s: any) => s.is_active).length > 3 && (
+                <div style={{ fontSize: '12px', color: '#64748b', textAlign: 'center', paddingTop: '4px' }}>
+                  +{provider.provider_service_offerings.filter((s: any) => s.is_active).length - 3} más
+                </div>
+              )}
             </div>
           </div>
-          {provider.price_per_night && (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '14px', color: '#64748b' }}>Per Night</div>
+        )}
+
+        {(!provider.provider_service_offerings || provider.provider_service_offerings.length === 0) && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <div style={{ fontSize: '14px', color: '#64748b' }}>{t.provider.hourlyRate}</div>
               <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b' }}>
-                ${provider.price_per_night}
+                ${provider.hourly_rate}/hr
               </div>
             </div>
-          )}
-        </div>
+            {provider.price_per_night && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '14px', color: '#64748b' }}>Per Night</div>
+                <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e293b' }}>
+                  ${provider.price_per_night}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <Link
           to={user ? `/provider/${provider.id}/book` : `/login?redirect=/provider/${provider.id}/book`}

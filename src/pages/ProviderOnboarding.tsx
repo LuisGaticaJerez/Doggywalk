@@ -151,8 +151,8 @@ export default function ProviderOnboarding() {
 
       await refreshProfile();
 
-      showToast('¡Configuración completada con éxito!', 'success');
-      navigate('/dashboard', { replace: true });
+      showToast('¡Configuración completada con éxito! Ahora configura tus servicios', 'success');
+      navigate('/manage-offerings', { replace: true });
     } catch (error) {
       console.error('Error:', error);
       showToast('Error al guardar', 'error');

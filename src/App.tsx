@@ -25,6 +25,7 @@ const RateBooking = lazy(() => import('./pages/RateBooking'))
 const Chat = lazy(() => import('./pages/Chat').then(module => ({ default: module.Chat })))
 const ProviderOnboarding = lazy(() => import('./pages/ProviderOnboarding'))
 const ManageServices = lazy(() => import('./pages/ManageServices'))
+const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
 
 function App() {
   return (
@@ -129,6 +130,12 @@ function App() {
           <Route path="/manage-services" element={
             <ProtectedRoute requireRole="pet_master">
               <ManageServices />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/manage-offerings" element={
+            <ProtectedRoute requireRole="pet_master">
+              <ManageOfferings />
             </ProtectedRoute>
           } />
 

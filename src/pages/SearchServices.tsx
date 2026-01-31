@@ -67,6 +67,18 @@ export default function SearchServices() {
           profiles (
             full_name,
             avatar_url
+          ),
+          provider_service_offerings!provider_id (
+            id,
+            custom_name,
+            description,
+            duration_minutes,
+            price_clp,
+            is_active,
+            service_catalog:service_catalog_id (
+              name,
+              subcategory
+            )
           )
         `)
         .eq('verified', true);
