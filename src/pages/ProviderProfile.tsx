@@ -103,27 +103,50 @@ export default function ProviderProfile() {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-          {t.provider.profile}
-        </h1>
-        <p style={{ color: '#64748b', marginBottom: '32px' }}>
-          {t.provider.completeProfile}
-        </p>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 16px' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
+            ⚙️ {t.provider.profile}
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '16px' }}>
+            {t.provider.completeProfile}
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} style={{
           background: 'white',
           padding: '32px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0'
+          borderRadius: '16px',
+          border: '2px solid #E8F5E9',
+          boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)',
+          marginBottom: '24px'
         }}>
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '24px',
+            paddingBottom: '12px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            📋 Información Básica
+          </h3>
+
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>{t.provider.serviceType}</label>
+            <label style={labelStyle}>🎯 {t.provider.serviceType}</label>
             <select
               value={formData.service_type}
               onChange={(e) => setFormData({ ...formData, service_type: e.target.value as PetMaster['service_type'] })}
               required
               style={inputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               <option value="walker">{t.provider.dogWalker}</option>
               <option value="hotel">{t.provider.petHotel}</option>
@@ -131,20 +154,39 @@ export default function ProviderProfile() {
             </select>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>{t.provider.bio}</label>
+          <div style={{ marginBottom: '32px' }}>
+            <label style={labelStyle}>📝 {t.provider.bio}</label>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               rows={4}
               placeholder={t.provider.bioPlaceholder}
               style={{ ...inputStyle, resize: 'vertical' }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
           </div>
 
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '24px',
+            paddingBottom: '12px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            💰 Precios y Capacidad
+          </h3>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
-              <label style={labelStyle}>{t.provider.hourlyRateLabel}</label>
+              <label style={labelStyle}>💵 {t.provider.hourlyRateLabel}</label>
               <input
                 type="number"
                 value={formData.hourly_rate}
@@ -158,7 +200,7 @@ export default function ProviderProfile() {
 
             {formData.service_type === 'hotel' && (
               <div>
-                <label style={labelStyle}>{t.provider.pricePerNight}</label>
+                <label style={labelStyle}>🌙 {t.provider.pricePerNight}</label>
                 <input
                   type="number"
                   value={formData.price_per_night}
@@ -171,9 +213,20 @@ export default function ProviderProfile() {
             )}
           </div>
 
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '24px',
+            paddingBottom: '12px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            🗺️ Cobertura y Capacidad
+          </h3>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
-              <label style={labelStyle}>{t.provider.serviceRadius}</label>
+              <label style={labelStyle}>📍 {t.provider.serviceRadius}</label>
               <input
                 type="number"
                 value={formData.service_radius}
@@ -185,7 +238,7 @@ export default function ProviderProfile() {
             </div>
 
             <div>
-              <label style={labelStyle}>{t.provider.capacity}</label>
+              <label style={labelStyle}>👥 {t.provider.capacity}</label>
               <input
                 type="number"
                 value={formData.capacity}
@@ -197,8 +250,19 @@ export default function ProviderProfile() {
             </div>
           </div>
 
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '24px',
+            paddingBottom: '12px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            ✨ Especialidades y Facilidades
+          </h3>
+
           <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>{t.provider.specialties}</label>
+            <label style={labelStyle}>🎓 {t.provider.specialties}</label>
             <input
               type="text"
               value={formData.specialties}
@@ -208,8 +272,8 @@ export default function ProviderProfile() {
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={labelStyle}>{t.provider.facilities}</label>
+          <div style={{ marginBottom: '32px' }}>
+            <label style={labelStyle}>🏢 {t.provider.facilities}</label>
             <input
               type="text"
               value={formData.facilities}
@@ -219,76 +283,142 @@ export default function ProviderProfile() {
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            marginBottom: '24px',
+            paddingBottom: '12px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            ⚙️ Configuración de Disponibilidad
+          </h3>
+
+          <div style={{
+            marginBottom: '20px',
+            padding: '16px',
+            background: '#F0FDF4',
+            borderRadius: '10px',
+            border: '2px solid #BBF7D0'
+          }}>
             <label style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '12px',
               cursor: 'pointer'
             }}>
               <input
                 type="checkbox"
                 checked={formData.is_available}
                 onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-                style={{ width: '18px', height: '18px' }}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  cursor: 'pointer',
+                  accentColor: '#10b981'
+                }}
               />
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                {t.provider.currentlyAvailable}
-              </span>
+              <div>
+                <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', display: 'block' }}>
+                  ✅ {t.provider.currentlyAvailable}
+                </span>
+                <span style={{ fontSize: '13px', color: '#64748b' }}>
+                  Los clientes podrán reservar tus servicios
+                </span>
+              </div>
             </label>
           </div>
 
           {formData.service_type === 'vet' && (
-            <div style={{ marginBottom: '24px' }}>
+            <div style={{
+              marginBottom: '20px',
+              padding: '16px',
+              background: '#FEF2F2',
+              borderRadius: '10px',
+              border: '2px solid #FECACA'
+            }}>
               <label style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '12px',
                 cursor: 'pointer'
               }}>
                 <input
                   type="checkbox"
                   checked={formData.emergency_service}
                   onChange={(e) => setFormData({ ...formData, emergency_service: e.target.checked })}
-                  style={{ width: '18px', height: '18px' }}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    accentColor: '#EF4444'
+                  }}
                 />
-                <span style={{ fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                  {t.provider.emergencyService}
-                </span>
+                <div>
+                  <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', display: 'block' }}>
+                    🚨 {t.provider.emergencyService}
+                  </span>
+                  <span style={{ fontSize: '13px', color: '#64748b' }}>
+                    Disponible para emergencias fuera del horario normal
+                  </span>
+                </div>
               </label>
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '2px solid #f1f5f9' }}>
             <button
               type="submit"
               disabled={loading}
               style={{
                 flex: 1,
-                padding: '12px',
-                background: loading ? '#94a3b8' : '#0ea5e9',
+                padding: '14px',
+                background: loading ? '#94a3b8' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '10px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: loading ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                }
               }}
             >
-              {loading ? t.common.loading : t.provider.saveProfile}
+              {loading ? '⏳ ' + t.common.loading : '💾 ' + t.provider.saveProfile}
             </button>
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
               style={{
-                padding: '12px 24px',
+                padding: '14px 24px',
                 background: 'white',
                 color: '#64748b',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '10px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f8fafc';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.borderColor = '#e2e8f0';
               }}
             >
               {t.common.cancel}
@@ -321,13 +451,19 @@ export default function ProviderProfile() {
             <div style={{
               background: 'white',
               padding: '32px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              border: '2px solid #FEF3C7',
+              boxShadow: '0 4px 12px rgba(251, 191, 36, 0.1)',
               marginTop: '24px'
             }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '24px' }}>
-                Your Reviews
-              </h2>
+              <div style={{ marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+                  ⭐ Tus Reseñas
+                </h2>
+                <p style={{ fontSize: '14px', color: '#64748b' }}>
+                  Opiniones de clientes que han usado tus servicios
+                </p>
+              </div>
               <ReviewsList petMasterId={profile.id} />
             </div>
           </>
@@ -339,17 +475,19 @@ export default function ProviderProfile() {
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  marginBottom: '8px',
-  color: '#334155',
+  marginBottom: '10px',
+  color: '#1e293b',
   fontSize: '14px',
-  fontWeight: '500'
+  fontWeight: '600'
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '12px',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
+  padding: '12px 16px',
+  border: '2px solid #e2e8f0',
+  borderRadius: '10px',
   fontSize: '14px',
-  outline: 'none'
+  outline: 'none',
+  transition: 'all 0.2s',
+  background: '#fff'
 };

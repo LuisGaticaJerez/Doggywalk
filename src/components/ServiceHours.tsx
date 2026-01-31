@@ -127,36 +127,84 @@ export default function ServiceHours({ petMasterId, editable = false }: ServiceH
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{ textAlign: 'center', padding: '32px' }}>
+        <div style={{
+          display: 'inline-block',
+          width: '32px',
+          height: '32px',
+          border: '3px solid #e2e8f0',
+          borderTopColor: '#10b981',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-xl font-semibold mb-4">
-        {t.serviceHours?.title || 'Service Hours'}
-      </h3>
+    <div style={{
+      background: 'white',
+      borderRadius: '16px',
+      padding: '24px',
+      border: '2px solid #DBEAFE',
+      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+    }}>
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
+          🕐 {t.serviceHours?.title || 'Horario de Atención'}
+        </h3>
+        <p style={{ fontSize: '14px', color: '#64748b' }}>
+          Configura tus horarios de disponibilidad por día
+        </p>
+      </div>
 
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {hours.map((hour, index) => (
-          <div key={index} className="flex items-center gap-4 pb-4 border-b last:border-b-0">
-            <div className="w-32 font-medium text-gray-700">
+          <div
+            key={index}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              padding: '12px 16px',
+              background: hour.is_closed ? '#F8FAFC' : '#FFFFFF',
+              borderRadius: '10px',
+              border: '2px solid',
+              borderColor: hour.is_closed ? '#E2E8F0' : '#DBEAFE'
+            }}
+          >
+            <div style={{
+              minWidth: '100px',
+              fontWeight: '600',
+              color: '#1e293b',
+              fontSize: '14px'
+            }}>
               {daysOfWeek[hour.day_of_week]}
             </div>
 
             {editable ? (
               <>
-                <input
-                  type="checkbox"
-                  checked={hour.is_closed}
-                  onChange={() => handleClosedToggle(index)}
-                  className="h-4 w-4 text-blue-600 rounded"
-                />
-                <span className="text-sm text-gray-600">
-                  {t.serviceHours?.closed || 'Closed'}
-                </span>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={hour.is_closed}
+                    onChange={() => handleClosedToggle(index)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: '#EF4444'
+                    }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>
+                    {t.serviceHours?.closed || 'Cerrado'}
+                  </span>
+                </label>
 
                 {!hour.is_closed && (
                   <>
@@ -164,22 +212,34 @@ export default function ServiceHours({ petMasterId, editable = false }: ServiceH
                       type="time"
                       value={hour.open_time}
                       onChange={(e) => handleTimeChange(index, 'open_time', e.target.value)}
-                      className="border rounded px-3 py-1"
+                      style={{
+                        padding: '6px 12px',
+                        border: '2px solid #e2e8f0',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
                     />
-                    <span className="text-gray-500">-</span>
+                    <span style={{ color: '#94a3b8', fontWeight: '600' }}>-</span>
                     <input
                       type="time"
                       value={hour.close_time}
                       onChange={(e) => handleTimeChange(index, 'close_time', e.target.value)}
-                      className="border rounded px-3 py-1"
+                      style={{
+                        padding: '6px 12px',
+                        border: '2px solid #e2e8f0',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
                     />
                   </>
                 )}
               </>
             ) : (
-              <div className="text-gray-600">
+              <div style={{ color: '#64748b', fontSize: '14px', fontWeight: '500', flex: 1 }}>
                 {hour.is_closed
-                  ? (t.serviceHours?.closed || 'Closed')
+                  ? (t.serviceHours?.closed || 'Cerrado')
                   : `${hour.open_time} - ${hour.close_time}`}
               </div>
             )}
@@ -188,15 +248,39 @@ export default function ServiceHours({ petMasterId, editable = false }: ServiceH
       </div>
 
       {editable && (
-        <div className="mt-6">
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '2px solid #f1f5f9' }}>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: saving ? '#94a3b8' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '15px',
+              fontWeight: '600',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              boxShadow: saving ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }
+            }}
           >
             {saving
-              ? (t.common?.saving || 'Saving...')
-              : (t.common?.save || 'Save Changes')}
+              ? '⏳ ' + (t.common?.saving || 'Guardando...')
+              : '💾 ' + (t.common?.save || 'Guardar Cambios')}
           </button>
         </div>
       )}

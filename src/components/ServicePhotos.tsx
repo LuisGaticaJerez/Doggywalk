@@ -162,58 +162,160 @@ export default function ServicePhotos({ petMasterId, editable = false }: Service
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{ textAlign: 'center', padding: '32px' }}>
+        <div style={{
+          display: 'inline-block',
+          width: '32px',
+          height: '32px',
+          border: '3px solid #e2e8f0',
+          borderTopColor: '#10b981',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">
-          {t.servicePhotos?.title || 'Service Photos'}
-        </h3>
+    <div style={{
+      background: 'white',
+      borderRadius: '16px',
+      padding: '24px',
+      border: '2px solid #E8F5E9',
+      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
+            📸 {t.servicePhotos?.title || 'Fotos del Servicio'}
+          </h3>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>
+            Muestra tu espacio y servicio a los clientes
+          </p>
+        </div>
         {editable && (
-          <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer">
-            {uploading ? (t.common?.uploading || 'Uploading...') : (t.common?.addPhoto || 'Add Photo')}
+          <label style={{
+            padding: '12px 24px',
+            background: uploading ? '#94a3b8' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: uploading ? 'not-allowed' : 'pointer',
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+            transition: 'all 0.2s'
+          }}>
+            {uploading ? '📤 Subiendo...' : '+ Agregar Foto'}
             <input
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
               disabled={uploading}
-              className="hidden"
+              style={{ display: 'none' }}
             />
           </label>
         )}
       </div>
 
       {photos.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          {t.servicePhotos?.noPhotos || 'No photos yet'}
+        <div style={{
+          textAlign: 'center',
+          padding: '60px 20px',
+          background: '#F8FAFC',
+          borderRadius: '12px',
+          border: '2px dashed #CBD5E1'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>📷</div>
+          <p style={{ fontSize: '16px', color: '#64748b', marginBottom: '8px' }}>
+            {t.servicePhotos?.noPhotos || 'No hay fotos aún'}
+          </p>
+          <p style={{ fontSize: '14px', color: '#94a3b8' }}>
+            Sube fotos de tus instalaciones para atraer más clientes
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '16px'
+        }}>
           {photos.map((photo) => (
-            <div key={photo.id} className="relative group">
+            <div
+              key={photo.id}
+              style={{
+                position: 'relative',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
               <img
                 src={photo.photo_url}
                 alt={photo.caption || ''}
-                className="w-full h-48 object-cover rounded-lg"
+                style={{
+                  width: '100%',
+                  height: '200px',
+                  objectFit: 'cover'
+                }}
               />
 
               {photo.is_cover && (
-                <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  {t.servicePhotos?.cover || 'Cover'}
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  left: '8px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: 'white',
+                  fontSize: '11px',
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                }}>
+                  ⭐ {t.servicePhotos?.cover || 'Portada'}
                 </div>
               )}
 
               {editable && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col justify-end p-3 gap-2">
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.7)',
+                    opacity: 0,
+                    transition: 'opacity 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    padding: '12px',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '0';
+                  }}
+                >
                   <select
                     value={photo.photo_type}
                     onChange={(e) => handleUpdateType(photo.id, e.target.value)}
-                    className="text-sm px-2 py-1 rounded bg-white"
+                    style={{
+                      fontSize: '12px',
+                      padding: '6px 8px',
+                      borderRadius: '6px',
+                      background: 'white',
+                      border: 'none',
+                      fontWeight: '500'
+                    }}
                   >
                     {photoTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -224,26 +326,52 @@ export default function ServicePhotos({ petMasterId, editable = false }: Service
 
                   <input
                     type="text"
-                    placeholder={t.servicePhotos?.captionPlaceholder || 'Add caption...'}
+                    placeholder={t.servicePhotos?.captionPlaceholder || 'Agregar descripción...'}
                     value={photo.caption || ''}
                     onChange={(e) => handleUpdateCaption(photo.id, e.target.value)}
-                    className="text-sm px-2 py-1 rounded"
+                    style={{
+                      fontSize: '12px',
+                      padding: '6px 8px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'white'
+                    }}
                   />
 
-                  <div className="flex gap-2">
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     {!photo.is_cover && (
                       <button
                         onClick={() => handleSetCover(photo.id)}
-                        className="flex-1 bg-blue-600 text-white text-sm py-1 rounded hover:bg-blue-700"
+                        style={{
+                          flex: 1,
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
+                          fontSize: '12px',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '600'
+                        }}
                       >
-                        {t.servicePhotos?.setCover || 'Set Cover'}
+                        ⭐ Portada
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(photo.id)}
-                      className="flex-1 bg-red-600 text-white text-sm py-1 rounded hover:bg-red-700"
+                      style={{
+                        flex: 1,
+                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                        color: 'white',
+                        fontSize: '12px',
+                        padding: '6px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
                     >
-                      {t.common?.delete || 'Delete'}
+                      🗑️ Eliminar
                     </button>
                   </div>
                 </div>
