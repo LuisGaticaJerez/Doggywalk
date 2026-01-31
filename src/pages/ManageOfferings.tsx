@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
@@ -322,21 +324,26 @@ export default function ManageOfferings() {
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '32px'
-      }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
-            Gestionar Mis Servicios
-          </h1>
-          <p style={{ color: '#64748b' }}>
-            Agrega y personaliza los servicios que ofreces
-          </p>
+    <Layout>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <BackButton color="#FF8C42" />
         </div>
+
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '32px'
+        }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
+              Gestionar Mis Servicios
+            </h1>
+            <p style={{ color: '#64748b' }}>
+              Agrega y personaliza los servicios que ofreces
+            </p>
+          </div>
         <button
           onClick={() => {
             setShowAddForm(true);
@@ -357,13 +364,13 @@ export default function ManageOfferings() {
         >
           ➕ Agregar Servicio
         </button>
-      </div>
+        </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: showAddForm || editingOffering ? '1fr 400px' : '1fr',
-        gap: '24px'
-      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: showAddForm || editingOffering ? '1fr 400px' : '1fr',
+          gap: '24px'
+        }}>
         <div>
           <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: '#1e293b' }}>
             Mis Servicios Activos
@@ -733,7 +740,8 @@ export default function ManageOfferings() {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

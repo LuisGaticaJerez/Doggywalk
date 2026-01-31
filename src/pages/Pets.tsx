@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
@@ -71,6 +72,10 @@ export default function Pets() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <BackButton color="#4CAF50" />
+        </div>
+
         <div style={{
           background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
           padding: '32px',

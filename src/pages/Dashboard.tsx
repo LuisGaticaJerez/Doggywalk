@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
@@ -89,6 +90,10 @@ export default function Dashboard() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <BackButton to="/" label="Volver al Inicio" color="#FF8C42" />
+        </div>
+
         <div style={{
           background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
           padding: '32px',

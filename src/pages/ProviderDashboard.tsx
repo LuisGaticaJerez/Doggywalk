@@ -278,6 +278,39 @@ export default function ProviderDashboard() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'white',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#64748b',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.borderColor = '#FF8C42';
+              e.currentTarget.style.color = '#FF8C42';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>←</span>
+            <span>Volver al Inicio</span>
+          </button>
+        </div>
+
         <div
           style={{
             background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',

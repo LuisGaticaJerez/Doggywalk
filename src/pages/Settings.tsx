@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -60,6 +61,10 @@ export default function Settings() {
   return (
     <Layout>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <BackButton color="#8B5CF6" />
+        </div>
+
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
           {t.settings.title}
         </h1>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -36,6 +37,7 @@ interface BusinessVerification {
 export default function ManageServices() {
   const { profile } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [services, setServices] = useState<ProviderService[]>([]);
   const [businessVerification, setBusinessVerification] = useState<BusinessVerification | null>(null);
   const [loading, setLoading] = useState(true);
@@ -263,6 +265,39 @@ export default function ManageServices() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'white',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#64748b',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.borderColor = '#FF8C42';
+              e.currentTarget.style.color = '#FF8C42';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>←</span>
+            <span>Volver</span>
+          </button>
+        </div>
+
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
             Gestión de Servicios

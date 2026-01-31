@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -22,6 +22,7 @@ export default function Bookings() {
   const { profile } = useAuth();
   const { t } = useI18n();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled'>('all');
@@ -159,6 +160,39 @@ export default function Bookings() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'white',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#64748b',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.borderColor = '#0ea5e9';
+              e.currentTarget.style.color = '#0ea5e9';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            <span style={{ fontSize: '18px' }}>←</span>
+            <span>Volver</span>
+          </button>
+        </div>
+
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
             {t.bookings.title}

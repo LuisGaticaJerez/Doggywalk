@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import ProvidersMap from '../components/ProvidersMap';
 import ProviderCard from '../components/ProviderCard';
 import { useI18n } from '../contexts/I18nContext';
@@ -216,6 +217,10 @@ export default function SearchServices() {
   return (
     <Layout>
       <div>
+        <div style={{ marginBottom: '16px' }}>
+          <BackButton color="#FF6B6B" />
+        </div>
+
         <div style={{
           background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)',
           padding: '32px',
