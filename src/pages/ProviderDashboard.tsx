@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,12 @@ interface ServiceStats {
   revenue: number;
 }
 
+interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+  bookings: number;
+}
+
 export default function ProviderDashboard() {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -31,6 +37,8 @@ export default function ProviderDashboard() {
   const [petMaster, setPetMaster] = useState<PetMaster | null>(null);
   const [pendingBookings, setPendingBookings] = useState<BookingWithDetails[]>([]);
   const [upcomingBookings, setUpcomingBookings] = useState<BookingWithDetails[]>([]);
+  const [completedBookings, setCompletedBookings] = useState<BookingWithDetails[]>([]);
+  const [allBookings, setAllBookings] = useState<BookingWithDetails[]>([]);
   const [stats, setStats] = useState<ServiceStats>({
     totalBookings: 0,
     completedBookings: 0,
@@ -39,6 +47,8 @@ export default function ProviderDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [updatingAvailability, setUpdatingAvailability] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('month');
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     if (profile && !profile.onboarding_completed) {
@@ -52,7 +62,7 @@ export default function ProviderDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const [masterRes, pendingRes, upcomingRes, statsRes] = await Promise.all([
+      const [masterRes, pendingRes, upcomingRes, completedRes, allRes] = await Promise.all([
         supabase.from('pet_masters').select('*').eq('id', profile?.id).maybeSingle(),
         supabase
           .from('bookings')
@@ -83,19 +93,36 @@ export default function ProviderDashboard() {
           .limit(5),
         supabase
           .from('bookings')
-          .select('status, total_amount')
-          .eq('pet_master_id', profile?.id),
+          .select(`
+            *,
+            pets (name),
+            profiles!bookings_owner_id_fkey (full_name),
+            booking_pets (
+              pets (id, name)
+            )
+          `)
+          .eq('pet_master_id', profile?.id)
+          .eq('status', 'completed')
+          .order('scheduled_date', { ascending: false })
+          .limit(20),
+        supabase
+          .from('bookings')
+          .select('*')
+          .eq('pet_master_id', profile?.id)
+          .order('scheduled_date', { ascending: false }),
       ]);
 
       if (masterRes.data) setPetMaster(masterRes.data);
       if (pendingRes.data) setPendingBookings(pendingRes.data);
       if (upcomingRes.data) setUpcomingBookings(upcomingRes.data);
+      if (completedRes.data) setCompletedBookings(completedRes.data);
+      if (allRes.data) {
+        setAllBookings(allRes.data);
 
-      if (statsRes.data) {
-        const totalBookings = statsRes.data.length;
-        const completedBookings = statsRes.data.filter((b) => b.status === 'completed').length;
-        const cancelledBookings = statsRes.data.filter((b) => b.status === 'cancelled').length;
-        const revenue = statsRes.data
+        const totalBookings = allRes.data.length;
+        const completedBookings = allRes.data.filter((b) => b.status === 'completed').length;
+        const cancelledBookings = allRes.data.filter((b) => b.status === 'cancelled').length;
+        const revenue = allRes.data
           .filter((b) => b.status === 'completed')
           .reduce((sum, b) => sum + Number(b.total_amount), 0);
 
@@ -180,6 +207,52 @@ export default function ProviderDashboard() {
         return '💼';
     }
   };
+
+  const periodStats = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const filterByPeriod = (booking: Booking) => {
+      const bookingDate = new Date(booking.scheduled_date);
+      if (selectedPeriod === 'week') return bookingDate >= weekAgo;
+      if (selectedPeriod === 'month') return bookingDate >= monthAgo;
+      return true;
+    };
+
+    const filteredBookings = allBookings.filter(filterByPeriod).filter(b => b.status === 'completed');
+    const revenue = filteredBookings.reduce((sum, b) => sum + Number(b.total_amount), 0);
+    const count = filteredBookings.length;
+
+    return { revenue, count };
+  }, [allBookings, selectedPeriod]);
+
+  const monthlyRevenue = useMemo(() => {
+    const months: MonthlyRevenue[] = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStr = date.toLocaleDateString('es', { month: 'short', year: 'numeric' });
+
+      const monthBookings = allBookings.filter(b => {
+        const bookingDate = new Date(b.scheduled_date);
+        return bookingDate.getMonth() === date.getMonth() &&
+               bookingDate.getFullYear() === date.getFullYear() &&
+               b.status === 'completed';
+      });
+
+      months.push({
+        month: monthStr,
+        revenue: monthBookings.reduce((sum, b) => sum + Number(b.total_amount), 0),
+        bookings: monthBookings.length
+      });
+    }
+
+    return months;
+  }, [allBookings]);
+
+  const maxRevenue = Math.max(...monthlyRevenue.map(m => m.revenue), 1);
 
   if (loading) {
     return (
@@ -549,6 +622,212 @@ export default function ProviderDashboard() {
                     <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>
                       ${booking.total_amount} • {booking.duration_minutes} min
                       {booking.profiles?.full_name && ` • ${booking.profiles.full_name}`}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              background: 'white',
+              padding: '24px',
+              borderRadius: '16px',
+              border: '2px solid #E8F5E9',
+              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)',
+              marginBottom: '24px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>
+                📊 Ganancias por Período
+              </h2>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {(['week', 'month', 'all'] as const).map(period => (
+                  <button
+                    key={period}
+                    onClick={() => setSelectedPeriod(period)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: selectedPeriod === period ? 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' : '#f1f5f9',
+                      color: selectedPeriod === period ? 'white' : '#64748b',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {period === 'week' ? 'Semana' : period === 'month' ? 'Mes' : 'Todo'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #86efac' }}>
+                <p style={{ fontSize: '13px', color: '#16a34a', marginBottom: '8px', fontWeight: '600' }}>💰 Ingresos</p>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#15803d' }}>
+                  ${periodStats.revenue.toLocaleString()}
+                </p>
+              </div>
+              <div style={{ padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #93c5fd' }}>
+                <p style={{ fontSize: '13px', color: '#2563eb', marginBottom: '8px', fontWeight: '600' }}>🎯 Servicios</p>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e40af' }}>
+                  {periodStats.count}
+                </p>
+              </div>
+              <div style={{ padding: '20px', background: '#fef3c7', borderRadius: '12px', border: '1px solid #fcd34d' }}>
+                <p style={{ fontSize: '13px', color: '#d97706', marginBottom: '8px', fontWeight: '600' }}>📈 Promedio</p>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#b45309' }}>
+                  ${periodStats.count > 0 ? Math.round(periodStats.revenue / periodStats.count).toLocaleString() : '0'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', marginBottom: '16px' }}>
+                Últimos 6 meses
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '200px' }}>
+                {monthlyRevenue.map((month, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '8px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '100%',
+                        background: 'linear-gradient(to top, #4CAF50, #81C784)',
+                        borderRadius: '8px 8px 0 0',
+                        height: `${(month.revenue / maxRevenue) * 160}px`,
+                        minHeight: month.revenue > 0 ? '20px' : '0',
+                        position: 'relative',
+                        transition: 'height 0.3s',
+                      }}
+                      title={`$${month.revenue.toLocaleString()} - ${month.bookings} servicios`}
+                    >
+                      {month.revenue > 0 && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '-24px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#16a34a',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          ${Math.round(month.revenue / 1000)}k
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#64748b', textAlign: 'center' }}>
+                      {month.month.split(' ')[0]}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {completedBookings.length > 0 && (
+            <div
+              style={{
+                background: 'white',
+                padding: '24px',
+                borderRadius: '16px',
+                border: '2px solid #E8F5E9',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.1)',
+                marginBottom: '24px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b' }}>
+                  ✅ Historial de Servicios Completados
+                </h2>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    background: 'white',
+                    color: '#4CAF50',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showHistory ? 'Ocultar' : 'Ver todo'}
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gap: '12px' }}>
+                {(showHistory ? completedBookings : completedBookings.slice(0, 5)).map((booking) => (
+                  <div
+                    key={booking.id}
+                    style={{
+                      padding: '16px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      background: '#fafafa',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.25rem' }}>
+                          {booking.pet_count > 1 ? '🐕🐕' : '🐕'}
+                        </span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
+                              {booking.booking_pets && booking.booking_pets.length > 0
+                                ? booking.booking_pets.map((bp) => bp.pets.name).join(', ')
+                                : booking.pets?.name}
+                            </span>
+                            {booking.pet_count > 1 && (
+                              <span
+                                style={{
+                                  padding: '2px 6px',
+                                  background: '#E8F5E9',
+                                  color: '#2E7D32',
+                                  borderRadius: '8px',
+                                  fontSize: '10px',
+                                  fontWeight: '600',
+                                }}
+                              >
+                                {booking.pet_count} mascotas
+                              </span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                            👤 {booking.profiles?.full_name}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#16a34a' }}>
+                          ${booking.total_amount}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                          {new Date(booking.scheduled_date).toLocaleDateString('es', { day: 'numeric', month: 'short' })}
+                        </div>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+                      ⏱️ {booking.duration_minutes} min • 📍 {booking.pickup_address}
                     </p>
                   </div>
                 ))}
