@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import Layout from '../components/Layout';
 import ProvidersMap from '../components/ProvidersMap';
 import ProviderCard from '../components/ProviderCard';
@@ -27,30 +27,44 @@ export default function SearchServices() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(10);
+  const isLoadingRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
     getUserLocation();
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   useEffect(() => {
-    loadProviders();
-  }, [serviceType]);
+    if (userLocation) {
+      loadProviders();
+    }
+  }, [serviceType, userLocation]);
 
   const getUserLocation = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setLocationError(null);
+          if (isMountedRef.current) {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+            setLocationError(null);
+          }
         },
         (error) => {
           console.error('Error getting location:', error);
-          setLocationError(t.search.geolocationError);
-          setUserLocation({ lat: 4.7110, lng: -74.0721 });
-        }
+          if (isMountedRef.current) {
+            setLocationError(t.search.geolocationError);
+            setUserLocation({ lat: 4.7110, lng: -74.0721 });
+          }
+        },
+        { timeout: 10000, maximumAge: 300000 }
       );
     } else {
       setLocationError(t.search.geolocationNotSupported);
@@ -59,6 +73,11 @@ export default function SearchServices() {
   };
 
   const loadProviders = async () => {
+    if (isLoadingRef.current) return;
+
+    isLoadingRef.current = true;
+    setLoading(true);
+
     try {
       let query = supabase
         .from('pet_masters')
@@ -91,7 +110,7 @@ export default function SearchServices() {
 
       if (error) throw error;
 
-      if (data) {
+      if (data && isMountedRef.current) {
         const { data: activeBookings } = await supabase
           .from('bookings')
           .select('pet_master_id')
@@ -154,17 +173,14 @@ export default function SearchServices() {
     } catch (error) {
       console.error('Error loading providers:', error);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+      isLoadingRef.current = false;
     }
   };
 
-  useEffect(() => {
-    if (userLocation && providers.length > 0) {
-      loadProviders();
-    }
-  }, [userLocation]);
-
-  const filteredProviders = providers.filter(provider => {
+  const filteredProviders = useMemo(() => providers.filter(provider => {
     const matchesSearch = (() => {
       if (!searchTerm) return true;
       const name = provider.profiles?.full_name?.toLowerCase() || '';
@@ -187,7 +203,7 @@ export default function SearchServices() {
     })();
 
     return matchesSearch && matchesDistance && matchesAvailability;
-  });
+  }), [providers, searchTerm, userLocation, maxDistance]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);

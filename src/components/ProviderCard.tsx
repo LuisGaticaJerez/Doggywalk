@@ -1,11 +1,56 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
+import { PetMaster } from '../types';
+
+interface HotelAmenities {
+  air_conditioning: boolean;
+  pool: boolean;
+  supervision_24h: boolean;
+  cameras: boolean;
+  [key: string]: boolean;
+}
+
+interface VetServices {
+  emergency: boolean;
+  surgery: boolean;
+  laboratory: boolean;
+  home_visits: boolean;
+  [key: string]: boolean;
+}
+
+interface ServiceHours {
+  open_time: string;
+  close_time: string;
+  is_closed: boolean;
+}
+
+interface ProviderWithProfile extends PetMaster {
+  profiles?: {
+    full_name: string;
+    avatar_url: string | null;
+  };
+  distance?: number;
+  avg_rating?: number;
+  review_count?: number;
+  provider_service_offerings?: Array<{
+    id: string;
+    custom_name: string | null;
+    description: string;
+    duration_minutes: number;
+    price_clp: number;
+    is_active: boolean;
+    service_catalog?: {
+      name: string;
+      subcategory: string;
+    } | null;
+  }>;
+}
 
 interface ProviderCardProps {
-  provider: any;
+  provider: ProviderWithProfile;
   colors: {
     bg: string;
     badge: string;
@@ -17,13 +62,19 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
   const { t } = useI18n();
   const { user } = useAuth();
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
-  const [hotelAmenities, setHotelAmenities] = useState<any>(null);
-  const [vetServices, setVetServices] = useState<any>(null);
-  const [todayHours, setTodayHours] = useState<{ open_time: string; close_time: string; is_closed: boolean } | null>(null);
+  const [hotelAmenities, setHotelAmenities] = useState<HotelAmenities | null>(null);
+  const [vetServices, setVetServices] = useState<VetServices | null>(null);
+  const [todayHours, setTodayHours] = useState<ServiceHours | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
     loadProviderDetails();
-  }, [provider.id]);
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [provider.id, provider.service_type]);
 
   const loadProviderDetails = async () => {
     const { data: photos } = await supabase
@@ -33,7 +84,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
       .eq('is_cover', true)
       .maybeSingle();
 
-    if (photos) {
+    if (photos && isMountedRef.current) {
       setCoverPhoto(photos.photo_url);
     }
 
@@ -43,7 +94,9 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
         .select('*')
         .eq('pet_master_id', provider.id)
         .maybeSingle();
-      setHotelAmenities(amenities);
+      if (isMountedRef.current) {
+        setHotelAmenities(amenities);
+      }
     }
 
     if (provider.service_type === 'vet') {
@@ -52,7 +105,9 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
         .select('*')
         .eq('pet_master_id', provider.id)
         .maybeSingle();
-      setVetServices(services);
+      if (isMountedRef.current) {
+        setVetServices(services);
+      }
     }
 
     const today = new Date().getDay();
@@ -63,7 +118,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
       .eq('day_of_week', today)
       .maybeSingle();
 
-    if (hours) {
+    if (hours && isMountedRef.current) {
       setTodayHours(hours);
     }
   };

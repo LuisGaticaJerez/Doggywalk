@@ -34,6 +34,7 @@ export default function ManageOfferings() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [catalog, setCatalog] = useState<ServiceCatalog[]>([]);
   const [offerings, setOfferings] = useState<ProviderOffering[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -124,6 +125,24 @@ export default function ManageOfferings() {
       return;
     }
 
+    if (formData.duration_minutes <= 0) {
+      showToast('La duración debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (formData.price_clp <= 0) {
+      showToast('El precio debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (formData.max_capacity <= 0) {
+      showToast('La capacidad debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (saving) return;
+    setSaving(true);
+
     try {
       const offering = {
         provider_id: user!.id,
@@ -136,52 +155,83 @@ export default function ManageOfferings() {
         is_active: formData.is_active
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('provider_service_offerings')
-        .insert(offering);
+        .insert(offering)
+        .select()
+        .single();
 
       if (error) throw error;
 
+      setOfferings(prev => [data, ...prev]);
       showToast(t.success.saved, 'success');
       setShowAddForm(false);
       resetForm();
-      await loadOfferings();
     } catch (error) {
       console.error('Error adding offering:', error);
       showToast(t.errors.saveFailed, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleUpdateOffering = async () => {
     if (!editingOffering) return;
 
+    if (formData.duration_minutes <= 0) {
+      showToast('La duración debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (formData.price_clp <= 0) {
+      showToast('El precio debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (formData.max_capacity <= 0) {
+      showToast('La capacidad debe ser mayor a 0', 'error');
+      return;
+    }
+
+    if (saving) return;
+    setSaving(true);
+
     try {
+      const updates = {
+        custom_name: formData.custom_name || null,
+        description: formData.description,
+        duration_minutes: formData.duration_minutes,
+        price_clp: formData.price_clp,
+        max_capacity: formData.max_capacity,
+        is_active: formData.is_active
+      };
+
       const { error } = await supabase
         .from('provider_service_offerings')
-        .update({
-          custom_name: formData.custom_name || null,
-          description: formData.description,
-          duration_minutes: formData.duration_minutes,
-          price_clp: formData.price_clp,
-          max_capacity: formData.max_capacity,
-          is_active: formData.is_active
-        })
+        .update(updates)
         .eq('id', editingOffering.id);
 
       if (error) throw error;
 
+      setOfferings(prev => prev.map(o =>
+        o.id === editingOffering.id ? { ...o, ...updates } : o
+      ));
       showToast(t.success.saved, 'success');
       setEditingOffering(null);
       resetForm();
-      await loadOfferings();
     } catch (error) {
       console.error('Error updating offering:', error);
       showToast(t.errors.updateFailed, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDeleteOffering = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este servicio?')) return;
+    if (!window.confirm('¿Estás seguro de eliminar este servicio?')) return;
+
+    if (saving) return;
+    setSaving(true);
 
     try {
       const { error } = await supabase
@@ -191,11 +241,13 @@ export default function ManageOfferings() {
 
       if (error) throw error;
 
+      setOfferings(prev => prev.filter(o => o.id !== id));
       showToast('Servicio eliminado', 'success');
-      await loadOfferings();
     } catch (error) {
       console.error('Error deleting offering:', error);
       showToast(t.errors.deleteFailed, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -662,18 +714,20 @@ export default function ManageOfferings() {
                 </button>
                 <button
                   onClick={editingOffering ? handleUpdateOffering : handleAddOffering}
+                  disabled={saving}
                   style={{
                     flex: 1,
                     padding: '12px',
-                    background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+                    background: saving ? '#94a3b8' : 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: '600'
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    fontWeight: '600',
+                    opacity: saving ? 0.7 : 1
                   }}
                 >
-                  {editingOffering ? 'Guardar Cambios' : 'Agregar Servicio'}
+                  {saving ? 'Guardando...' : (editingOffering ? 'Guardar Cambios' : 'Agregar Servicio')}
                 </button>
               </div>
             </div>
