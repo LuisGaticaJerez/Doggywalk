@@ -134,8 +134,16 @@ export default function VetServices({ petMasterId, editable = false }: VetServic
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{ textAlign: 'center', padding: '32px' }}>
+        <div style={{
+          display: 'inline-block',
+          width: '32px',
+          height: '32px',
+          border: '3px solid #e2e8f0',
+          borderTopColor: '#10b981',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
       </div>
     );
   }
@@ -144,24 +152,45 @@ export default function VetServices({ petMasterId, editable = false }: VetServic
 
   if (!editable && activeServices.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">
-          {t.vetServices?.title || 'Veterinary Services'}
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        padding: '24px',
+        border: '2px solid #DBEAFE',
+        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+      }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
+          🏥 {t.vetServices?.title || 'Servicios Veterinarios'}
         </h3>
-        <p className="text-gray-500 text-center py-4">
-          {t.vetServices?.noServices || 'No services listed'}
+        <p style={{ fontSize: '14px', color: '#94a3b8', textAlign: 'center', padding: '16px 0' }}>
+          {t.vetServices?.noServices || 'No hay servicios listados'}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-xl font-semibold mb-4">
-        {t.vetServices?.title || 'Veterinary Services'}
-      </h3>
+    <div style={{
+      background: 'white',
+      borderRadius: '16px',
+      padding: '24px',
+      border: '2px solid #DBEAFE',
+      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+    }}>
+      <div style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
+          🏥 {t.vetServices?.title || 'Servicios Veterinarios'}
+        </h3>
+        <p style={{ fontSize: '14px', color: '#64748b' }}>
+          Servicios médicos y especializados que ofreces en tu clínica
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+        gap: '12px'
+      }}>
         {serviceList.map((item) => {
           const isActive = services[item.key as keyof VetServicesData];
 
@@ -170,22 +199,51 @@ export default function VetServices({ petMasterId, editable = false }: VetServic
           return (
             <label
               key={item.key}
-              className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors cursor-pointer ${
-                isActive
-                  ? 'border-green-600 bg-green-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              } ${!editable ? 'cursor-default' : ''}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '14px 16px',
+                borderRadius: '10px',
+                border: '2px solid',
+                borderColor: isActive ? '#10b981' : '#e2e8f0',
+                background: isActive ? '#F0FDF4' : '#ffffff',
+                cursor: editable ? 'pointer' : 'default',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                if (editable && !isActive) {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.background = '#f8fafc';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (editable && !isActive) {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.background = '#ffffff';
+                }
+              }}
             >
               {editable && (
                 <input
                   type="checkbox"
                   checked={Boolean(isActive)}
                   onChange={() => handleToggle(item.key)}
-                  className="h-5 w-5 text-green-600 rounded"
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    accentColor: '#10b981'
+                  }}
                 />
               )}
-              <span className="text-2xl">{item.icon}</span>
-              <span className={`flex-1 ${isActive ? 'font-medium' : ''}`}>
+              <span style={{ fontSize: '24px' }}>{item.icon}</span>
+              <span style={{
+                flex: 1,
+                fontSize: '14px',
+                fontWeight: isActive ? '600' : '500',
+                color: isActive ? '#1e293b' : '#64748b'
+              }}>
                 {item.label}
               </span>
             </label>
@@ -194,15 +252,39 @@ export default function VetServices({ petMasterId, editable = false }: VetServic
       </div>
 
       {editable && (
-        <div className="mt-6">
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '2px solid #f1f5f9' }}>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: saving ? '#94a3b8' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '15px',
+              fontWeight: '600',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              boxShadow: saving ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }
+            }}
           >
             {saving
-              ? (t.common?.saving || 'Saving...')
-              : (t.common?.save || 'Save Changes')}
+              ? '⏳ ' + (t.common?.saving || 'Guardando...')
+              : '💾 ' + (t.common?.save || 'Guardar Cambios')}
           </button>
         </div>
       )}
