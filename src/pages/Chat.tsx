@@ -39,7 +39,7 @@ export function Chat() {
     if (messages.length > 0) {
       markAllAsRead();
     }
-  }, [messages, markAllAsRead]);
+  }, [messages.length]);
 
   useEffect(() => {
     if (!bookingId) return;

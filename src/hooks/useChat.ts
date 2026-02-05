@@ -58,7 +58,7 @@ export function useChat(bookingId: string | null) {
     }
   }, [bookingId, user?.id]);
 
-  const sendMessage = async (message: string, photoFile?: File) => {
+  const sendMessage = useCallback(async (message: string, photoFile?: File) => {
     if (!bookingId || !user?.id) return;
     if (!message.trim() && !photoFile) return;
 
@@ -79,15 +79,17 @@ export function useChat(bookingId: string | null) {
       });
 
       if (error) throw error;
+
+      await loadMessages();
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
     } finally {
       setSending(false);
     }
-  };
+  }, [bookingId, user?.id, loadMessages]);
 
-  const markAsRead = async (messageId: string) => {
+  const markAsRead = useCallback(async (messageId: string) => {
     if (!user?.id) return;
 
     try {
@@ -101,9 +103,9 @@ export function useChat(bookingId: string | null) {
     } catch (error) {
       console.error('Error marking message as read:', error);
     }
-  };
+  }, [user?.id]);
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     if (!bookingId || !user?.id) return;
 
     try {
@@ -119,7 +121,7 @@ export function useChat(bookingId: string | null) {
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
-  };
+  }, [bookingId, user?.id]);
 
   useEffect(() => {
     loadMessages();
@@ -131,56 +133,60 @@ export function useChat(bookingId: string | null) {
     let channel: RealtimeChannel;
 
     const setupRealtimeSubscription = async () => {
-      channel = supabase
-        .channel(`chat:${bookingId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `booking_id=eq.${bookingId}`,
-          },
-          async (payload) => {
-            const { data: senderData } = await supabase
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', payload.new.sender_id)
-              .single();
+      try {
+        channel = supabase
+          .channel(`chat:${bookingId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'chat_messages',
+              filter: `booking_id=eq.${bookingId}`,
+            },
+            async (payload) => {
+              const { data: senderData } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url')
+                .eq('id', payload.new.sender_id)
+                .maybeSingle();
 
-            const newMessage = {
-              ...payload.new,
-              sender: senderData,
-            } as ChatMessage;
+              const newMessage = {
+                ...payload.new,
+                sender: senderData || undefined,
+              } as ChatMessage;
 
-            setMessages((prev) => [...prev, newMessage]);
+              setMessages((prev) => [...prev, newMessage]);
 
-            if (newMessage.sender_id !== user?.id) {
-              setUnreadCount((prev) => prev + 1);
+              if (newMessage.sender_id !== user?.id) {
+                setUnreadCount((prev) => prev + 1);
+              }
             }
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'chat_messages',
-            filter: `booking_id=eq.${bookingId}`,
-          },
-          (payload) => {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === payload.new.id ? { ...msg, ...payload.new } : msg
-              )
-            );
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'chat_messages',
+              filter: `booking_id=eq.${bookingId}`,
+            },
+            (payload) => {
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === payload.new.id ? { ...msg, ...payload.new } : msg
+                )
+              );
 
-            if (payload.new.read_at && payload.new.sender_id !== user?.id) {
-              setUnreadCount((prev) => Math.max(0, prev - 1));
+              if (payload.new.read_at && payload.new.sender_id !== user?.id) {
+                setUnreadCount((prev) => Math.max(0, prev - 1));
+              }
             }
-          }
-        )
-        .subscribe();
+          )
+          .subscribe();
+      } catch (error) {
+        console.error('Error setting up realtime subscription:', error);
+      }
     };
 
     setupRealtimeSubscription();
