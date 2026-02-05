@@ -94,18 +94,29 @@ export default function Bookings() {
         }
 
         if ('geolocation' in navigator) {
-          navigator.geolocation.getCurrentPosition(async (position) => {
-            const initialCoord = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              timestamp: new Date().toISOString()
-            };
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const initialCoord = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                timestamp: new Date().toISOString()
+              };
 
-            await supabase
-              .from('routes')
-              .update({ coordinates: [initialCoord] })
-              .eq('booking_id', bookingId);
-          });
+              await supabase
+                .from('routes')
+                .update({ coordinates: [initialCoord] })
+                .eq('booking_id', bookingId);
+            },
+            (error) => {
+              console.error('Geolocation error:', error);
+              showToast('Could not get initial location. Tracking will start when available.', 'warning');
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
         }
       }
 
