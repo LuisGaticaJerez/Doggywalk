@@ -469,7 +469,7 @@ export default function ProviderDashboard() {
                 )}
                 {(!identityVerification || identityVerification?.status === 'rejected') && (
                   <button
-                    onClick={() => navigate('/provider-onboarding')}
+                    onClick={() => navigate('/identity-verification')}
                     style={{
                       padding: '10px 20px',
                       background: '#3b82f6',

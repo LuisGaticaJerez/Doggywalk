@@ -26,6 +26,7 @@ const Chat = lazy(() => import('./pages/Chat').then(module => ({ default: module
 const ProviderOnboarding = lazy(() => import('./pages/ProviderOnboarding'))
 const ManageServices = lazy(() => import('./pages/ManageServices'))
 const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
+const IdentityVerificationPage = lazy(() => import('./pages/IdentityVerificationPage'))
 
 function App() {
   return (
@@ -124,6 +125,12 @@ function App() {
           <Route path="/provider-onboarding" element={
             <ProtectedRoute requireRole="pet_master">
               <ProviderOnboarding />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/identity-verification" element={
+            <ProtectedRoute requireRole="pet_master">
+              <IdentityVerificationPage />
             </ProtectedRoute>
           } />
 
