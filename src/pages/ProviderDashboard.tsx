@@ -49,6 +49,8 @@ export default function ProviderDashboard() {
   const [updatingAvailability, setUpdatingAvailability] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('month');
   const [showHistory, setShowHistory] = useState(false);
+  const [identityVerification, setIdentityVerification] = useState<any>(null);
+  const [loadingVerification, setLoadingVerification] = useState(true);
 
   useEffect(() => {
     if (profile && !profile.onboarding_completed) {
@@ -57,8 +59,26 @@ export default function ProviderDashboard() {
     }
     if (profile) {
       loadDashboardData();
+      loadIdentityVerification();
     }
   }, [profile, navigate]);
+
+  const loadIdentityVerification = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('identity_verifications')
+        .select('*')
+        .eq('provider_id', profile?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setIdentityVerification(data);
+    } catch (error) {
+      console.error('Error loading identity verification:', error);
+    } finally {
+      setLoadingVerification(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -138,10 +158,17 @@ export default function ProviderDashboard() {
   const toggleAvailability = async () => {
     if (!petMaster || !profile) return;
 
+    const newAvailability = !petMaster.is_available;
+
+    if (newAvailability && petMaster.service_type === 'walker') {
+      if (!identityVerification || identityVerification.status !== 'approved') {
+        showToast(t.identityVerification.requiredToActivate, 'error');
+        return;
+      }
+    }
+
     setUpdatingAvailability(true);
     try {
-      const newAvailability = !petMaster.is_available;
-
       const { error } = await supabase
         .from('pet_masters')
         .update({ is_available: newAvailability })
@@ -376,6 +403,91 @@ export default function ProviderDashboard() {
             )}
           </div>
         </div>
+
+        {!loadingVerification && petMaster?.service_type === 'walker' && (
+          <div
+            style={{
+              background: identityVerification?.status === 'approved' ? '#f0fdf4' :
+                         identityVerification?.status === 'rejected' ? '#fef2f2' :
+                         identityVerification?.status === 'under_review' ? '#fef3c7' :
+                         '#eff6ff',
+              border: `2px solid ${
+                identityVerification?.status === 'approved' ? '#86efac' :
+                identityVerification?.status === 'rejected' ? '#fca5a5' :
+                identityVerification?.status === 'under_review' ? '#fde047' :
+                '#93c5fd'
+              }`,
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '24px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'start', gap: '16px' }}>
+              <div style={{ fontSize: '2.5rem' }}>
+                {identityVerification?.status === 'approved' ? '✅' :
+                 identityVerification?.status === 'rejected' ? '❌' :
+                 identityVerification?.status === 'under_review' ? '🔍' :
+                 '📋'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: identityVerification?.status === 'approved' ? '#166534' :
+                         identityVerification?.status === 'rejected' ? '#991b1b' :
+                         identityVerification?.status === 'under_review' ? '#854d0e' :
+                         '#1e40af'
+                }}>
+                  {identityVerification?.status === 'approved' ? t.identityVerification.approved :
+                   identityVerification?.status === 'rejected' ? t.identityVerification.rejected :
+                   identityVerification?.status === 'under_review' ? t.identityVerification.underReview :
+                   t.identityVerification.pending}
+                </h3>
+                <p style={{
+                  color: '#64748b',
+                  marginBottom: '12px',
+                  fontSize: '14px'
+                }}>
+                  {identityVerification?.status === 'approved' ? t.identityVerification.approvedDescription :
+                   identityVerification?.status === 'rejected' ? t.identityVerification.rejectedDescription :
+                   identityVerification?.status === 'under_review' ? t.identityVerification.underReviewDescription :
+                   t.identityVerification.pendingDescription}
+                </p>
+                {identityVerification?.status === 'rejected' && identityVerification?.rejection_reason && (
+                  <div style={{
+                    padding: '12px',
+                    background: '#fee2e2',
+                    borderRadius: '8px',
+                    marginBottom: '12px',
+                  }}>
+                    <p style={{ fontSize: '14px', color: '#991b1b', fontWeight: '500' }}>
+                      Razón: {identityVerification.rejection_reason}
+                    </p>
+                  </div>
+                )}
+                {(!identityVerification || identityVerification?.status === 'rejected') && (
+                  <button
+                    onClick={() => navigate('/provider-onboarding')}
+                    style={{
+                      padding: '10px 20px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {t.identityVerification.verifyNow}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div

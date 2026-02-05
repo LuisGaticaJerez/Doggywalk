@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
+import IdentityVerification from '../components/IdentityVerification';
 
 type BusinessType = 'individual' | 'business';
 type ServiceType = 'walker' | 'hotel' | 'vet';
@@ -92,7 +93,11 @@ export default function ProviderOnboarding() {
     );
   };
 
-  const handleSubmit = async () => {
+  const needsIdentityVerification = () => {
+    return businessType === 'individual' && selectedServices.includes('walker');
+  };
+
+  const handleSaveAndContinue = async () => {
     if (selectedServices.length === 0) {
       showToast('Selecciona al menos un servicio', 'error');
       return;
@@ -112,6 +117,7 @@ export default function ProviderOnboarding() {
           provider_id: profile?.id,
           service_type: serviceType,
           ...data,
+          is_active: false,
         });
 
         if (error) throw error;
@@ -131,7 +137,6 @@ export default function ProviderOnboarding() {
         .from('profiles')
         .update({
           business_type: businessType,
-          onboarding_completed: true,
         })
         .eq('id', profile?.id);
 
@@ -149,15 +154,37 @@ export default function ProviderOnboarding() {
 
       if (masterError) throw masterError;
 
+      if (needsIdentityVerification()) {
+        setStep(4);
+      } else {
+        await completeOnboarding();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al guardar', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const completeOnboarding = async () => {
+    try {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          onboarding_completed: true,
+        })
+        .eq('id', profile?.id);
+
+      if (profileError) throw profileError;
+
       await refreshProfile();
 
       showToast('¡Configuración completada con éxito! Ahora configura tus servicios', 'success');
       navigate('/manage-offerings', { replace: true });
     } catch (error) {
       console.error('Error:', error);
-      showToast('Error al guardar', 'error');
-    } finally {
-      setLoading(false);
+      showToast('Error al completar onboarding', 'error');
     }
   };
 
@@ -210,18 +237,21 @@ export default function ProviderOnboarding() {
           </h1>
           <p style={{ color: '#64748b' }}>Configuremos tu perfil de proveedor</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                style={{
-                  width: s <= step ? '40px' : '12px',
-                  height: '8px',
-                  background: s <= step ? '#FF8C42' : '#e2e8f0',
-                  borderRadius: '4px',
-                  transition: 'all 0.3s',
-                }}
-              />
-            ))}
+            {Array.from({ length: needsIdentityVerification() ? 4 : 3 }).map((_, index) => {
+              const s = index + 1;
+              return (
+                <div
+                  key={s}
+                  style={{
+                    width: s <= step ? '40px' : '12px',
+                    height: '8px',
+                    background: s <= step ? '#FF8C42' : '#e2e8f0',
+                    borderRadius: '4px',
+                    transition: 'all 0.3s',
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -628,12 +658,12 @@ export default function ProviderOnboarding() {
                 ← Atrás
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={handleSaveAndContinue}
                 disabled={loading}
                 style={{
                   flex: 1,
                   padding: '14px',
-                  background: loading ? '#cbd5e1' : '#10b981',
+                  background: loading ? '#cbd5e1' : (needsIdentityVerification() ? '#3b82f6' : '#10b981'),
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -642,9 +672,20 @@ export default function ProviderOnboarding() {
                   cursor: loading ? 'not-allowed' : 'pointer',
                 }}
               >
-                {loading ? 'Guardando...' : '✓ Completar'}
+                {loading ? 'Guardando...' : (needsIdentityVerification() ? 'Continuar →' : '✓ Completar')}
               </button>
             </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div>
+            <IdentityVerification
+              onComplete={async () => {
+                showToast('Verificación enviada con éxito', 'success');
+                await completeOnboarding();
+              }}
+            />
           </div>
         )}
       </div>
