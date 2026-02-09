@@ -29,6 +29,7 @@ const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
 const IdentityVerificationPage = lazy(() => import('./pages/IdentityVerificationPage'))
 const Support = lazy(() => import('./pages/Support'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const RecurringSeries = lazy(() => import('./pages/RecurringSeries'))
 
 function App() {
   return (
@@ -163,6 +164,12 @@ function App() {
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/recurring-bookings" element={
+            <ProtectedRoute requireRole="owner">
+              <RecurringSeries />
             </ProtectedRoute>
           } />
                 </Routes>

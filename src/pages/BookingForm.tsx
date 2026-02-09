@@ -6,6 +6,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Pet, PetMaster } from '../types';
+import { createRecurringSeries, RecurringSeries } from '../utils/recurringBookings';
 
 interface PetMasterWithProfile extends PetMaster {
   profiles?: {
@@ -31,6 +32,15 @@ export default function BookingForm() {
     pickup_latitude: '0',
     pickup_longitude: '0',
     special_instructions: ''
+  });
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringOptions, setRecurringOptions] = useState({
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    interval_count: 1,
+    days_of_week: [] as number[],
+    end_type: 'date' as 'date' | 'occurrences',
+    end_date: '',
+    max_occurrences: 10,
   });
 
   useEffect(() => {
@@ -79,6 +89,15 @@ export default function BookingForm() {
     return basePrice + (basePrice * 0.5 * (petCount - 1));
   };
 
+  const handleDayToggle = (day: number) => {
+    setRecurringOptions(prev => ({
+      ...prev,
+      days_of_week: prev.days_of_week.includes(day)
+        ? prev.days_of_week.filter(d => d !== day)
+        : [...prev.days_of_week, day].sort()
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -87,49 +106,89 @@ export default function BookingForm() {
       return;
     }
 
+    if (isRecurring && recurringOptions.frequency === 'weekly' && recurringOptions.days_of_week.length === 0) {
+      showToast('Please select at least one day of the week', 'error');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const scheduledDateTime = `${formData.scheduled_date}T${formData.scheduled_time}:00`;
       const totalAmount = calculateTotal();
 
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          owner_id: profile?.id,
-          pet_master_id: providerId,
-          pet_id: selectedPetIds[0],
-          pet_count: selectedPetIds.length,
-          scheduled_date: scheduledDateTime,
+      if (isRecurring) {
+        const series: RecurringSeries = {
+          owner_id: profile!.id,
+          provider_id: providerId!,
+          pet_ids: selectedPetIds,
+          frequency: recurringOptions.frequency,
+          interval_count: recurringOptions.interval_count,
+          days_of_week: recurringOptions.frequency === 'weekly' ? recurringOptions.days_of_week : undefined,
+          time_of_day: formData.scheduled_time,
           duration_minutes: parseInt(formData.duration_minutes),
           pickup_address: formData.pickup_address,
           pickup_latitude: parseFloat(formData.pickup_latitude),
           pickup_longitude: parseFloat(formData.pickup_longitude),
+          special_instructions: formData.special_instructions,
+          service_name: provider?.service_type || 'Service',
           total_amount: totalAmount,
-          special_instructions: formData.special_instructions || null,
-          status: 'pending'
-        })
-        .select()
-        .single();
+          start_date: formData.scheduled_date,
+          end_date: recurringOptions.end_type === 'date' ? recurringOptions.end_date : undefined,
+          max_occurrences: recurringOptions.end_type === 'occurrences' ? recurringOptions.max_occurrences : undefined,
+        };
 
-      if (bookingError) throw bookingError;
+        const result = await createRecurringSeries(series);
 
-      const bookingPets = selectedPetIds.map(petId => ({
-        booking_id: booking.id,
-        pet_id: petId
-      }));
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create recurring series');
+        }
 
-      const { error: petsError } = await supabase
-        .from('booking_pets')
-        .insert(bookingPets);
+        showToast('Recurring booking series created successfully!', 'success');
+        navigate('/bookings');
+      } else {
+        const scheduledDateTime = `${formData.scheduled_date}T${formData.scheduled_time}:00`;
 
-      if (petsError) throw petsError;
+        const { data: booking, error: bookingError } = await supabase
+          .from('bookings')
+          .insert({
+            owner_id: profile?.id,
+            pet_master_id: providerId,
+            pet_id: selectedPetIds[0],
+            pet_count: selectedPetIds.length,
+            scheduled_date: scheduledDateTime,
+            booking_date: scheduledDateTime,
+            duration_minutes: parseInt(formData.duration_minutes),
+            pickup_address: formData.pickup_address,
+            pickup_latitude: parseFloat(formData.pickup_latitude),
+            pickup_longitude: parseFloat(formData.pickup_longitude),
+            total_amount: totalAmount,
+            total_price: totalAmount,
+            special_instructions: formData.special_instructions || null,
+            status: 'pending',
+            service_name: provider?.service_type || 'Service'
+          })
+          .select()
+          .single();
 
-      showToast(t.bookings.bookingSuccess, 'success');
-      navigate('/bookings');
+        if (bookingError) throw bookingError;
+
+        const bookingPets = selectedPetIds.map(petId => ({
+          booking_id: booking.id,
+          pet_id: petId
+        }));
+
+        const { error: petsError } = await supabase
+          .from('booking_pets')
+          .insert(bookingPets);
+
+        if (petsError) throw petsError;
+
+        showToast(t.bookings.bookingSuccess, 'success');
+        navigate('/bookings');
+      }
     } catch (error) {
       console.error('Error creating booking:', error);
-      showToast(t.bookings.bookingError, 'error');
+      showToast(error instanceof Error ? error.message : t.bookings.bookingError, 'error');
     } finally {
       setLoading(false);
     }
@@ -359,6 +418,140 @@ export default function BookingForm() {
                 placeholder={t.bookings.instructionsPlaceholder}
                 style={{ ...inputStyle, resize: 'vertical' }}
               />
+            </div>
+
+            <div style={{
+              background: '#f0f9ff',
+              border: '2px solid #0ea5e9',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '24px'
+            }}>
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                marginBottom: isRecurring ? '20px' : '0'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={isRecurring}
+                  onChange={(e) => setIsRecurring(e.target.checked)}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    marginRight: '12px',
+                    cursor: 'pointer',
+                    accentColor: '#0ea5e9'
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '4px' }}>
+                    Make this a recurring booking
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    Automatically schedule multiple bookings on a regular basis
+                  </div>
+                </div>
+              </label>
+
+              {isRecurring && (
+                <div style={{ borderTop: '1px solid #bae6fd', paddingTop: '20px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={labelStyle}>Frequency</label>
+                    <select
+                      value={recurringOptions.frequency}
+                      onChange={(e) => setRecurringOptions({ ...recurringOptions, frequency: e.target.value as 'daily' | 'weekly' | 'monthly' })}
+                      style={inputStyle}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+
+                  {recurringOptions.frequency === 'weekly' && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={labelStyle}>Days of the week</label>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => handleDayToggle(index)}
+                            style={{
+                              padding: '8px 12px',
+                              background: recurringOptions.days_of_week.includes(index) ? '#0ea5e9' : 'white',
+                              color: recurringOptions.days_of_week.includes(index) ? 'white' : '#64748b',
+                              border: `2px solid ${recurringOptions.days_of_week.includes(index) ? '#0ea5e9' : '#e2e8f0'}`,
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={labelStyle}>Ends</label>
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          checked={recurringOptions.end_type === 'date'}
+                          onChange={() => setRecurringOptions({ ...recurringOptions, end_type: 'date' })}
+                          style={{ marginRight: '8px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '14px' }}>On date</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          checked={recurringOptions.end_type === 'occurrences'}
+                          onChange={() => setRecurringOptions({ ...recurringOptions, end_type: 'occurrences' })}
+                          style={{ marginRight: '8px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '14px' }}>After number of times</span>
+                      </label>
+                    </div>
+
+                    {recurringOptions.end_type === 'date' ? (
+                      <input
+                        type="date"
+                        value={recurringOptions.end_date}
+                        onChange={(e) => setRecurringOptions({ ...recurringOptions, end_date: e.target.value })}
+                        min={formData.scheduled_date || new Date().toISOString().split('T')[0]}
+                        style={inputStyle}
+                      />
+                    ) : (
+                      <input
+                        type="number"
+                        value={recurringOptions.max_occurrences}
+                        onChange={(e) => setRecurringOptions({ ...recurringOptions, max_occurrences: parseInt(e.target.value) || 1 })}
+                        min="1"
+                        max="100"
+                        placeholder="Number of occurrences"
+                        style={inputStyle}
+                      />
+                    )}
+                  </div>
+
+                  <div style={{
+                    background: 'rgba(14, 165, 233, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    color: '#0369a1'
+                  }}>
+                    <strong>Note:</strong> Up to 10 future bookings will be created initially. As bookings are completed, new ones will be generated automatically.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{
