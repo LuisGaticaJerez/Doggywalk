@@ -267,6 +267,7 @@ export const en = {
     service: 'Service',
     price: 'Price',
     noBookings: 'No bookings found',
+    cancel: 'Cancel Booking',
     cancelBooking: 'Cancel Booking',
     cancelConfirm: 'Are you sure you want to cancel this booking?',
     subtitle: 'View and manage your service bookings',

@@ -269,6 +269,7 @@ export const zh: Translations = {
     service: '服务',
     price: '价格',
     noBookings: '未找到预订',
+    cancel: '取消预订',
     cancelBooking: '取消预订',
     cancelConfirm: '您确定要取消这个预订吗？',
     subtitle: '查看和管理您的服务预订',

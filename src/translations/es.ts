@@ -269,6 +269,7 @@ export const es: Translations = {
     service: 'Servicio',
     price: 'Precio',
     noBookings: 'No se encontraron reservas',
+    cancel: 'Cancelar Reserva',
     cancelBooking: 'Cancelar Reserva',
     cancelConfirm: '¿Estás seguro de que quieres cancelar esta reserva?',
     subtitle: 'Ver y administrar tus reservas de servicios',

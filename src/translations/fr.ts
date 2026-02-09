@@ -269,6 +269,7 @@ export const fr: Translations = {
     service: 'Service',
     price: 'Prix',
     noBookings: 'Aucune réservation trouvée',
+    cancel: 'Annuler la réservation',
     cancelBooking: 'Annuler la réservation',
     cancelConfirm: 'Êtes-vous sûr de vouloir annuler cette réservation?',
     subtitle: 'Voir et gérer vos réservations de services',

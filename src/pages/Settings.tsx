@@ -8,6 +8,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { requestNotificationPermission, savePushToken, checkNotificationStatus } from '../utils/pushNotifications';
 
 export default function Settings() {
   const { profile, refreshProfile } = useAuth();
@@ -20,6 +21,12 @@ export default function Settings() {
     phone: '',
     avatar_url: ''
   });
+  const [pushNotificationStatus, setPushNotificationStatus] = useState<{
+    supported: boolean;
+    permission: NotificationPermission;
+    hasToken: boolean;
+  }>({ supported: false, permission: 'default', hasToken: false });
+  const [enablingPush, setEnablingPush] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -30,6 +37,37 @@ export default function Settings() {
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    checkNotificationStatus().then(status => {
+      setPushNotificationStatus(status);
+    });
+  }, []);
+
+  const handleEnablePushNotifications = async () => {
+    setEnablingPush(true);
+    try {
+      const result = await requestNotificationPermission();
+
+      if (result.granted && result.token) {
+        const saved = await savePushToken(result.token);
+        if (saved) {
+          showToast('Push notifications enabled successfully', 'success');
+          const status = await checkNotificationStatus();
+          setPushNotificationStatus(status);
+        } else {
+          showToast('Failed to save notification token', 'error');
+        }
+      } else {
+        showToast('Notification permission denied', 'error');
+      }
+    } catch (error) {
+      console.error('Error enabling push notifications:', error);
+      showToast('Failed to enable push notifications', 'error');
+    } finally {
+      setEnablingPush(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +168,63 @@ export default function Settings() {
               maxSizeMB={3}
               disabled={loading}
             />
+          </div>
+
+          <div style={{
+            background: '#f8fafc',
+            padding: '16px',
+            borderRadius: '8px',
+            marginBottom: '24px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>
+              Push Notifications
+            </h3>
+            {!pushNotificationStatus.supported ? (
+              <p style={{ fontSize: '14px', color: '#64748b' }}>
+                Your browser does not support push notifications
+              </p>
+            ) : pushNotificationStatus.hasToken ? (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    background: '#10b981'
+                  }} />
+                  <span style={{ fontSize: '14px', color: '#10b981', fontWeight: '500' }}>
+                    Enabled
+                  </span>
+                </div>
+                <p style={{ fontSize: '14px', color: '#64748b' }}>
+                  You will receive notifications for bookings, messages, and updates
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>
+                  Enable push notifications to stay updated about your bookings and messages
+                </p>
+                <button
+                  type="button"
+                  onClick={handleEnablePushNotifications}
+                  disabled={enablingPush}
+                  style={{
+                    padding: '10px 16px',
+                    background: enablingPush ? '#94a3b8' : '#0ea5e9',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: enablingPush ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {enablingPush ? 'Enabling...' : 'Enable Notifications'}
+                </button>
+              </div>
+            )}
           </div>
 
           <div style={{

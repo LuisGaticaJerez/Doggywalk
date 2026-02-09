@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Booking } from '../types';
 import { getStatusColor } from '../utils/statusColors';
+import { calculateCancellationRefund, cancelBookingWithRefund, CancellationResult } from '../utils/cancellationLogic';
 
 interface BookingWithDetails extends Booking {
   pets?: { name: string };
@@ -26,6 +27,19 @@ export default function Bookings() {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled'>('all');
+  const [cancelModal, setCancelModal] = useState<{
+    open: boolean;
+    bookingId: string | null;
+    cancellationInfo: CancellationResult | null;
+    reason: string;
+    processing: boolean;
+  }>({
+    open: false,
+    bookingId: null,
+    cancellationInfo: null,
+    reason: '',
+    processing: false,
+  });
 
   useEffect(() => {
     loadBookings();
@@ -61,6 +75,43 @@ export default function Bookings() {
       console.error('Error loading bookings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenCancelModal = async (bookingId: string) => {
+    const cancellationInfo = await calculateCancellationRefund(bookingId);
+    setCancelModal({
+      open: true,
+      bookingId,
+      cancellationInfo,
+      reason: '',
+      processing: false,
+    });
+  };
+
+  const handleCancelBooking = async () => {
+    if (!cancelModal.bookingId || !cancelModal.reason.trim()) {
+      showToast('Please provide a reason for cancellation', 'error');
+      return;
+    }
+
+    setCancelModal(prev => ({ ...prev, processing: true }));
+
+    const result = await cancelBookingWithRefund(cancelModal.bookingId, cancelModal.reason);
+
+    if (result.success) {
+      showToast(result.message, 'success');
+      await loadBookings();
+      setCancelModal({
+        open: false,
+        bookingId: null,
+        cancellationInfo: null,
+        reason: '',
+        processing: false,
+      });
+    } else {
+      showToast(result.message, 'error');
+      setCancelModal(prev => ({ ...prev, processing: false }));
     }
   };
 
@@ -534,11 +585,194 @@ export default function Bookings() {
                     💬 {t.chat?.openChat || 'Open Chat'}
                   </Link>
                 )}
+
+                {profile?.role === 'owner' && (booking.status === 'pending' || booking.status === 'accepted') && (
+                  <button
+                    onClick={() => handleOpenCancelModal(booking.id)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      background: 'white',
+                      color: '#ef4444',
+                      border: '1px solid #ef4444',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      marginTop: '8px'
+                    }}
+                  >
+                    {t.bookings.cancel || 'Cancel Booking'}
+                  </button>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {cancelModal.open && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '16px' }}>
+              Cancel Booking
+            </h2>
+
+            {cancelModal.cancellationInfo ? (
+              <>
+                {cancelModal.cancellationInfo.canCancel ? (
+                  <>
+                    <div style={{
+                      background: '#f0f9ff',
+                      border: '1px solid #0ea5e9',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      marginBottom: '16px'
+                    }}>
+                      <p style={{ fontSize: '14px', color: '#0369a1', marginBottom: '8px' }}>
+                        <strong>Policy:</strong> {cancelModal.cancellationInfo.policyName}
+                      </p>
+                      <p style={{ fontSize: '14px', color: '#0369a1', marginBottom: '8px' }}>
+                        <strong>Refund:</strong> {cancelModal.cancellationInfo.refundPercentage}% (${cancelModal.cancellationInfo.refundAmount.toFixed(2)})
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#64748b' }}>
+                        {cancelModal.cancellationInfo.reason}
+                      </p>
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        marginBottom: '8px',
+                        color: '#334155',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}>
+                        Reason for cancellation *
+                      </label>
+                      <textarea
+                        value={cancelModal.reason}
+                        onChange={(e) => setCancelModal(prev => ({ ...prev, reason: e.target.value }))}
+                        placeholder="Please provide a reason for cancelling this booking..."
+                        rows={4}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          outline: 'none',
+                          resize: 'vertical'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        onClick={handleCancelBooking}
+                        disabled={cancelModal.processing || !cancelModal.reason.trim()}
+                        style={{
+                          flex: 1,
+                          padding: '12px',
+                          background: cancelModal.processing || !cancelModal.reason.trim() ? '#94a3b8' : '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          cursor: cancelModal.processing || !cancelModal.reason.trim() ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {cancelModal.processing ? 'Processing...' : 'Confirm Cancellation'}
+                      </button>
+                      <button
+                        onClick={() => setCancelModal({ open: false, bookingId: null, cancellationInfo: null, reason: '', processing: false })}
+                        disabled={cancelModal.processing}
+                        style={{
+                          flex: 1,
+                          padding: '12px',
+                          background: 'white',
+                          color: '#64748b',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          cursor: cancelModal.processing ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        Keep Booking
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      background: '#fef2f2',
+                      border: '1px solid #ef4444',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      marginBottom: '16px'
+                    }}>
+                      <p style={{ fontSize: '14px', color: '#991b1b' }}>
+                        {cancelModal.cancellationInfo.reason}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setCancelModal({ open: false, bookingId: null, cancellationInfo: null, reason: '', processing: false })}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: '#0ea5e9',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Close
+                    </button>
+                  </>
+                )}
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '4px solid #e2e8f0',
+                  borderTopColor: '#0ea5e9',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto'
+                }} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

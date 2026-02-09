@@ -27,6 +27,8 @@ const ProviderOnboarding = lazy(() => import('./pages/ProviderOnboarding'))
 const ManageServices = lazy(() => import('./pages/ManageServices'))
 const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
 const IdentityVerificationPage = lazy(() => import('./pages/IdentityVerificationPage'))
+const Support = lazy(() => import('./pages/Support'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 function App() {
   return (
@@ -149,6 +151,18 @@ function App() {
           <Route path="/chat" element={
             <ProtectedRoute>
               <Chat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/support" element={
+            <ProtectedRoute>
+              <Support />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           } />
                 </Routes>

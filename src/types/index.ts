@@ -9,6 +9,7 @@ export interface Profile {
   identity_verification_status: string;
   onboarding_completed: boolean;
   business_type: 'individual' | 'business';
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
