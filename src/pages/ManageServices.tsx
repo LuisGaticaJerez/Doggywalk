@@ -6,7 +6,7 @@ import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import ImageUpload from '../components/ImageUpload';
 
-type ServiceType = 'walker' | 'hotel' | 'vet';
+type ServiceType = 'walker' | 'hotel' | 'vet' | 'grooming';
 
 interface ServiceCatalog {
   id: string;
@@ -241,6 +241,8 @@ export default function ManageServices() {
         return '🏨';
       case 'vet':
         return '⚕️';
+      case 'grooming':
+        return '✂️';
     }
   };
 
@@ -252,6 +254,8 @@ export default function ManageServices() {
         return 'Hotel';
       case 'vet':
         return 'Veterinaria';
+      case 'grooming':
+        return 'Peluquería';
     }
   };
 
@@ -514,11 +518,15 @@ export default function ManageServices() {
                     }}
                   >
                     {profile?.business_type === 'individual' ? (
-                      <option value="walker">🚶 Paseador</option>
+                      <>
+                        <option value="walker">🚶 Paseador</option>
+                        <option value="grooming">✂️ Peluquería</option>
+                      </>
                     ) : (
                       <>
                         <option value="hotel">🏨 Hotel</option>
                         <option value="vet">⚕️ Veterinaria</option>
+                        <option value="grooming">✂️ Peluquería</option>
                       </>
                     )}
                   </select>

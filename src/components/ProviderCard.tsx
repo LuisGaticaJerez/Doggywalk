@@ -175,7 +175,12 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
         fontSize: '4rem',
         position: 'relative'
       }}>
-        {!coverPhoto && (provider.service_type === 'walker' ? '🐕' : provider.service_type === 'hotel' ? '🏨' : '🩺')}
+        {!coverPhoto && (
+          provider.service_type === 'walker' ? '🐕' :
+          provider.service_type === 'hotel' ? '🏨' :
+          provider.service_type === 'grooming' ? '✂️' :
+          '🩺'
+        )}
         {(provider.avg_rating && provider.avg_rating > 0) && (
           <div style={{
             position: 'absolute',
@@ -212,8 +217,11 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
               fontWeight: '600',
               textTransform: 'capitalize'
             }}>
-              {provider.service_type === 'walker' ? '🚶 ' : provider.service_type === 'hotel' ? '🏨 ' : '🩺 '}
-              {provider.service_type}
+              {provider.service_type === 'walker' ? '🚶 ' :
+               provider.service_type === 'hotel' ? '🏨 ' :
+               provider.service_type === 'grooming' ? '✂️ ' :
+               '🩺 '}
+              {(t.search as any)[provider.service_type] || provider.service_type}
             </span>
           </div>
           <div style={{ textAlign: 'right' }}>

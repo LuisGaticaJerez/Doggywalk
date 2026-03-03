@@ -22,7 +22,7 @@ export default function SearchServices() {
   const { t } = useI18n();
   const [providers, setProviders] = useState<PetMasterWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet'>('all');
+  const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet' | 'grooming'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -342,6 +342,23 @@ export default function SearchServices() {
               }}
             >
               🩺 {t.search.veterinary}
+            </button>
+            <button
+              onClick={() => setServiceType('grooming')}
+              style={{
+                padding: '10px 24px',
+                background: serviceType === 'grooming' ? 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)' : 'white',
+                color: serviceType === 'grooming' ? 'white' : '#64748b',
+                border: `2px solid ${serviceType === 'grooming' ? '#FF7F7F' : '#e2e8f0'}`,
+                borderRadius: '25px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: serviceType === 'grooming' ? '0 4px 12px rgba(255, 127, 127, 0.3)' : 'none'
+              }}
+            >
+              ✂️ {t.search.grooming || 'Grooming'}
             </button>
           </div>
 

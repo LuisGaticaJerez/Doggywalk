@@ -93,6 +93,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
     walker: createCustomIcon('🚶', 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)'),
     hotel: createCustomIcon('🏨', 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)'),
     vet: createCustomIcon('🩺', 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)'),
+    grooming: createCustomIcon('✂️', 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)'),
     default: createCustomIcon('🐾', 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)')
   }), []);
 
@@ -104,6 +105,8 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
         return { emoji: '🏨', color: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)', icon: providerIcons.hotel };
       case 'vet':
         return { emoji: '🩺', color: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)', icon: providerIcons.vet };
+      case 'grooming':
+        return { emoji: '✂️', color: 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)', icon: providerIcons.grooming };
       default:
         return { emoji: '🐾', color: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)', icon: providerIcons.default };
     }

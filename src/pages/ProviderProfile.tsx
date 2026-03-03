@@ -20,7 +20,7 @@ export default function ProviderProfile() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     bio: '',
-    service_type: 'walker' as 'walker' | 'hotel' | 'vet',
+    service_type: 'walker' as 'walker' | 'hotel' | 'vet' | 'grooming',
     hourly_rate: '15',
     price_per_night: '',
     service_radius: '5000',
@@ -151,6 +151,7 @@ export default function ProviderProfile() {
               <option value="walker">{t.provider.dogWalker}</option>
               <option value="hotel">{t.provider.petHotel}</option>
               <option value="vet">{t.provider.veterinarian}</option>
+              <option value="grooming">{t.search.grooming}</option>
             </select>
           </div>
 

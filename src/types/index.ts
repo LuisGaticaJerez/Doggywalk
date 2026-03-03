@@ -42,7 +42,7 @@ export interface PetMaster {
   rating: number;
   total_walks: number;
   verified: boolean;
-  service_type: 'walker' | 'hotel' | 'vet';
+  service_type: 'walker' | 'hotel' | 'vet' | 'grooming';
   specialties: string[];
   facilities: string[];
   capacity: number;
