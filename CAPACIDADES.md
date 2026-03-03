@@ -1,8 +1,21 @@
 # Documentación de Capacidades - DoggyWalk
 
+**Versión:** 2.0.0
+**Actualizado:** 3 de marzo, 2026
+
 ## Resumen Ejecutivo
 
-DoggyWalk es una plataforma completa de servicios para mascotas que conecta dueños de mascotas con proveedores de servicios profesionales. La aplicación incluye funcionalidades para paseadores de perros, hoteles para mascotas y servicios veterinarios, con un sistema robusto de pagos, calificaciones y seguridad.
+DoggyWalk es una plataforma completa de servicios para mascotas que conecta dueños de mascotas con proveedores de servicios profesionales. La aplicación incluye funcionalidades avanzadas como:
+
+- **Reservas recurrentes** (diarias, semanales, mensuales)
+- **Chat en tiempo real** con compartir fotos
+- **Notificaciones push**
+- **Verificación de identidad** con aprobación admin
+- **Multi-servicios** por proveedor (7 tipos diferentes)
+- **Catálogo de servicios** detallado
+- **Sistema de cancelación inteligente**
+- **Dashboard administrativo**
+- **Soporte PWA** con service worker
 
 ---
 
@@ -414,32 +427,368 @@ VITE_SUPABASE_ANON_KEY      # Clave pública de Supabase
 
 ---
 
-## 15. Próximos Pasos Sugeridos
+## 15. Sistema de Reservas Recurrentes (NUEVO)
 
-1. **Desarrollo de UI/UX:**
-   - Diseñar y desarrollar pantallas de usuario
-   - Implementar pantallas de proveedor de servicios
-   - Crear flujos de reserva y pago
+### 15.1 Configuración de Series
+- **Frecuencias soportadas:**
+  - Diaria: Servicio todos los días
+  - Semanal: Días específicos (Lun, Mié, Vie, etc.)
+  - Mensual: Misma fecha cada mes
+- **Condiciones de finalización:**
+  - Fecha de fin específica
+  - Número máximo de ocurrencias
+  - Ambas condiciones combinadas
 
-2. **Integraciones:**
-   - Integración completa de Stripe
-   - Implementación de Apple Pay/Google Pay
-   - Sistema de notificaciones push
-   - Mapas y geolocalización
+### 15.2 Generación Automática
+- Sistema genera hasta 10 reservas futuras por serie
+- Auto-generación de nuevas reservas cuando se completan
+- Solo genera reservas hasta 3 meses adelante
+- Respeta días de la semana (para frecuencia semanal)
 
-3. **Funcionalidades Adicionales:**
-   - Chat en tiempo real entre usuarios
-   - Sistema de favoritos
-   - Historial de servicios
-   - Dashboard administrativo
+### 15.3 Gestión de Series
+- Vista dedicada de todas las series activas
+- Próxima reserva de cada serie
+- Estadísticas (total de reservas, completadas, pendientes)
+- Cancelación de serie completa (solo afecta reservas futuras)
 
-4. **Mobile:**
-   - Aplicación nativa para iOS
-   - Aplicación nativa para Android
-   - O continuar con web app responsive
+### 15.4 Tabla de Base de Datos
+```sql
+recurring_booking_series
+- id, owner_id, pet_master_id
+- frequency (daily, weekly, monthly)
+- days_of_week (array para semanal)
+- time_of_day, duration_minutes
+- end_date, max_occurrences
+- status (active, paused, cancelled, completed)
+```
+
+---
+
+## 16. Sistema de Chat en Tiempo Real (NUEVO)
+
+### 16.1 Mensajería
+- Chat en tiempo real entre dueño y proveedor
+- Contexto de reserva siempre visible
+- Historial de mensajes preservado
+- Indicadores de lectura y timestamps
+
+### 16.2 Compartir Fotos
+- Subida de fotos en conversación
+- Almacenamiento en Supabase Storage
+- Previsualización de imágenes
+- Galería en el chat
+
+### 16.3 Implementación Técnica
+- Supabase Realtime subscriptions
+- Hook personalizado `useChat`
+- Actualizaciones optimistas de UI
+- Auto-scroll a mensajes nuevos
+
+### 16.4 Tablas de Base de Datos
+```sql
+chat_messages
+- id, booking_id, sender_id
+- message_text, sent_at, read_at
+
+chat_attachments
+- id, message_id, file_url
+- file_type, file_size
+```
+
+---
+
+## 17. Sistema de Notificaciones Push (NUEVO)
+
+### 17.1 Tipos de Notificaciones
+- Nuevas solicitudes de reserva (proveedores)
+- Reservas aceptadas/rechazadas (dueños)
+- Servicio iniciado/completado
+- Nuevos mensajes de chat
+- Actualizaciones de series recurrentes
+- Confirmaciones de pago
+- Notificaciones de cancelación
+
+### 17.2 Implementación
+- Servicio Expo Push Notifications
+- Edge Function de Supabase para envío
+- Gestión de tokens en base de datos
+- Preferencias por usuario
+
+### 17.3 Tabla de Base de Datos
+```sql
+notifications
+- id, user_id, type, title, message
+- data (JSON), read, sent_at
+- push_token
+```
+
+### 17.4 Edge Function
+- `send-push-notification` - Envío de notificaciones
+- Integración con Expo API
+- Manejo de errores y reintentos
+
+---
+
+## 18. Verificación de Identidad (NUEVO)
+
+### 18.1 Proceso de Verificación
+1. Proveedor sube documento de ID (frente y reverso)
+2. Proveedor toma selfie de verificación
+3. Admin revisa documentos en dashboard
+4. Admin aprueba o rechaza con razón
+5. Proveedor obtiene badge de verificado
+
+### 18.2 Tipos de Documentos
+- Cédula de identidad nacional
+- Pasaporte
+- Licencia de conducir
+
+### 18.3 Dashboard Administrativo
+- Ver verificaciones pendientes
+- Visualizar documentos subidos
+- Aprobar/rechazar con notas
+- Historial de verificaciones
+
+### 18.4 Seguridad
+- Documentos en Supabase Storage seguro
+- RLS en registros de verificación
+- Acceso solo para admins
+- Logs de todas las acciones
+
+### 18.5 Tabla de Base de Datos
+```sql
+identity_verifications
+- id, user_id, document_type
+- front_image_url, back_image_url, selfie_url
+- status (pending, in_review, approved, rejected)
+- rejection_reason, reviewed_by, reviewed_at
+```
+
+---
+
+## 19. Multi-Servicios por Proveedor (NUEVO)
+
+### 19.1 Tipos de Servicios Disponibles
+Los proveedores pueden ofrecer múltiples servicios simultáneamente:
+- **Dog Walker** - Paseos de perros
+- **Pet Sitter** - Cuidado en casa
+- **Groomer** - Servicios de grooming
+- **Trainer** - Entrenamiento de mascotas
+- **Veterinarian** - Servicios veterinarios
+- **Daycare** - Guardería de día
+- **Pet Hotel** - Hotel para mascotas
+
+### 19.2 Gestión de Servicios
+- Crear ofertas de servicio detalladas
+- Precio personalizado por servicio
+- Descripciones específicas
+- Habilitar/deshabilitar individualmente
+- Fotos por servicio
+
+### 19.3 Características Específicas por Servicio
+
+**Para Hoteles:**
+- Amenidades (AC, calefacción, piscina, cámaras)
+- Áreas de juego interiores/exteriores
+- Supervisión 24/7
+- Alojamiento individual vs grupal
+
+**Para Veterinarios:**
+- Servicios disponibles (vacunas, cirugía, dental)
+- Servicio de emergencia
+- Especializaciones
+- Equipamiento e instalaciones
+
+### 19.4 Tablas de Base de Datos
+```sql
+provider_services
+- id, pet_master_id, service_type
+- service_name, description
+- price, duration_minutes
+- is_active
+
+hotel_amenities
+- pet_master_id, has_ac, has_heating
+- has_pool, has_cameras, etc.
+
+vet_services
+- pet_master_id, has_consultations
+- has_vaccinations, has_surgery, etc.
+```
+
+---
+
+## 20. Sistema de Cancelación Inteligente (NUEVO)
+
+### 20.1 Política de Reembolsos
+- **Más de 24 horas:** 100% de reembolso
+- **6-24 horas antes:** 50% de reembolso
+- **Menos de 6 horas:** Sin reembolso
+
+### 20.2 Características
+- Cálculo automático de reembolso
+- Tracking de razón de cancelación
+- Compensación del proveedor
+- Actualización de estado de reserva
+- Notificación a ambas partes
+
+### 20.3 Tabla de Base de Datos
+```sql
+cancellations
+- id, booking_id, cancelled_by
+- cancellation_reason
+- refund_amount, refund_percentage
+- cancelled_at
+```
+
+---
+
+## 21. Dashboard Administrativo (NUEVO)
+
+### 21.1 Gestión de Plataforma
+- Ver todos los usuarios y reservas
+- Verificar identidades de proveedores
+- Monitorear estadísticas de plataforma
+- Gestionar contenido y disputas
+- Configuración del sistema
+
+### 21.2 Métricas Clave
+- Total de usuarios (dueños/proveedores)
+- Total de reservas (por estado)
+- Tracking de ingresos
+- Tendencias de crecimiento de usuarios
+- Utilización de servicios
+
+### 21.3 Roles de Admin
+- Campo `is_admin` en tabla profiles
+- Acceso protegido por RLS
+- Logs de acciones administrativas
+
+---
+
+## 22. Almacenamiento de Fotos (NUEVO)
+
+### 22.1 Buckets de Storage
+- `pet-photos` - Fotos de mascotas
+- `service-photos` - Fotos de servicios de proveedores
+- `walk-photos` - Fotos tomadas durante paseos
+- `verification-documents` - Documentos de identidad
+- `chat-attachments` - Archivos compartidos en chat
+
+### 22.2 Características
+- Subida directa desde cliente
+- URLs seguras con tokens
+- Políticas RLS en buckets
+- Compresión automática
+- Gestión de tamaño y formato
+
+### 22.3 Tablas Relacionadas
+```sql
+service_photos
+- id, pet_master_id, photo_url
+- caption, display_order, photo_type
+
+walk_photos
+- id, booking_id, photo_url
+- taken_at, uploaded_by
+```
+
+---
+
+## 23. Progressive Web App (PWA) (NUEVO)
+
+### 23.1 Características PWA
+- Service Worker para caché offline
+- Instalable en dispositivos móviles
+- Experiencia similar a app nativa
+- Carga rápida con caché
+- Actualización automática
+
+### 23.2 Implementación
+- `public/sw.js` - Service worker
+- Manifest para instalación
+- Estrategias de caché
+- Sincronización en background
+
+---
+
+## 24. Características Técnicas Actualizadas
+
+### 24.1 Stack Tecnológico
+- **Frontend:** React 18 + TypeScript
+- **Build Tool:** Vite
+- **Routing:** React Router DOM
+- **Mapas:** React Leaflet + Leaflet
+- **Base de Datos:** Supabase (PostgreSQL)
+- **Autenticación:** Supabase Auth
+- **Storage:** Supabase Storage
+- **Realtime:** Supabase Realtime
+- **Edge Functions:** Supabase Functions
+- **Hosting:** Netlify/Vercel ready
+
+### 24.2 Base de Datos
+- **PostgreSQL** con extensiones de Supabase
+- **30+ tablas** interrelacionadas
+- **14 migraciones** aplicadas exitosamente
+- **RLS habilitado** en todas las tablas
+- **Índices optimizados** para consultas frecuentes
+
+### 24.3 Internacionalización
+- **5 idiomas completos:** EN, ES, PT, FR, ZH
+- **282 claves** de traducción por idioma
+- **Preferencia persistente** en base de datos
+- **Cambio en tiempo real**
+
+---
+
+## 25. Estado del Proyecto Actualizado
+
+### ✅ Completado
+- Base de datos completa con 30+ tablas
+- Sistema de autenticación y autorización
+- Sistema de perfiles y verificación de identidad
+- Gestión de mascotas con fotos
+- Siete tipos de servicios para proveedores
+- Multi-servicios por proveedor
+- Sistema de reservas completo
+- **Reservas recurrentes (diarias/semanales/mensuales)**
+- Sistema de pagos robusto (Stripe + Wallets)
+- Sistema de calificaciones detallado con atributos
+- Sistema de suscripciones
+- **Chat en tiempo real con compartir fotos**
+- **Sistema de notificaciones push**
+- **Verificación de identidad con aprobación admin**
+- **Sistema de cancelación inteligente**
+- **Dashboard administrativo**
+- **Almacenamiento de fotos en múltiples buckets**
+- **Soporte PWA con service worker**
+- Row Level Security en todas las tablas
+- Optimizaciones de rendimiento
+- Internacionalización completa (5 idiomas)
+- Aplicación React lista para producción
+
+### 🚀 Listo para Producción
+- Configuración completa de frontend
+- Base de datos lista y optimizada
+- Autenticación y autorización configuradas
+- Build de producción funcional y optimizado
+- Edge Functions deployadas
+- Storage configurado con políticas
+- Realtime subscriptions activas
 
 ---
 
 ## Conclusión
 
-DoggyWalk es una plataforma robusta y completa para servicios de mascotas, con una arquitectura sólida, seguridad implementada correctamente, y preparada para escalar. La base de datos está diseñada para soportar múltiples tipos de servicios, sistemas de pago complejos, y un sistema de calificaciones detallado que proporciona transparencia y confianza a los usuarios.
+DoggyWalk es una plataforma robusta y completa para servicios de mascotas, con una arquitectura sólida, seguridad implementada correctamente, y preparada para escalar. La versión 2.0 incluye funcionalidades avanzadas como:
+
+- Sistema completo de reservas recurrentes
+- Chat en tiempo real con compartir multimedia
+- Notificaciones push para mantener usuarios informados
+- Verificación de identidad para confianza y seguridad
+- Multi-servicios permitiendo proveedores versátiles
+- Dashboard administrativo para gestión de plataforma
+- PWA support para experiencia móvil mejorada
+- Sistema de cancelación inteligente con reembolsos automáticos
+
+La plataforma está lista para despliegue en producción y ofrece una experiencia completa tanto para dueños de mascotas como para proveedores de servicios.
