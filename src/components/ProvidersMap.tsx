@@ -90,23 +90,23 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
     : [4.7110, -74.0721];
 
   const providerIcons = useMemo(() => ({
-    walker: createCustomIcon('🚶', 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)'),
-    hotel: createCustomIcon('🏨', 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)'),
-    vet: createCustomIcon('🩺', 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)'),
-    grooming: createCustomIcon('✂️', 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)'),
+    walker: createCustomIcon('🚶', 'linear-gradient(135deg, #10B981 0%, #059669 100%)'),
+    hotel: createCustomIcon('🏨', 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'),
+    vet: createCustomIcon('🩺', 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)'),
+    grooming: createCustomIcon('✂️', 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)'),
     default: createCustomIcon('🐾', 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)')
   }), []);
 
   const getProviderIcon = (serviceType: string) => {
     switch (serviceType) {
       case 'walker':
-        return { emoji: '🚶', color: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)', icon: providerIcons.walker };
+        return { emoji: '🚶', color: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', icon: providerIcons.walker };
       case 'hotel':
-        return { emoji: '🏨', color: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)', icon: providerIcons.hotel };
+        return { emoji: '🏨', color: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)', icon: providerIcons.hotel };
       case 'vet':
-        return { emoji: '🩺', color: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)', icon: providerIcons.vet };
+        return { emoji: '🩺', color: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)', icon: providerIcons.vet };
       case 'grooming':
-        return { emoji: '✂️', color: 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)', icon: providerIcons.grooming };
+        return { emoji: '✂️', color: 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)', icon: providerIcons.grooming };
       default:
         return { emoji: '🐾', color: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)', icon: providerIcons.default };
     }

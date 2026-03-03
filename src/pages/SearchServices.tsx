@@ -296,15 +296,15 @@ export default function SearchServices() {
               onClick={() => setServiceType('walker')}
               style={{
                 padding: '10px 24px',
-                background: serviceType === 'walker' ? 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' : 'white',
+                background: serviceType === 'walker' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'white',
                 color: serviceType === 'walker' ? 'white' : '#64748b',
-                border: `2px solid ${serviceType === 'walker' ? '#4CAF50' : '#e2e8f0'}`,
+                border: `2px solid ${serviceType === 'walker' ? '#10B981' : '#e2e8f0'}`,
                 borderRadius: '25px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'walker' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none'
+                boxShadow: serviceType === 'walker' ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none'
               }}
             >
               🚶 {t.search.walker}
@@ -313,15 +313,15 @@ export default function SearchServices() {
               onClick={() => setServiceType('hotel')}
               style={{
                 padding: '10px 24px',
-                background: serviceType === 'hotel' ? 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)' : 'white',
+                background: serviceType === 'hotel' ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)' : 'white',
                 color: serviceType === 'hotel' ? 'white' : '#64748b',
-                border: `2px solid ${serviceType === 'hotel' ? '#42A5F5' : '#e2e8f0'}`,
+                border: `2px solid ${serviceType === 'hotel' ? '#0891B2' : '#e2e8f0'}`,
                 borderRadius: '25px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(66, 165, 245, 0.3)' : 'none'
+                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(8, 145, 178, 0.3)' : 'none'
               }}
             >
               🏨 {t.search.boarding}
@@ -330,15 +330,15 @@ export default function SearchServices() {
               onClick={() => setServiceType('vet')}
               style={{
                 padding: '10px 24px',
-                background: serviceType === 'vet' ? 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)' : 'white',
+                background: serviceType === 'vet' ? 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)' : 'white',
                 color: serviceType === 'vet' ? 'white' : '#64748b',
-                border: `2px solid ${serviceType === 'vet' ? '#FF6B9D' : '#e2e8f0'}`,
+                border: `2px solid ${serviceType === 'vet' ? '#06B6D4' : '#e2e8f0'}`,
                 borderRadius: '25px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'vet' ? '0 4px 12px rgba(255, 107, 157, 0.3)' : 'none'
+                boxShadow: serviceType === 'vet' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none'
               }}
             >
               🩺 {t.search.veterinary}
@@ -347,15 +347,15 @@ export default function SearchServices() {
               onClick={() => setServiceType('grooming')}
               style={{
                 padding: '10px 24px',
-                background: serviceType === 'grooming' ? 'linear-gradient(135deg, #FF7F7F 0%, #FF9999 100%)' : 'white',
+                background: serviceType === 'grooming' ? 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)' : 'white',
                 color: serviceType === 'grooming' ? 'white' : '#64748b',
-                border: `2px solid ${serviceType === 'grooming' ? '#FF7F7F' : '#e2e8f0'}`,
+                border: `2px solid ${serviceType === 'grooming' ? '#FF8B7F' : '#e2e8f0'}`,
                 borderRadius: '25px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'grooming' ? '0 4px 12px rgba(255, 127, 127, 0.3)' : 'none'
+                boxShadow: serviceType === 'grooming' ? '0 4px 12px rgba(255, 139, 127, 0.3)' : 'none'
               }}
             >
               ✂️ {t.search.grooming || 'Grooming'}
