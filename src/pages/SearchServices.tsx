@@ -16,6 +16,9 @@ interface PetMasterWithProfile extends PetMaster {
   distance?: number;
   avg_rating?: number;
   review_count?: number;
+  provider_services?: Array<{
+    service_type: string;
+  }>;
 }
 
 export default function SearchServices() {
@@ -99,6 +102,9 @@ export default function SearchServices() {
               name,
               subcategory
             )
+          ),
+          provider_services!provider_id (
+            service_type
           )
         `)
         .eq('verified', true);
@@ -502,16 +508,9 @@ export default function SearchServices() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: '24px'
           }}>
-            {filteredProviders.map(provider => {
-              const serviceColors = {
-                walker: { bg: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)', badge: '#E8F5E9', badgeText: '#2E7D32' },
-                hotel: { bg: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)', badge: '#E3F2FD', badgeText: '#1565C0' },
-                vet: { bg: 'linear-gradient(135deg, #FF6B9D 0%, #FE5196 100%)', badge: '#FCE4EC', badgeText: '#C2185B' }
-              };
-              const colors = serviceColors[provider.service_type as keyof typeof serviceColors] || serviceColors.walker;
-
-              return <ProviderCard key={provider.id} provider={provider} colors={colors} />;
-            })}
+            {filteredProviders.map(provider => (
+              <ProviderCard key={provider.id} provider={provider} />
+            ))}
           </div>
         )}
       </div>

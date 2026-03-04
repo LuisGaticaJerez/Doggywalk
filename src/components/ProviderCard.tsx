@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PetMaster } from '../types';
+import ServiceBadge from './ServiceBadge';
+import { getServiceColor } from '../utils/serviceColors';
 
 interface HotelAmenities {
   air_conditioning: boolean;
@@ -47,18 +49,16 @@ interface ProviderWithProfile extends PetMaster {
       subcategory: string;
     } | null;
   }>;
+  provider_services?: Array<{
+    service_type: string;
+  }>;
 }
 
 interface ProviderCardProps {
   provider: ProviderWithProfile;
-  colors: {
-    bg: string;
-    badge: string;
-    badgeText: string;
-  };
 }
 
-export default function ProviderCard({ provider, colors }: ProviderCardProps) {
+export default function ProviderCard({ provider }: ProviderCardProps) {
   const { t } = useI18n();
   const { user } = useAuth();
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
@@ -66,6 +66,10 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
   const [vetServices, setVetServices] = useState<VetServices | null>(null);
   const [todayHours, setTodayHours] = useState<ServiceHours | null>(null);
   const isMountedRef = useRef(true);
+
+  const mainServiceColor = getServiceColor(provider.service_type);
+  const allServices = provider.provider_services?.map(ps => ps.service_type) || [provider.service_type];
+  const uniqueServices = Array.from(new Set(allServices));
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -167,7 +171,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
     >
       <div style={{
         height: '140px',
-        background: coverPhoto ? `url(${coverPhoto}) center/cover` : colors.bg,
+        background: coverPhoto ? `url(${coverPhoto}) center/cover` : mainServiceColor.gradient,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -175,12 +179,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
         fontSize: '4rem',
         position: 'relative'
       }}>
-        {!coverPhoto && (
-          provider.service_type === 'walker' ? '🐕' :
-          provider.service_type === 'hotel' ? '🏨' :
-          provider.service_type === 'grooming' ? '✂️' :
-          '🩺'
-        )}
+        {!coverPhoto && mainServiceColor.emoji}
         {(provider.avg_rating && provider.avg_rating > 0) && (
           <div style={{
             position: 'absolute',
@@ -191,7 +190,7 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
             borderRadius: '20px',
             fontSize: '14px',
             fontWeight: '700',
-            color: colors.badgeText,
+            color: mainServiceColor.text,
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
@@ -199,30 +198,34 @@ export default function ProviderCard({ provider, colors }: ProviderCardProps) {
             ⭐ {provider.avg_rating.toFixed(1)} ({provider.review_count})
           </div>
         )}
+        {uniqueServices.length > 1 && (
+          <div style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '6px',
+            maxWidth: '180px'
+          }}>
+            {uniqueServices.map((serviceType, idx) => (
+              <ServiceBadge key={idx} serviceType={serviceType} size="small" showName={false} />
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-          <div>
+          <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
               {provider.profiles?.full_name || 'Provider'}
             </h3>
-            <span style={{
-              display: 'inline-block',
-              padding: '6px 14px',
-              background: colors.badge,
-              color: colors.badgeText,
-              borderRadius: '20px',
-              fontSize: '13px',
-              fontWeight: '600',
-              textTransform: 'capitalize'
-            }}>
-              {provider.service_type === 'walker' ? '🚶 ' :
-               provider.service_type === 'hotel' ? '🏨 ' :
-               provider.service_type === 'grooming' ? '✂️ ' :
-               '🩺 '}
-              {(t.search as any)[provider.service_type] || provider.service_type}
-            </span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {uniqueServices.map((serviceType, idx) => (
+                <ServiceBadge key={idx} serviceType={serviceType} size="medium" showName={true} />
+              ))}
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             {provider.distance && provider.distance !== Infinity && (

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useI18n } from '../contexts/I18nContext';
+import { getServiceColor } from '../utils/serviceColors';
 
 interface Provider {
   id: string;
@@ -15,6 +16,9 @@ interface Provider {
   rating?: number;
   avg_rating?: number;
   hourly_rate: number | string;
+  provider_services?: Array<{
+    service_type: string;
+  }>;
 }
 
 interface ProvidersMapProps {
@@ -31,23 +35,52 @@ function RecenterMap({ center }: { center: [number, number] }) {
   return null;
 }
 
-const createCustomIcon = (emoji: string, color: string) => {
+const createCustomIcon = (emoji: string, color: string, badges?: string[]) => {
+  const badgesHtml = badges && badges.length > 0 ? `
+    <div style="
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    ">
+      ${badges.map(badge => `
+        <div style="
+          background: white;
+          border: 2px solid ${badge};
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        ">🐾</div>
+      `).join('')}
+    </div>
+  ` : '';
+
   return L.divIcon({
     html: `
-      <div style="
-        background: ${color};
-        width: 40px;
-        height: 40px;
-        border-radius: 50% 50% 50% 0;
-        border: 3px solid white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        transform: rotate(-45deg);
-      ">
-        <span style="transform: rotate(45deg);">${emoji}</span>
+      <div style="position: relative;">
+        <div style="
+          background: ${color};
+          width: 40px;
+          height: 40px;
+          border-radius: 50% 50% 50% 0;
+          border: 3px solid white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          transform: rotate(-45deg);
+        ">
+          <span style="transform: rotate(45deg);">${emoji}</span>
+        </div>
+        ${badgesHtml}
       </div>
     `,
     className: 'custom-marker',
@@ -89,27 +122,16 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
     ? [userLocation.lat, userLocation.lng]
     : [4.7110, -74.0721];
 
-  const providerIcons = useMemo(() => ({
-    walker: createCustomIcon('🚶', 'linear-gradient(135deg, #10B981 0%, #059669 100%)'),
-    hotel: createCustomIcon('🏨', 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'),
-    vet: createCustomIcon('🩺', 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)'),
-    grooming: createCustomIcon('✂️', 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)'),
-    default: createCustomIcon('🐾', 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)')
-  }), []);
+  const getProviderIcon = (provider: Provider) => {
+    const mainColor = getServiceColor(provider.service_type);
+    const allServices = provider.provider_services?.map(ps => ps.service_type) || [provider.service_type];
+    const uniqueServices = Array.from(new Set(allServices));
 
-  const getProviderIcon = (serviceType: string) => {
-    switch (serviceType) {
-      case 'walker':
-        return { emoji: '🚶', color: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', icon: providerIcons.walker };
-      case 'hotel':
-        return { emoji: '🏨', color: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)', icon: providerIcons.hotel };
-      case 'vet':
-        return { emoji: '🩺', color: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)', icon: providerIcons.vet };
-      case 'grooming':
-        return { emoji: '✂️', color: 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)', icon: providerIcons.grooming };
-      default:
-        return { emoji: '🐾', color: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)', icon: providerIcons.default };
-    }
+    const badgeColors = uniqueServices
+      .filter(s => s !== provider.service_type)
+      .map(s => getServiceColor(s).primary);
+
+    return createCustomIcon(mainColor.emoji, mainColor.gradient, badgeColors);
   };
 
   const validProviders = useMemo(
@@ -152,7 +174,10 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
         )}
 
         {validProviders.map((provider) => {
-          const iconData = getProviderIcon(provider.service_type);
+          const icon = getProviderIcon(provider);
+          const mainColor = getServiceColor(provider.service_type);
+          const allServices = provider.provider_services?.map(ps => ps.service_type) || [provider.service_type];
+          const uniqueServices = Array.from(new Set(allServices));
           const lat = typeof provider.latitude === 'number' ? provider.latitude : parseFloat(String(provider.latitude));
           const lng = typeof provider.longitude === 'number' ? provider.longitude : parseFloat(String(provider.longitude));
 
@@ -160,33 +185,49 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
             <Marker
               key={provider.id}
               position={[lat, lng]}
-              icon={iconData.icon}
+              icon={icon}
               eventHandlers={{
                 click: () => onProviderClick(provider.id)
               }}
             >
               <Popup>
-                <div style={{ padding: '8px', minWidth: '200px' }}>
+                <div style={{ padding: '8px', minWidth: '220px' }}>
                   <h3 style={{
                     fontSize: '1.125rem',
                     fontWeight: '700',
                     color: '#1e293b',
                     marginBottom: '8px'
                   }}>
-                    {iconData.emoji} {provider.profiles?.full_name || 'Provider'}
+                    {mainColor.emoji} {provider.profiles?.full_name || 'Provider'}
                   </h3>
                   <div style={{
-                    display: 'inline-block',
-                    padding: '4px 12px',
-                    background: '#FFF9E6',
-                    color: '#8B6914',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    marginBottom: '8px',
-                    textTransform: 'capitalize'
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '4px',
+                    marginBottom: '8px'
                   }}>
-                    {provider.service_type}
+                    {uniqueServices.map((serviceType, idx) => {
+                      const color = getServiceColor(serviceType);
+                      return (
+                        <span
+                          key={idx}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            background: color.light,
+                            color: color.text,
+                            borderRadius: '12px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            border: `1px solid ${color.primary}`
+                          }}
+                        >
+                          {color.emoji} {color.name}
+                        </span>
+                      );
+                    })}
                   </div>
                   <div style={{
                     display: 'flex',
