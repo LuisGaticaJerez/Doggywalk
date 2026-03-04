@@ -30,6 +30,7 @@ export default function ProviderOnboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
 
   const [businessType, setBusinessType] = useState<BusinessType>('individual');
   const [selectedServices, setSelectedServices] = useState<ServiceType[]>([]);
@@ -91,6 +92,45 @@ export default function ProviderOnboarding() {
       },
       () => showToast('Error al obtener ubicación', 'error')
     );
+  };
+
+  const handleGeocodeAddress = async (service: ServiceType) => {
+    const data = servicesData[service];
+    if (!data.address || !data.city) {
+      showToast('Ingresa dirección y ciudad primero', 'error');
+      return;
+    }
+
+    setIsGeocodingLocation(true);
+    try {
+      const query = `${data.address}, ${data.city}, ${data.country || 'Chile'}`;
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'DoggyWalk App'
+          }
+        }
+      );
+
+      const results = await response.json();
+
+      if (results && results.length > 0) {
+        const { lat, lon } = results[0];
+        updateServiceData(service, {
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lon)
+        });
+        showToast('Ubicación encontrada', 'success');
+      } else {
+        showToast('No se pudo encontrar la ubicación', 'error');
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error);
+      showToast('Error al buscar la ubicación', 'error');
+    } finally {
+      setIsGeocodingLocation(false);
+    }
   };
 
   const needsIdentityVerification = () => {
@@ -535,6 +575,38 @@ export default function ProviderOnboarding() {
                         />
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => handleGeocodeAddress(service)}
+                      disabled={isGeocodingLocation}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: isGeocodingLocation ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: isGeocodingLocation ? 'not-allowed' : 'pointer',
+                        boxShadow: isGeocodingLocation ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
+                      }}
+                    >
+                      {isGeocodingLocation ? 'Buscando ubicacion...' : 'Buscar coordenadas desde direccion'}
+                    </button>
+
+                    {servicesData[service].latitude && servicesData[service].longitude && (
+                      <div style={{
+                        padding: '12px',
+                        background: '#F0F9FF',
+                        border: '2px solid #BAE6FD',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        color: '#0C4A6E'
+                      }}>
+                        Ubicacion: {servicesData[service].latitude?.toFixed(6)}, {servicesData[service].longitude?.toFixed(6)}
+                      </div>
+                    )}
 
                     {service === 'walker' && (
                       <>

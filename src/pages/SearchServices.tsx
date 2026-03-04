@@ -31,6 +31,9 @@ export default function SearchServices() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(10);
+  const [showAllServices, setShowAllServices] = useState(false);
+  const [manualLocation, setManualLocation] = useState('');
+  const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
   const isLoadingRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -75,6 +78,38 @@ export default function SearchServices() {
       setLocationError(t.search.geolocationNotSupported);
       // Usar Talcahuano como ubicación predeterminada
       setUserLocation({ lat: -36.7225, lng: -73.1136 });
+    }
+  };
+
+  const handleManualLocationSearch = async () => {
+    if (!manualLocation.trim()) return;
+
+    setIsGeocodingLocation(true);
+    try {
+      // Usar Nominatim (OpenStreetMap) para geocodificar
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocation)}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'DoggyWalk App'
+          }
+        }
+      );
+
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        setUserLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+        setLocationError(null);
+      } else {
+        setLocationError('No se pudo encontrar la ubicación');
+      }
+    } catch (error) {
+      console.error('Error geocoding location:', error);
+      setLocationError('Error al buscar la ubicación');
+    } finally {
+      setIsGeocodingLocation(false);
     }
   };
 
@@ -213,6 +248,8 @@ export default function SearchServices() {
     })();
 
     const matchesDistance = (() => {
+      // Si está activado "mostrar todos", ignorar el filtro de distancia
+      if (showAllServices) return true;
       if (!userLocation || !provider.distance) return true;
       return provider.distance <= maxDistance;
     })();
@@ -225,7 +262,7 @@ export default function SearchServices() {
     })();
 
     return matchesSearch && matchesDistance && matchesAvailability;
-  }), [providers, searchTerm, userLocation, maxDistance]);
+  }), [providers, searchTerm, userLocation, maxDistance, showAllServices]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);
@@ -288,11 +325,71 @@ export default function SearchServices() {
                 borderRadius: '30px',
                 fontSize: '15px',
                 outline: 'none',
-                transition: 'border-color 0.2s'
+                transition: 'border-color 0.2s',
+                marginBottom: '12px'
               }}
               onFocus={(e) => e.currentTarget.style.borderColor = '#FF8C42'}
               onBlur={(e) => e.currentTarget.style.borderColor = '#FFE5B4'}
             />
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="Buscar por ciudad o direccion (ej: Talcahuano, Chile)"
+                value={manualLocation}
+                onChange={(e) => setManualLocation(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleManualLocationSearch()}
+                style={{
+                  flex: 1,
+                  padding: '12px 16px',
+                  border: '2px solid #E0E0E0',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#4CAF50'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#E0E0E0'}
+              />
+              <button
+                onClick={handleManualLocationSearch}
+                disabled={isGeocodingLocation}
+                style={{
+                  padding: '12px 24px',
+                  background: isGeocodingLocation ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: isGeocodingLocation ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: isGeocodingLocation ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isGeocodingLocation ? 'Buscando...' : 'Buscar'}
+              </button>
+              <button
+                onClick={getUserLocation}
+                style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Usar mi ubicacion actual"
+              >
+                Mi ubicacion
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -437,25 +534,53 @@ export default function SearchServices() {
             </div>
 
             {userLocation && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '300px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
-                  {t.search.radiusLabel} {maxDistance}km
-                </span>
-                <input
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={maxDistance}
-                  onChange={(e) => setMaxDistance(Number(e.target.value))}
-                  style={{
-                    flex: 1,
-                    height: '6px',
-                    borderRadius: '3px',
-                    background: `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '300px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
+                    {t.search.radiusLabel} {maxDistance}km
+                  </span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    value={maxDistance}
+                    onChange={(e) => setMaxDistance(Number(e.target.value))}
+                    disabled={showAllServices}
+                    style={{
+                      flex: 1,
+                      height: '6px',
+                      borderRadius: '3px',
+                      background: showAllServices
+                        ? '#e2e8f0'
+                        : `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
+                      outline: 'none',
+                      cursor: showAllServices ? 'not-allowed' : 'pointer',
+                      opacity: showAllServices ? 0.5 : 1
+                    }}
+                  />
+                </div>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#64748b'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={showAllServices}
+                    onChange={(e) => setShowAllServices(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: '#FF8C42'
+                    }}
+                  />
+                  Mostrar todos los servicios disponibles
+                </label>
               </div>
             )}
 
