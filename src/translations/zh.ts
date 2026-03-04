@@ -348,6 +348,7 @@ export const zh: Translations = {
     dogWalker: '遛狗员',
     petHotel: '宠物酒店',
     veterinarian: '兽医',
+    grooming: '美容',
     bio: '简介',
     bioPlaceholder: '告诉宠物主人关于您和您的服务...',
     hourlyRateLabel: '小时费率（$）',

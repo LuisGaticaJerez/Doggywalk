@@ -346,6 +346,7 @@ export const en = {
     dogWalker: 'Dog Walker',
     petHotel: 'Pet Hotel',
     veterinarian: 'Veterinarian',
+    grooming: 'Grooming',
     bio: 'Bio',
     bioPlaceholder: 'Tell pet owners about yourself and your services...',
     hourlyRateLabel: 'Hourly Rate ($)',

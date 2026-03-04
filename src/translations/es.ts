@@ -348,6 +348,7 @@ export const es: Translations = {
     dogWalker: 'Paseador de Perros',
     petHotel: 'Hotel de Mascotas',
     veterinarian: 'Veterinario',
+    grooming: 'Peluquería',
     bio: 'Biografía',
     bioPlaceholder: 'Cuéntale a los dueños de mascotas sobre ti y tus servicios...',
     hourlyRateLabel: 'Tarifa por Hora ($)',

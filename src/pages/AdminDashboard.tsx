@@ -83,19 +83,19 @@ export default function AdminDashboard() {
 
   const loadMetrics = async () => {
     const { count: totalUsers } = await supabase
-      .from('pet_masters')
+      .from('profiles')
       .select('*', { count: 'exact', head: true });
 
     const { count: totalProviders } = await supabase
-      .from('pet_masters')
+      .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('role', 'pet_master');
 
     const { count: pendingProviders } = await supabase
-      .from('pet_masters')
+      .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('role', 'pet_master')
-      .eq('onboarding_status', 'pending');
+      .eq('onboarding_completed', false);
 
     const { count: activeBookings } = await supabase
       .from('bookings')
@@ -126,10 +126,10 @@ export default function AdminDashboard() {
 
   const loadPendingProviders = async () => {
     const { data, error } = await supabase
-      .from('pet_masters')
-      .select('id, profiles(full_name, email, phone), created_at, onboarding_status, identity_verified')
+      .from('profiles')
+      .select('id, full_name, email, phone, created_at, onboarding_completed, identity_verified')
       .eq('role', 'pet_master')
-      .in('onboarding_status', ['pending', 'incomplete'])
+      .eq('onboarding_completed', false)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -139,11 +139,11 @@ export default function AdminDashboard() {
 
     const formatted = data?.map((pm: any) => ({
       id: pm.id,
-      full_name: pm.profiles?.full_name || 'Unknown',
-      email: pm.profiles?.email || 'Unknown',
-      phone: pm.profiles?.phone || 'N/A',
+      full_name: pm.full_name || 'Unknown',
+      email: pm.email || 'Unknown',
+      phone: pm.phone || 'N/A',
       created_at: pm.created_at,
-      onboarding_status: pm.onboarding_status,
+      onboarding_status: pm.onboarding_completed ? 'completed' : 'pending',
       identity_verified: pm.identity_verified,
     })) || [];
 

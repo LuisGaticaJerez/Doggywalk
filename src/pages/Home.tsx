@@ -6,7 +6,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 function Home() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const [serviceType, setServiceType] = useState<'walker' | 'hotel' | 'vet'>('walker');
+  const [serviceType, setServiceType] = useState<'walker' | 'hotel' | 'vet' | 'grooming'>('walker');
   const [address, setAddress] = useState('');
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
@@ -167,7 +167,7 @@ function Home() {
             {t.search.serviceType}
           </label>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {['walker', 'hotel', 'vet'].map((type) => (
+            {['walker', 'hotel', 'vet', 'grooming'].map((type) => (
               <button
                 key={type}
                 onClick={() => setServiceType(type as any)}

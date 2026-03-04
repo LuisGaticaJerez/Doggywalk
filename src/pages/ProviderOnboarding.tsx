@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import IdentityVerification from '../components/IdentityVerification';
 
 type BusinessType = 'individual' | 'business';
-type ServiceType = 'walker' | 'hotel' | 'vet';
+type ServiceType = 'walker' | 'hotel' | 'vet' | 'grooming';
 
 interface ServiceData {
   service_type: ServiceType;
@@ -43,6 +43,7 @@ export default function ProviderOnboarding() {
     walker: {},
     hotel: {},
     vet: {},
+    grooming: {},
   });
 
   const [businessData, setBusinessData] = useState({
@@ -64,7 +65,7 @@ export default function ProviderOnboarding() {
     if (businessType === 'individual') {
       return ['walker'];
     }
-    return ['hotel', 'vet'];
+    return ['hotel', 'vet', 'grooming'];
   };
 
   const updateServiceData = (service: ServiceType, data: Partial<ServiceData>) => {
