@@ -5,6 +5,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PetMaster } from '../types';
 import ServiceBadge from './ServiceBadge';
+import ServicePawBadges from './ServicePawBadges';
 import { getServiceColor } from '../utils/serviceColors';
 
 interface HotelAmenities {
@@ -203,14 +204,13 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
             position: 'absolute',
             top: '12px',
             left: '12px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '6px',
-            maxWidth: '180px'
+            background: 'rgba(255, 255, 255, 0.95)',
+            padding: '8px 12px',
+            borderRadius: '20px',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}>
-            {uniqueServices.map((serviceType, idx) => (
-              <ServiceBadge key={idx} serviceType={serviceType} size="small" showName={false} />
-            ))}
+            <ServicePawBadges serviceTypes={uniqueServices} size="medium" />
           </div>
         )}
       </div>

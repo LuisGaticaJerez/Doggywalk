@@ -13,7 +13,7 @@ export const SERVICE_COLORS: Record<string, ServiceColorScheme> = {
     gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
     light: '#D1FAE5',
     text: '#065F46',
-    emoji: '🐾',
+    emoji: '🏃',
     name: 'Paseo'
   },
   daycare: {
