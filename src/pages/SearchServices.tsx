@@ -144,7 +144,7 @@ export default function SearchServices() {
             service_type
           )
         `)
-        .eq('verified', true);
+        .not('service_type', 'is', null);
 
       const { data, error } = await query;
 
@@ -237,32 +237,36 @@ export default function SearchServices() {
     }
   };
 
-  const filteredProviders = useMemo(() => providers.filter(provider => {
-    const matchesSearch = (() => {
-      if (!searchTerm) return true;
-      const name = provider.profiles?.full_name?.toLowerCase() || '';
-      const bio = provider.bio?.toLowerCase() || '';
-      const specialties = provider.specialties?.join(' ').toLowerCase() || '';
-      const search = searchTerm.toLowerCase();
-      return name.includes(search) || bio.includes(search) || specialties.includes(search);
-    })();
+  const filteredProviders = useMemo(() => {
+    const filtered = providers.filter(provider => {
+      const matchesSearch = (() => {
+        if (!searchTerm) return true;
+        const name = provider.profiles?.full_name?.toLowerCase() || '';
+        const bio = provider.bio?.toLowerCase() || '';
+        const specialties = provider.specialties?.join(' ').toLowerCase() || '';
+        const search = searchTerm.toLowerCase();
+        return name.includes(search) || bio.includes(search) || specialties.includes(search);
+      })();
 
-    const matchesDistance = (() => {
-      // Si está activado "mostrar todos", ignorar el filtro de distancia
-      if (showAllServices) return true;
-      if (!userLocation || !provider.distance) return true;
-      return provider.distance <= maxDistance;
-    })();
+      const matchesDistance = (() => {
+        // Si está activado "mostrar todos", ignorar el filtro de distancia
+        if (showAllServices) return true;
+        if (!userLocation || !provider.distance) return true;
+        return provider.distance <= maxDistance;
+      })();
 
-    const matchesAvailability = (() => {
-      if (provider.service_type === 'hotel' || provider.service_type === 'vet') {
-        return true;
-      }
-      return provider.is_available === true;
-    })();
+      const matchesAvailability = (() => {
+        if (provider.service_type === 'hotel' || provider.service_type === 'vet' || provider.service_type === 'grooming') {
+          return true;
+        }
+        return provider.is_available === true;
+      })();
 
-    return matchesSearch && matchesDistance && matchesAvailability;
-  }), [providers, searchTerm, userLocation, maxDistance, showAllServices]);
+      return matchesSearch && matchesDistance && matchesAvailability;
+    });
+
+    return filtered;
+  }, [providers, searchTerm, userLocation, maxDistance, showAllServices]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);
@@ -638,8 +642,13 @@ export default function SearchServices() {
             boxShadow: '0 4px 12px rgba(255, 183, 77, 0.1)'
           }}>
             <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🔍</div>
-            <p style={{ fontSize: '1.25rem', color: '#64748b', fontWeight: '500' }}>
+            <p style={{ fontSize: '1.25rem', color: '#64748b', fontWeight: '500', marginBottom: '12px' }}>
               {t.search.noResults}
+            </p>
+            <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '8px' }}>
+              {providers.length > 0
+                ? 'Intenta ampliar el radio de busqueda o activar "Mostrar todos los servicios disponibles"'
+                : 'No hay proveedores registrados en este momento'}
             </p>
           </div>
         ) : (
