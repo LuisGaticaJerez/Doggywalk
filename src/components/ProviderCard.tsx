@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PetMaster } from '../types';
-import ServiceBadge from './ServiceBadge';
 import ServicePawBadges from './ServicePawBadges';
 import { getServiceColor } from '../utils/serviceColors';
 
@@ -205,12 +204,12 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
             top: '12px',
             left: '12px',
             background: 'rgba(255, 255, 255, 0.95)',
-            padding: '8px 12px',
+            padding: '6px 10px',
             borderRadius: '20px',
             backdropFilter: 'blur(8px)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}>
-            <ServicePawBadges serviceTypes={uniqueServices} size="medium" />
+            <ServicePawBadges serviceTypes={uniqueServices} size="small" />
           </div>
         )}
       </div>
@@ -221,11 +220,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
               {provider.profiles?.full_name || 'Provider'}
             </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {uniqueServices.map((serviceType, idx) => (
-                <ServiceBadge key={idx} serviceType={serviceType} size="medium" showName={true} />
-              ))}
-            </div>
+            <ServicePawBadges serviceTypes={uniqueServices} size="medium" />
           </div>
           <div style={{ textAlign: 'right' }}>
             {provider.distance && provider.distance !== Infinity && (
