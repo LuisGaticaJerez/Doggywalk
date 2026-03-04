@@ -104,12 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authError) return { error: authError };
       if (!authData.user) return { error: new Error('No user returned') };
 
-      if (role === 'pet_master') {
-        const { error: petMasterError } = await supabase.from('pet_masters').insert({
-          id: authData.user.id,
-          account_type: accountType,
-        });
-        if (petMasterError) return { error: petMasterError };
+      // El trigger handle_new_user() crea automáticamente el registro en pet_masters
+      // Solo necesitamos actualizar el account_type si es diferente al default
+      if (accountType !== 'individual') {
+        await supabase
+          .from('pet_masters')
+          .update({ account_type: accountType })
+          .eq('id', authData.user.id);
       }
 
       return { error: null };

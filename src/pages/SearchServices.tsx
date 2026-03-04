@@ -16,9 +16,6 @@ interface PetMasterWithProfile extends PetMaster {
   distance?: number;
   avg_rating?: number;
   review_count?: number;
-  provider_services?: Array<{
-    service_type: string;
-  }>;
 }
 
 export default function SearchServices() {
@@ -124,27 +121,13 @@ export default function SearchServices() {
         .from('pet_masters')
         .select(`
           *,
-          profiles (
+          profiles!pet_masters_id_fkey (
             full_name,
             avatar_url
-          ),
-          provider_service_offerings!provider_id (
-            id,
-            custom_name,
-            description,
-            duration_minutes,
-            price_clp,
-            is_active,
-            service_catalog:service_catalog_id (
-              name,
-              subcategory
-            )
-          ),
-          provider_services!provider_id (
-            service_type
           )
         `)
-        .not('service_type', 'is', null);
+        .not('service_type', 'is', null)
+        .eq('is_available', true);
 
       const { data, error } = await query;
 
@@ -153,43 +136,15 @@ export default function SearchServices() {
         throw error;
       }
 
-      console.log('Providers from query:', data?.length || 0);
-
       if (data && isMountedRef.current) {
-        const { data: activeBookings } = await supabase
-          .from('bookings')
-          .select('pet_master_id')
-          .in('status', ['in_progress', 'accepted']);
+        let availableProviders = data;
 
-        const activeProviderIds = new Set(
-          activeBookings?.map(b => b.pet_master_id).filter(Boolean) || []
-        );
-
-        let availableProviders = data.filter(
-          provider => !activeProviderIds.has(provider.id)
-        );
-
-        console.log('After active filter:', availableProviders.length);
-        console.log('Service type filter:', serviceType);
-
-        // Filtrar por tipo de servicio (buscar en service_type principal o en provider_services)
+        // Filtrar por tipo de servicio
         if (serviceType !== 'all') {
-          availableProviders = availableProviders.filter(provider => {
-            // Verificar si el servicio principal coincide
-            if (provider.service_type === serviceType) return true;
-
-            // Verificar si está en los servicios adicionales
-            if (provider.provider_services && Array.isArray(provider.provider_services)) {
-              return provider.provider_services.some(
-                (ps: { service_type: string }) => ps.service_type === serviceType
-              );
-            }
-
-            return false;
-          });
+          availableProviders = availableProviders.filter(provider =>
+            provider.service_type === serviceType
+          );
         }
-
-        console.log('After service type filter:', availableProviders.length);
 
         const { data: ratingsData } = await supabase
           .from('ratings')
@@ -235,9 +190,6 @@ export default function SearchServices() {
           processedProviders.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
         }
 
-        console.log('Processed providers to set:', processedProviders.length);
-        console.log('User location:', userLocation);
-
         setProviders(processedProviders);
       }
     } catch (error) {
@@ -251,9 +203,6 @@ export default function SearchServices() {
   };
 
   const filteredProviders = useMemo(() => {
-    console.log('Filtering from providers:', providers.length);
-    console.log('Filters:', { searchTerm, maxDistance, showAllServices, userLocation });
-
     const filtered = providers.filter(provider => {
       const matchesSearch = (() => {
         if (!searchTerm) return true;
@@ -271,34 +220,15 @@ export default function SearchServices() {
         return provider.distance <= maxDistance;
       })();
 
-      const matchesAvailability = (() => {
-        if (provider.service_type === 'hotel' || provider.service_type === 'vet' || provider.service_type === 'grooming') {
-          return true;
-        }
-        return provider.is_available === true;
-      })();
+      const matchesAvailability =
+        showAllServices ||
+        provider.service_type === 'hotel' ||
+        provider.service_type === 'vet' ||
+        provider.service_type === 'grooming' ||
+        provider.is_available === true;
 
-      const passes = matchesSearch && matchesDistance && matchesAvailability;
-
-      if (!passes) {
-        console.log('Provider filtered out:', {
-          id: provider.id,
-          name: provider.profiles?.full_name,
-          matchesSearch,
-          matchesDistance,
-          matchesAvailability,
-          distance: provider.distance,
-          maxDistance,
-          showAllServices,
-          is_available: provider.is_available,
-          service_type: provider.service_type
-        });
-      }
-
-      return passes;
+      return matchesSearch && matchesDistance && matchesAvailability;
     });
-
-    console.log('Final filtered providers:', filtered.length);
 
     return filtered;
   }, [providers, searchTerm, userLocation, maxDistance, showAllServices]);

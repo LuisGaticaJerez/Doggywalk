@@ -48,12 +48,12 @@ export default function ProviderProfile() {
         setFormData({
           bio: data.bio || '',
           service_type: data.service_type,
-          hourly_rate: data.hourly_rate.toString(),
+          hourly_rate: data.hourly_rate ? data.hourly_rate.toString() : '0',
           price_per_night: data.price_per_night?.toString() || '',
-          service_radius: data.service_radius.toString(),
-          capacity: data.capacity.toString(),
-          is_available: data.is_available,
-          emergency_service: data.emergency_service,
+          service_radius: data.service_radius ? data.service_radius.toString() : '5000',
+          capacity: data.capacity ? data.capacity.toString() : '1',
+          is_available: data.is_available ?? false,
+          emergency_service: data.emergency_service ?? false,
           specialties: data.specialties?.join(', ') || '',
           facilities: data.facilities?.join(', ') || ''
         });

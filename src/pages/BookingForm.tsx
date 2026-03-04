@@ -83,7 +83,10 @@ export default function BookingForm() {
 
   const calculateTotal = () => {
     if (!provider) return 0;
-    const basePrice = (parseFloat(formData.duration_minutes) / 60) * provider.hourly_rate;
+    const hourlyRate = typeof provider.hourly_rate === 'string'
+      ? parseFloat(provider.hourly_rate)
+      : provider.hourly_rate;
+    const basePrice = (parseFloat(formData.duration_minutes) / 60) * hourlyRate;
     const petCount = selectedPetIds.length;
     if (petCount <= 1) return basePrice;
     return basePrice + (basePrice * 0.5 * (petCount - 1));
