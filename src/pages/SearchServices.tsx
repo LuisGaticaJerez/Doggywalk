@@ -65,14 +65,16 @@ export default function SearchServices() {
           console.error('Error getting location:', error);
           if (isMountedRef.current) {
             setLocationError(t.search.geolocationError);
-            setUserLocation({ lat: 4.7110, lng: -74.0721 });
+            // Usar Talcahuano como ubicación predeterminada
+            setUserLocation({ lat: -36.7225, lng: -73.1136 });
           }
         },
         { timeout: 10000, maximumAge: 300000 }
       );
     } else {
       setLocationError(t.search.geolocationNotSupported);
-      setUserLocation({ lat: 4.7110, lng: -74.0721 });
+      // Usar Talcahuano como ubicación predeterminada
+      setUserLocation({ lat: -36.7225, lng: -73.1136 });
     }
   };
 
@@ -109,10 +111,6 @@ export default function SearchServices() {
         `)
         .eq('verified', true);
 
-      if (serviceType !== 'all') {
-        query = query.eq('service_type', serviceType);
-      }
-
       const { data, error } = await query;
 
       if (error) throw error;
@@ -127,9 +125,26 @@ export default function SearchServices() {
           activeBookings?.map(b => b.pet_master_id).filter(Boolean) || []
         );
 
-        const availableProviders = data.filter(
+        let availableProviders = data.filter(
           provider => !activeProviderIds.has(provider.id)
         );
+
+        // Filtrar por tipo de servicio (buscar en service_type principal o en provider_services)
+        if (serviceType !== 'all') {
+          availableProviders = availableProviders.filter(provider => {
+            // Verificar si el servicio principal coincide
+            if (provider.service_type === serviceType) return true;
+
+            // Verificar si está en los servicios adicionales
+            if (provider.provider_services && Array.isArray(provider.provider_services)) {
+              return provider.provider_services.some(
+                (ps: { service_type: string }) => ps.service_type === serviceType
+              );
+            }
+
+            return false;
+          });
+        }
 
         const { data: ratingsData } = await supabase
           .from('ratings')
