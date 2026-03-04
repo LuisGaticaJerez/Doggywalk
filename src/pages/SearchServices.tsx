@@ -148,7 +148,12 @@ export default function SearchServices() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Query error:', error);
+        throw error;
+      }
+
+      console.log('Providers from query:', data?.length || 0);
 
       if (data && isMountedRef.current) {
         const { data: activeBookings } = await supabase
@@ -163,6 +168,9 @@ export default function SearchServices() {
         let availableProviders = data.filter(
           provider => !activeProviderIds.has(provider.id)
         );
+
+        console.log('After active filter:', availableProviders.length);
+        console.log('Service type filter:', serviceType);
 
         // Filtrar por tipo de servicio (buscar en service_type principal o en provider_services)
         if (serviceType !== 'all') {
@@ -180,6 +188,8 @@ export default function SearchServices() {
             return false;
           });
         }
+
+        console.log('After service type filter:', availableProviders.length);
 
         const { data: ratingsData } = await supabase
           .from('ratings')
@@ -225,6 +235,9 @@ export default function SearchServices() {
           processedProviders.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
         }
 
+        console.log('Processed providers to set:', processedProviders.length);
+        console.log('User location:', userLocation);
+
         setProviders(processedProviders);
       }
     } catch (error) {
@@ -238,6 +251,9 @@ export default function SearchServices() {
   };
 
   const filteredProviders = useMemo(() => {
+    console.log('Filtering from providers:', providers.length);
+    console.log('Filters:', { searchTerm, maxDistance, showAllServices, userLocation });
+
     const filtered = providers.filter(provider => {
       const matchesSearch = (() => {
         if (!searchTerm) return true;
@@ -262,8 +278,27 @@ export default function SearchServices() {
         return provider.is_available === true;
       })();
 
-      return matchesSearch && matchesDistance && matchesAvailability;
+      const passes = matchesSearch && matchesDistance && matchesAvailability;
+
+      if (!passes) {
+        console.log('Provider filtered out:', {
+          id: provider.id,
+          name: provider.profiles?.full_name,
+          matchesSearch,
+          matchesDistance,
+          matchesAvailability,
+          distance: provider.distance,
+          maxDistance,
+          showAllServices,
+          is_available: provider.is_available,
+          service_type: provider.service_type
+        });
+      }
+
+      return passes;
     });
+
+    console.log('Final filtered providers:', filtered.length);
 
     return filtered;
   }, [providers, searchTerm, userLocation, maxDistance, showAllServices]);
