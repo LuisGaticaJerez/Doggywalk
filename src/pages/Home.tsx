@@ -197,7 +197,10 @@ function Home() {
                   }
                 }}
               >
-                {type === 'walker' ? '🚶 ' + t.search.walker : type === 'hotel' ? '🏨 ' + t.search.boarding : '🏥 ' + t.search.veterinary}
+                {type === 'walker' ? '🏃 ' + t.search.walker :
+                 type === 'hotel' ? '🏨 ' + t.search.boarding :
+                 type === 'vet' ? '🩺 ' + t.search.veterinary :
+                 '✂️ ' + t.search.grooming}
               </button>
             ))}
           </div>
