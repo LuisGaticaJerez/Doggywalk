@@ -10,16 +10,22 @@ export default function ServicePawBadges({ serviceTypes, size = 'medium' }: Serv
 
   const sizes = {
     small: {
-      paw: '16px',
-      gap: '4px'
+      paw: '14px',
+      text: '11px',
+      gap: '6px',
+      itemGap: '4px'
     },
     medium: {
-      paw: '20px',
-      gap: '6px'
+      paw: '18px',
+      text: '13px',
+      gap: '8px',
+      itemGap: '5px'
     },
     large: {
-      paw: '24px',
-      gap: '8px'
+      paw: '22px',
+      text: '15px',
+      gap: '10px',
+      itemGap: '6px'
     }
   };
 
@@ -41,20 +47,30 @@ export default function ServicePawBadges({ serviceTypes, size = 'medium' }: Serv
           <div
             key={`${serviceType}-${index}`}
             style={{
-              fontSize: currentSize.paw,
-              filter: `drop-shadow(0 2px 4px ${colors.primary}40)`,
-              cursor: 'help',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: currentSize.itemGap,
               transition: 'all 0.2s ease'
             }}
-            title={colors.name}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.2) rotate(15deg)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-            }}
           >
-            <span style={{ color: colors.primary }}>🐾</span>
+            <span
+              style={{
+                fontSize: currentSize.paw,
+                color: colors.primary,
+                filter: `drop-shadow(0 1px 2px ${colors.primary}40)`
+              }}
+            >
+              🐾
+            </span>
+            <span
+              style={{
+                fontSize: currentSize.text,
+                fontWeight: '600',
+                color: colors.text
+              }}
+            >
+              {colors.name}
+            </span>
           </div>
         );
       })}
