@@ -585,6 +585,52 @@ export default function SearchServices() {
           </div>
         )}
 
+        {!loading && filteredProviders.length > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+            padding: '20px 28px',
+            borderRadius: '16px',
+            marginBottom: '24px',
+            color: 'white',
+            boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '2rem' }}>📍</div>
+              <div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+                  {filteredProviders.length} {filteredProviders.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
+                </div>
+                <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                  {showAllServices
+                    ? 'Mostrando todos los servicios disponibles'
+                    : `Dentro de un radio de ${maxDistance}km de tu ubicación`}
+                </div>
+              </div>
+            </div>
+            {!showAllServices && userLocation && (
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.25)',
+                padding: '10px 20px',
+                borderRadius: '25px',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>🎯</span>
+                Ordenados por distancia
+              </div>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{

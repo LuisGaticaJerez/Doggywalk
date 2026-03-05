@@ -215,25 +215,41 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
       </div>
 
       <div style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px', gap: '12px' }}>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
               {provider.profiles?.full_name || 'Provider'}
             </h3>
             <ServicePawBadges serviceTypes={uniqueServices} size="medium" />
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {provider.distance && provider.distance !== Infinity && (
               <div style={{
+                padding: '8px 14px',
+                background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                color: 'white',
+                borderRadius: '20px',
                 fontSize: '13px',
                 fontWeight: '700',
-                color: '#FF8C42',
-                marginBottom: '4px'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                whiteSpace: 'nowrap'
               }}>
-                📍 {provider.distance.toFixed(1)} km
+                <span>📍</span>
+                <span>{provider.distance.toFixed(1)} km</span>
               </div>
             )}
-            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#64748b',
+              fontWeight: '500',
+              textAlign: 'center',
+              padding: '4px 8px',
+              background: '#f8fafc',
+              borderRadius: '12px'
+            }}>
               📊 {provider.total_walks} services
             </div>
           </div>
