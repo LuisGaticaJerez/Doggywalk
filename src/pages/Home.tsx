@@ -68,18 +68,18 @@ function Home() {
         animation: 'float 4.5s ease-in-out infinite'
       }}>🦴</div>
 
-      <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '12px', alignItems: 'center', zIndex: 10 }}>
+      <div style={{ position: 'absolute', top: '20px', right: '20px', left: '20px', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'flex-end', zIndex: 10, flexWrap: 'wrap' }}>
         <LanguageSwitcher />
         <Link
           to="/login"
           style={{
-            padding: '12px 24px',
+            padding: '10px 20px',
             background: 'rgba(255,255,255,0.2)',
             backdropFilter: 'blur(10px)',
             color: 'white',
             textDecoration: 'none',
             borderRadius: '50px',
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: '600',
             border: '2px solid white',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -99,12 +99,12 @@ function Home() {
         <Link
           to="/register"
           style={{
-            padding: '12px 24px',
+            padding: '10px 20px',
             background: 'white',
             color: '#FF6B6B',
             textDecoration: 'none',
             borderRadius: '50px',
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: '700',
             border: '2px solid white',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -166,23 +166,23 @@ function Home() {
           <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '14px', fontWeight: '600' }}>
             {t.search.serviceType}
           </label>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
             {['walker', 'hotel', 'vet', 'grooming'].map((type) => (
               <button
                 key={type}
                 onClick={() => setServiceType(type as any)}
                 style={{
-                  flex: 1,
-                  minWidth: '150px',
-                  padding: '12px 20px',
+                  padding: '12px 16px',
                   border: serviceType === type ? '2px solid #FF6B6B' : '2px solid #e2e8f0',
                   borderRadius: '8px',
                   background: serviceType === type ? '#FEF2F2' : 'white',
                   color: serviceType === type ? '#FF6B6B' : '#64748B',
-                  fontSize: '15px',
+                  fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center'
                 }}
                 onMouseEnter={(e) => {
                   if (serviceType !== type) {

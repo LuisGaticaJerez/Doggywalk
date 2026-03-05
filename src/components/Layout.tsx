@@ -52,19 +52,20 @@ export default function Layout({ children }: LayoutProps) {
           </Link>
 
           {!user ? (
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={() => navigate(-1)}
                 style={{
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   background: '#f1f5f9',
                   color: '#475569',
                   border: 'none',
                   borderRadius: '25px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
                 onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
@@ -77,16 +78,17 @@ export default function Layout({ children }: LayoutProps) {
               <Link
                 to="/login"
                 style={{
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   background: 'white',
                   color: '#FF8C42',
                   border: '2px solid #FF8C42',
                   borderRadius: '25px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   textDecoration: 'none',
                   transition: 'all 0.2s',
-                  display: 'inline-block'
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = '#FFF7ED';
@@ -101,17 +103,18 @@ export default function Layout({ children }: LayoutProps) {
               <Link
                 to="/register"
                 style={{
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '25px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   textDecoration: 'none',
                   boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
                   transition: 'all 0.2s',
-                  display: 'inline-block'
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -136,24 +139,28 @@ export default function Layout({ children }: LayoutProps) {
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   style={{
-                    padding: '10px 20px',
+                    padding: '8px 16px',
                     background: 'linear-gradient(135deg, #FFE5B4 0%, #FFD93D 100%)',
                     color: '#8B6914',
                     border: 'none',
                     borderRadius: '25px',
-                    fontSize: '14px',
+                    fontSize: '13px',
                     fontWeight: '600',
                     cursor: 'pointer',
                     boxShadow: '0 4px 12px rgba(255, 221, 61, 0.3)',
                     transition: 'all 0.2s',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '6px',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '200px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   <span>⚙️</span>
-                  <span>{profile?.full_name || 'Menu'}</span>
-                  <span style={{ fontSize: '12px' }}>{menuOpen ? '▲' : '▼'}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.full_name || 'Menu'}</span>
+                  <span style={{ fontSize: '11px' }}>{menuOpen ? '▲' : '▼'}</span>
                 </button>
 
               {menuOpen && (

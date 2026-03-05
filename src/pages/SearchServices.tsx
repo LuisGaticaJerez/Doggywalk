@@ -301,80 +301,87 @@ export default function SearchServices() {
               onBlur={(e) => e.currentTarget.style.borderColor = '#FFE5B4'}
             />
 
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <input
                 type="text"
-                placeholder="Buscar por ciudad o direccion (ej: Talcahuano, Chile)"
+                placeholder="Buscar por ciudad o direccion"
                 value={manualLocation}
                 onChange={(e) => setManualLocation(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleManualLocationSearch()}
                 style={{
-                  flex: 1,
+                  width: '100%',
                   padding: '12px 16px',
                   border: '2px solid #E0E0E0',
                   borderRadius: '25px',
                   fontSize: '14px',
                   outline: 'none',
-                  transition: 'border-color 0.2s'
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
                 }}
                 onFocus={(e) => e.currentTarget.style.borderColor = '#4CAF50'}
                 onBlur={(e) => e.currentTarget.style.borderColor = '#E0E0E0'}
               />
-              <button
-                onClick={handleManualLocationSearch}
-                disabled={isGeocodingLocation}
-                style={{
-                  padding: '12px 24px',
-                  background: isGeocodingLocation ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '25px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: isGeocodingLocation ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: isGeocodingLocation ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {isGeocodingLocation ? 'Buscando...' : 'Buscar'}
-              </button>
-              <button
-                onClick={getUserLocation}
-                style={{
-                  padding: '12px 16px',
-                  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '25px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
-                  whiteSpace: 'nowrap'
-                }}
-                title="Usar mi ubicacion actual"
-              >
-                Mi ubicacion
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={handleManualLocationSearch}
+                  disabled={isGeocodingLocation}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    background: isGeocodingLocation ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '25px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: isGeocodingLocation ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: isGeocodingLocation ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {isGeocodingLocation ? 'Buscando...' : 'Buscar'}
+                </button>
+                <button
+                  onClick={getUserLocation}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '25px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title="Usar mi ubicacion actual"
+                >
+                  Mi ubicacion
+                </button>
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
             <button
               onClick={() => setServiceType('all')}
               style={{
-                padding: '10px 24px',
+                padding: '10px 16px',
                 background: serviceType === 'all' ? 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)' : 'white',
                 color: serviceType === 'all' ? 'white' : '#64748b',
                 border: `2px solid ${serviceType === 'all' ? '#FF8C42' : '#e2e8f0'}`,
                 borderRadius: '25px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'all' ? '0 4px 12px rgba(255, 140, 66, 0.3)' : 'none'
+                boxShadow: serviceType === 'all' ? '0 4px 12px rgba(255, 140, 66, 0.3)' : 'none',
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               🌟 {t.provider.services}
@@ -382,16 +389,18 @@ export default function SearchServices() {
             <button
               onClick={() => setServiceType('walker')}
               style={{
-                padding: '10px 24px',
+                padding: '10px 16px',
                 background: serviceType === 'walker' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'white',
                 color: serviceType === 'walker' ? 'white' : '#64748b',
                 border: `2px solid ${serviceType === 'walker' ? '#10B981' : '#e2e8f0'}`,
                 borderRadius: '25px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'walker' ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none'
+                boxShadow: serviceType === 'walker' ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none',
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               🚶 {t.search.walker}
@@ -399,16 +408,18 @@ export default function SearchServices() {
             <button
               onClick={() => setServiceType('hotel')}
               style={{
-                padding: '10px 24px',
+                padding: '10px 16px',
                 background: serviceType === 'hotel' ? 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' : 'white',
                 color: serviceType === 'hotel' ? 'white' : '#64748b',
                 border: `2px solid ${serviceType === 'hotel' ? '#D4A017' : '#e2e8f0'}`,
                 borderRadius: '25px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(212, 160, 23, 0.3)' : 'none'
+                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(212, 160, 23, 0.3)' : 'none',
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               🏨 {t.search.boarding}
@@ -416,16 +427,18 @@ export default function SearchServices() {
             <button
               onClick={() => setServiceType('vet')}
               style={{
-                padding: '10px 24px',
+                padding: '10px 16px',
                 background: serviceType === 'vet' ? 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)' : 'white',
                 color: serviceType === 'vet' ? 'white' : '#64748b',
                 border: `2px solid ${serviceType === 'vet' ? '#06B6D4' : '#e2e8f0'}`,
                 borderRadius: '25px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'vet' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none'
+                boxShadow: serviceType === 'vet' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               🩺 {t.search.veterinary}
@@ -433,16 +446,18 @@ export default function SearchServices() {
             <button
               onClick={() => setServiceType('grooming')}
               style={{
-                padding: '10px 24px',
+                padding: '10px 16px',
                 background: serviceType === 'grooming' ? 'linear-gradient(135deg, #FF8B7F 0%, #FF9999 100%)' : 'white',
                 color: serviceType === 'grooming' ? 'white' : '#64748b',
                 border: `2px solid ${serviceType === 'grooming' ? '#FF8B7F' : '#e2e8f0'}`,
                 borderRadius: '25px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'grooming' ? '0 4px 12px rgba(255, 139, 127, 0.3)' : 'none'
+                boxShadow: serviceType === 'grooming' ? '0 4px 12px rgba(255, 139, 127, 0.3)' : 'none',
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               ✂️ {t.search.grooming || 'Grooming'}
@@ -457,25 +472,26 @@ export default function SearchServices() {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '16px'
+            gap: '12px'
           }}>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setViewMode('list')}
                 style={{
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   background: viewMode === 'list' ? 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)' : 'white',
                   color: viewMode === 'list' ? 'white' : '#64748b',
                   border: `2px solid ${viewMode === 'list' ? '#FF8C42' : '#e2e8f0'}`,
                   borderRadius: '25px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   boxShadow: viewMode === 'list' ? '0 4px 12px rgba(255, 140, 66, 0.3)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {t.common.listView}
@@ -483,19 +499,20 @@ export default function SearchServices() {
               <button
                 onClick={() => setViewMode('map')}
                 style={{
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   background: viewMode === 'map' ? 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)' : 'white',
                   color: viewMode === 'map' ? 'white' : '#64748b',
                   border: `2px solid ${viewMode === 'map' ? '#4CAF50' : '#e2e8f0'}`,
                   borderRadius: '25px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   boxShadow: viewMode === 'map' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {t.common.mapView}
