@@ -17,18 +17,18 @@ export const SERVICE_COLORS: Record<string, ServiceColorScheme> = {
     name: 'Paseo'
   },
   daycare: {
-    primary: '#F59E0B',
-    gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+    primary: '#D4A017',
+    gradient: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
     light: '#FEF3C7',
-    text: '#92400E',
+    text: '#7C5E10',
     emoji: '🏃',
     name: 'Guardería'
   },
   hotel: {
-    primary: '#0891B2',
-    gradient: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
-    light: '#CFFAFE',
-    text: '#164E63',
+    primary: '#D4A017',
+    gradient: 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)',
+    light: '#FEF3C7',
+    text: '#7C5E10',
     emoji: '🏨',
     name: 'Hospedaje'
   },

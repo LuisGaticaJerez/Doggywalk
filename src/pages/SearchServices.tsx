@@ -400,15 +400,15 @@ export default function SearchServices() {
               onClick={() => setServiceType('hotel')}
               style={{
                 padding: '10px 24px',
-                background: serviceType === 'hotel' ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)' : 'white',
+                background: serviceType === 'hotel' ? 'linear-gradient(135deg, #D4A017 0%, #B8860B 100%)' : 'white',
                 color: serviceType === 'hotel' ? 'white' : '#64748b',
-                border: `2px solid ${serviceType === 'hotel' ? '#0891B2' : '#e2e8f0'}`,
+                border: `2px solid ${serviceType === 'hotel' ? '#D4A017' : '#e2e8f0'}`,
                 borderRadius: '25px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(8, 145, 178, 0.3)' : 'none'
+                boxShadow: serviceType === 'hotel' ? '0 4px 12px rgba(212, 160, 23, 0.3)' : 'none'
               }}
             >
               🏨 {t.search.boarding}
