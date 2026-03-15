@@ -35,7 +35,9 @@ export default function SearchServices() {
 
   useEffect(() => {
     isMountedRef.current = true;
-    getUserLocation();
+    // En Mac, es mejor no solicitar ubicación automáticamente al cargar
+    // Usar ubicación predeterminada y dejar que el usuario active manualmente
+    setUserLocation({ lat: -36.7225, lng: -73.1136 });
 
     return () => {
       isMountedRef.current = false;
@@ -48,11 +50,29 @@ export default function SearchServices() {
     }
   }, [serviceType, userLocation]);
 
-  const getUserLocation = () => {
-    if ('geolocation' in navigator) {
+  const getUserLocation = async () => {
+    if (!('geolocation' in navigator)) {
+      setLocationError(t.search.geolocationNotSupported);
+      setUserLocation({ lat: -36.7225, lng: -73.1136 });
+      return;
+    }
+
+    try {
+      // Verificar el estado del permiso primero
+      if ('permissions' in navigator) {
+        try {
+          const permissionStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+          console.log('Permission status:', permissionStatus.state);
+        } catch (e) {
+          console.log('Permission API not fully supported, continuing with geolocation request');
+        }
+      }
+
+      // Solicitar la ubicación con opciones optimizadas para Mac/Safari
       navigator.geolocation.getCurrentPosition(
         (position) => {
           if (isMountedRef.current) {
+            console.log('Location obtained:', position.coords.latitude, position.coords.longitude);
             setUserLocation({
               lat: position.coords.latitude,
               lng: position.coords.longitude
@@ -63,16 +83,35 @@ export default function SearchServices() {
         (error) => {
           console.error('Error getting location:', error);
           if (isMountedRef.current) {
-            setLocationError(t.search.geolocationError);
+            let errorMessage = t.search.geolocationError;
+
+            // Proporcionar mensajes de error más específicos
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = 'Permiso de ubicación denegado. Por favor, habilita la ubicación en la configuración de tu navegador.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Información de ubicación no disponible.';
+                break;
+              case error.TIMEOUT:
+                errorMessage = 'La solicitud de ubicación ha expirado.';
+                break;
+            }
+
+            setLocationError(errorMessage);
             // Usar Talcahuano como ubicación predeterminada
             setUserLocation({ lat: -36.7225, lng: -73.1136 });
           }
         },
-        { timeout: 10000, maximumAge: 300000 }
+        {
+          enableHighAccuracy: false, // false es mejor para Mac/Safari
+          timeout: 10000,
+          maximumAge: 300000
+        }
       );
-    } else {
-      setLocationError(t.search.geolocationNotSupported);
-      // Usar Talcahuano como ubicación predeterminada
+    } catch (error) {
+      console.error('Error in getUserLocation:', error);
+      setLocationError(t.search.geolocationError);
       setUserLocation({ lat: -36.7225, lng: -73.1136 });
     }
   };
