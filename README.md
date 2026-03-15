@@ -1,8 +1,8 @@
 # 🐾 DoggyWalk - Professional Pet Care Platform
 
-**Version:** 2.0.0
+**Version:** 2.1.0
 **Status:** Production Ready ✅
-**Last Updated:** March 3, 2026
+**Last Updated:** March 15, 2026
 
 DoggyWalk is a comprehensive, full-featured platform connecting pet owners with professional pet care providers. Built with React, TypeScript, and Supabase, it offers walker services, pet hotels, veterinary care, and advanced features like multi-pet bookings, real-time GPS tracking, and multi-language support.
 
@@ -135,6 +135,10 @@ All migrations are in `supabase/migrations/` and should be applied in order (14 
 - `20260205005858_complete_identity_verification_setup.sql`
 - `20260209203532_add_push_notifications_cancellation_support_admin.sql`
 - `20260209204615_add_recurring_bookings.sql`
+- `20260303205411_add_grooming_service_type.sql`
+- `20260303210748_update_service_type_constraint_grooming.sql`
+- `20260304215649_fix_user_registration_pet_masters.sql`
+- `20260315013733_add_public_read_access_for_providers.sql`
 
 5. **Start development server**
 ```bash
@@ -304,32 +308,51 @@ Owner has 3 dogs: Max, Luna, Charlie
 ### 3. Provider Search & Discovery
 
 **Search Capabilities:**
-- **Location-based:** Find providers within service radius
-- **Service Type Filter:** Walker, Hotel, or Veterinary
-- **Availability Filter:** Show only available providers
-- **Verified Filter:** Show only verified providers
-- **View Modes:** List view or interactive map view
+- **Dynamic Location-based Search:** Map-first interface with automatic updates
+- **Service Type Filter:** Walker, Hotel, Veterinary, or Grooming
+- **Adjustable Search Radius:** 1-50km range slider
+- **Real-time Distance Calculation:** Providers sorted by proximity
+- **Interactive Map Navigation:** Move map to update search location automatically
+
+**NEW: Map-First Experience (v2.1.0):**
+- **Default Map View:** Shows providers immediately on interactive map
+- **Dynamic Location Updates:** Moving the map updates provider list automatically
+- **Smart Filtering:** Only shows providers within selected radius from map center
+- **Distance-Based Sorting:** Results always ordered from nearest to farthest
+- **Real-time Recalculation:** Distances update as you explore different areas
 
 **Provider Information Display:**
 - Profile photo and name
-- Service type badge
+- Service type badge with multi-service indicators
 - Hourly rate or price per night
 - Rating (stars) and total services
 - Verification badge
-- Distance from your location
+- Distance from selected location
 - Availability status
 
 **Map Features:**
 - Different colored markers per service type:
-  - Green: Walkers 🚶
+  - Orange: Walkers 🚶
   - Blue: Hotels 🏨
   - Red: Vets ⚕️
+  - Purple: Groomers ✂️
+- Multi-service providers show additional service badges
 - Click marker to see provider details
 - "Book Now" button directly from map popup
+- Your current location marked with animated pin
+- Providers update as you pan/move the map
+
+**How It Works:**
+1. Map opens at your current location (or default city)
+2. Providers within selected radius (default 50km) are shown
+3. Move or drag the map to explore different areas
+4. Provider list updates automatically with new center point
+5. All distances recalculate from the new map center
+6. Adjust radius slider to expand or narrow search
 
 **Key Files:**
-- `src/pages/SearchServices.tsx` - Search interface
-- `src/components/ProvidersMap.tsx` - Interactive map
+- `src/pages/SearchServices.tsx` - Search interface with map integration
+- `src/components/ProvidersMap.tsx` - Interactive map with movement detection
 
 ### 4. Pet Profile Management
 
@@ -576,7 +599,7 @@ Owner has 3 dogs: Max, Luna, Charlie
 Providers can now offer multiple service types simultaneously:
 - Dog Walker
 - Pet Sitter
-- Groomer
+- Groomer (Added in v2.1.0)
 - Trainer
 - Veterinarian
 - Daycare
@@ -602,6 +625,15 @@ Providers can now offer multiple service types simultaneously:
 - Emergency service availability
 - Specializations
 - Equipment and facilities
+
+**For Groomers (NEW in v2.1.0):**
+- Hair cutting and styling
+- Bathing and drying
+- Nail trimming and paw care
+- Ear cleaning
+- Teeth cleaning
+- Special treatments (de-shedding, flea treatment)
+- Mobile grooming options
 
 **Key Files:**
 - `src/pages/ManageServices.tsx` - Service CRUD interface
@@ -1033,7 +1065,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 - **Utilities:** 6 utility modules
 - **Translations:** 5 languages, 282 keys each
 - **Database:** 30+ tables with full RLS
-- **Migrations:** 14 applied successfully
+- **Migrations:** 18 applied successfully
 - **Edge Functions:** 1 (push notifications)
 
 **Build:**
@@ -1082,7 +1114,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 - [x] PWA support with service worker
 - [x] Toast notification system
 - [x] Security (RLS on all tables)
-- [x] Database schema (30+ tables, 14 migrations)
+- [x] Database schema (30+ tables, 18 migrations)
 - [x] Edge Functions (push notifications)
 - [x] Production build optimized
 
@@ -1090,4 +1122,31 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 
 **DoggyWalk** - Connecting pets with the care they deserve 🐾
 
-**Version:** 2.0.0 | **Status:** Production Ready ✅ | **Updated:** March 3, 2026
+**Version:** 2.1.0 | **Status:** Production Ready ✅ | **Updated:** March 15, 2026
+
+---
+
+## 🆕 What's New in v2.1.0 (March 15, 2026)
+
+### Map-First Search Experience
+- **Dynamic Location-Based Search:** Map view is now the default when searching for providers
+- **Real-Time Updates:** Move or drag the map to automatically update provider listings
+- **Smart Distance Calculation:** All providers are dynamically sorted from nearest to farthest based on map center
+- **Removed "Show All Services":** Simplified interface with radius-based filtering only
+- **Interactive Exploration:** Explore different neighborhoods by panning the map
+
+### Enhanced Provider Discovery
+- **Automatic List Updates:** Provider list refreshes when you move the map to a new area
+- **Distance Recalculation:** All distances update in real-time from the new map center point
+- **Improved UX:** More intuitive way to discover providers in different locations
+- **Radius Control:** Easily adjust search radius (1-50km) with slider
+
+### Technical Improvements
+- **MapEventHandler Component:** New component for handling map movement events
+- **Optimized Performance:** Efficient distance recalculation on map movement
+- **Better State Management:** Location state updates synchronized with map position
+
+### Bug Fixes
+- Fixed public read access for provider profiles
+- Improved user registration flow for pet masters
+- Updated service type constraints for grooming services

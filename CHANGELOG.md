@@ -4,6 +4,75 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.1.0] - 2026-03-15
+
+### 🎉 Major UX Enhancement - Map-First Search Experience
+
+### ✨ New Features
+
+#### Dynamic Location-Based Search
+- **Map-First Interface:** Map view is now the default when searching for providers
+- **Real-Time Location Updates:** Move or drag the map to automatically update provider listings
+- **Smart Distance Calculation:** All providers dynamically sorted from nearest to farthest based on map center
+- **Interactive Exploration:** Explore different neighborhoods and areas by simply panning the map
+- **Automatic List Refresh:** Provider list updates automatically when map is moved to new location
+
+#### Enhanced Provider Discovery
+- **MapEventHandler Component:** New component that detects map movement and triggers location updates
+- **Distance Recalculation:** All provider distances recalculate in real-time from new map center
+- **Simplified Interface:** Removed "Show All Services" checkbox for cleaner, more intuitive UX
+- **Radius Control:** Easy radius adjustment (1-50km) with visual slider
+- **Location-Aware Results:** Search results always reflect the exact map location you're viewing
+
+#### Grooming Services Support
+- Added Grooming as a new service type for providers
+- Grooming-specific features and pricing
+- Service catalog support for grooming offerings
+
+### 🔧 Improvements
+
+- **Improved Search UX:** More intuitive way to discover providers in different areas
+- **Better Performance:** Optimized distance calculations on map movement
+- **Enhanced State Management:** Location state synchronized with map position
+- **Cleaner Interface:** Removed redundant "show all" option, focusing on radius-based filtering
+
+### 🗄️ Database Changes
+
+- Added grooming service type support
+- Updated service type constraints
+- Fixed public read access for provider profiles
+- Improved user registration flow for pet masters
+
+### 📦 New Migrations
+
+1. `20260303205411_add_grooming_service_type.sql` - Add grooming service type
+2. `20260303210748_update_service_type_constraint_grooming.sql` - Update constraints
+3. `20260304215649_fix_user_registration_pet_masters.sql` - Fix registration flow
+4. `20260315013733_add_public_read_access_for_providers.sql` - Public provider access
+
+### 🎨 Component Updates
+
+- **ProvidersMap.tsx:** Added MapEventHandler for movement detection
+- **SearchServices.tsx:** Integrated map movement callback, removed show-all toggle
+- Default view mode changed from 'list' to 'map'
+- Enhanced user experience with real-time location updates
+
+### 🐛 Bug Fixes
+
+- Fixed provider profile visibility for public users
+- Corrected pet masters table registration issues
+- Updated service type validation for new grooming services
+- Improved geolocation error handling
+
+### 📊 Metrics
+
+- Migrations: 14 → 18
+- Service Types: 6 → 7 (added Grooming)
+- Components Enhanced: ProvidersMap, SearchServices
+- New Feature: Real-time map-based location updates
+
+---
+
 ## [2.0.0] - 2026-03-03
 
 ### 🎉 Major Release - Advanced Features
