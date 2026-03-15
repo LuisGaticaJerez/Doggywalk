@@ -3,6 +3,7 @@ import { translations, Language, supportedLanguages } from '../translations';
 import { Translations } from '../translations/en';
 import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabase';
+import { detectLanguageFromGeolocation, getBrowserLanguage } from '../utils/languageDetection';
 
 interface I18nContextType {
   language: Language;
@@ -16,11 +17,28 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [language, setLanguageState] = useState<Language>(() => {
     const stored = localStorage.getItem('language');
-    return (stored && supportedLanguages.includes(stored as Language))
-      ? (stored as Language)
-      : 'en';
+    if (stored && supportedLanguages.includes(stored as Language)) {
+      return stored as Language;
+    }
+    // Return browser language as initial fallback
+    return getBrowserLanguage();
   });
 
+  const [languageDetected, setLanguageDetected] = useState(false);
+
+  // Auto-detect language on first load if not previously set
+  useEffect(() => {
+    const stored = localStorage.getItem('language');
+    if (!stored && !languageDetected) {
+      detectLanguageFromGeolocation().then((detectedLang) => {
+        setLanguageState(detectedLang);
+        localStorage.setItem('language', detectedLang);
+        setLanguageDetected(true);
+      });
+    }
+  }, [languageDetected]);
+
+  // Load user's saved language preference
   useEffect(() => {
     if (user) {
       supabase
@@ -31,6 +49,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         .then(({ data }) => {
           if (data?.language && supportedLanguages.includes(data.language as Language)) {
             setLanguageState(data.language as Language);
+            localStorage.setItem('language', data.language);
           }
         });
     }
