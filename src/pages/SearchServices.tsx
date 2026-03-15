@@ -27,8 +27,8 @@ export default function SearchServices() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [maxDistance, setMaxDistance] = useState<number>(10);
-  const [showAllServices, setShowAllServices] = useState(false);
+  const [maxDistance, setMaxDistance] = useState<number>(50);
+  const [showAllServices, setShowAllServices] = useState(true);
   const [manualLocation, setManualLocation] = useState('');
   const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
   const isLoadingRef = useRef(false);
