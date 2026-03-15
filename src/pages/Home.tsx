@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { ResponsiveGrid } from '../components/ResponsiveGrid';
 
 function Home() {
   const { t } = useI18n();
@@ -166,7 +167,7 @@ function Home() {
           <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '14px', fontWeight: '600' }}>
             {t.search.serviceType}
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <ResponsiveGrid columns={{ mobile: 2, tablet: 2, desktop: 2 }} gap="12px">
             {['walker', 'hotel', 'vet', 'grooming'].map((type) => (
               <button
                 key={type}
@@ -207,7 +208,7 @@ function Home() {
                  '✂️ ' + t.search.grooming}
               </button>
             ))}
-          </div>
+          </ResponsiveGrid>
         </div>
 
         <div style={{ marginBottom: '20px' }}>
