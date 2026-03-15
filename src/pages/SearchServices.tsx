@@ -24,11 +24,10 @@ export default function SearchServices() {
   const [loading, setLoading] = useState(true);
   const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet' | 'grooming'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(50);
-  const [showAllServices, setShowAllServices] = useState(true);
   const [manualLocation, setManualLocation] = useState('');
   const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
   const isLoadingRef = useRef(false);
@@ -214,14 +213,11 @@ export default function SearchServices() {
       })();
 
       const matchesDistance = (() => {
-        // Si está activado "mostrar todos", ignorar el filtro de distancia
-        if (showAllServices) return true;
         if (!userLocation || !provider.distance) return true;
         return provider.distance <= maxDistance;
       })();
 
       const matchesAvailability =
-        showAllServices ||
         provider.service_type === 'hotel' ||
         provider.service_type === 'vet' ||
         provider.service_type === 'grooming' ||
@@ -231,7 +227,7 @@ export default function SearchServices() {
     });
 
     return filtered;
-  }, [providers, searchTerm, userLocation, maxDistance, showAllServices]);
+  }, [providers, searchTerm, userLocation, maxDistance]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);
@@ -239,6 +235,10 @@ export default function SearchServices() {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       element.style.animation = 'highlight 1s ease';
     }
+  };
+
+  const handleMapMove = (center: { lat: number; lng: number }) => {
+    setUserLocation(center);
   };
 
   return (
@@ -520,53 +520,25 @@ export default function SearchServices() {
             </div>
 
             {userLocation && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '300px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
-                    {t.search.radiusLabel} {maxDistance}km
-                  </span>
-                  <input
-                    type="range"
-                    min="1"
-                    max="50"
-                    value={maxDistance}
-                    onChange={(e) => setMaxDistance(Number(e.target.value))}
-                    disabled={showAllServices}
-                    style={{
-                      flex: 1,
-                      height: '6px',
-                      borderRadius: '3px',
-                      background: showAllServices
-                        ? '#e2e8f0'
-                        : `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
-                      outline: 'none',
-                      cursor: showAllServices ? 'not-allowed' : 'pointer',
-                      opacity: showAllServices ? 0.5 : 1
-                    }}
-                  />
-                </div>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#64748b'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={showAllServices}
-                    onChange={(e) => setShowAllServices(e.target.checked)}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      cursor: 'pointer',
-                      accentColor: '#FF8C42'
-                    }}
-                  />
-                  Mostrar todos los servicios disponibles
-                </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '250px' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
+                  {t.search.radiusLabel} {maxDistance}km
+                </span>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  value={maxDistance}
+                  onChange={(e) => setMaxDistance(Number(e.target.value))}
+                  style={{
+                    flex: 1,
+                    height: '6px',
+                    borderRadius: '3px',
+                    background: `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                />
               </div>
             )}
 
@@ -598,6 +570,7 @@ export default function SearchServices() {
               providers={filteredProviders}
               userLocation={userLocation}
               onProviderClick={handleProviderClick}
+              onMapMove={handleMapMove}
             />
           </div>
         )}
@@ -623,13 +596,11 @@ export default function SearchServices() {
                   {filteredProviders.length} {filteredProviders.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
                 </div>
                 <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                  {showAllServices
-                    ? 'Mostrando todos los servicios disponibles'
-                    : `Dentro de un radio de ${maxDistance}km de tu ubicación`}
+                  Dentro de un radio de {maxDistance}km de tu ubicación
                 </div>
               </div>
             </div>
-            {!showAllServices && userLocation && (
+            {userLocation && (
               <div style={{
                 background: 'rgba(255, 255, 255, 0.25)',
                 padding: '10px 20px',
@@ -675,7 +646,7 @@ export default function SearchServices() {
             </p>
             <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '8px' }}>
               {providers.length > 0
-                ? 'Intenta ampliar el radio de busqueda o activar "Mostrar todos los servicios disponibles"'
+                ? 'Intenta ampliar el radio de búsqueda o mover el mapa a otra ubicación'
                 : 'No hay proveedores registrados en este momento'}
             </p>
           </div>

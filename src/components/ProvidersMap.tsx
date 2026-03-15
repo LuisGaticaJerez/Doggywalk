@@ -25,13 +25,28 @@ interface ProvidersMapProps {
   providers: Provider[];
   userLocation: { lat: number; lng: number } | null;
   onProviderClick: (providerId: string) => void;
+  onMapMove?: (center: { lat: number; lng: number }) => void;
 }
 
-function RecenterMap({ center }: { center: [number, number] }) {
+
+function MapEventHandler({ onMapMove }: { onMapMove?: (center: { lat: number; lng: number }) => void }) {
   const map = useMap();
+
   useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
+    if (!onMapMove) return;
+
+    const handleMoveEnd = () => {
+      const center = map.getCenter();
+      onMapMove({ lat: center.lat, lng: center.lng });
+    };
+
+    map.on('moveend', handleMoveEnd);
+
+    return () => {
+      map.off('moveend', handleMoveEnd);
+    };
+  }, [map, onMapMove]);
+
   return null;
 }
 
@@ -114,7 +129,7 @@ const userIcon = L.divIcon({
   iconAnchor: [12, 12]
 });
 
-export default function ProvidersMap({ providers, userLocation, onProviderClick }: ProvidersMapProps) {
+export default function ProvidersMap({ providers, userLocation, onProviderClick, onMapMove }: ProvidersMapProps) {
   const { t } = useI18n();
   const mapRef = useRef<L.Map>(null);
 
@@ -160,7 +175,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {userLocation && <RecenterMap center={[userLocation.lat, userLocation.lng]} />}
+        <MapEventHandler onMapMove={onMapMove} />
 
         {userLocation && (
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
