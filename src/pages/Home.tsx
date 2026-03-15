@@ -166,13 +166,13 @@ function Home() {
           <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '14px', fontWeight: '600' }}>
             {t.search.serviceType}
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             {['walker', 'hotel', 'vet', 'grooming'].map((type) => (
               <button
                 key={type}
                 onClick={() => setServiceType(type as any)}
                 style={{
-                  padding: '12px 16px',
+                  padding: '12px 8px',
                   border: serviceType === type ? '2px solid #FF6B6B' : '2px solid #e2e8f0',
                   borderRadius: '8px',
                   background: serviceType === type ? '#FEF2F2' : 'white',
@@ -181,8 +181,12 @@ function Home() {
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  whiteSpace: 'nowrap',
-                  textAlign: 'center'
+                  whiteSpace: 'normal',
+                  textAlign: 'center',
+                  minHeight: '48px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                 onMouseEnter={(e) => {
                   if (serviceType !== type) {
