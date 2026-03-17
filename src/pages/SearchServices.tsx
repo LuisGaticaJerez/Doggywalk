@@ -336,28 +336,38 @@ export default function SearchServices() {
     setUserLocation(center);
   };
 
-  // Separar proveedores en dos grupos: dentro y fuera del rango
-  const { providersInRange, providersOutOfRange } = useMemo(() => {
-    const referenceLocation = searchResultLocation || userLocation;
+  // Filtrar y agrupar proveedores según búsqueda activa
+  const { providersToShow, isSearchingAwayFromHome, distanceFromHome } = useMemo(() => {
+    const searchLocation = searchResultLocation || userLocation;
 
-    if (!referenceLocation) {
-      return { providersInRange: filteredProviders, providersOutOfRange: [] };
+    if (!searchLocation) {
+      return { providersToShow: [], isSearchingAwayFromHome: false, distanceFromHome: 0 };
     }
 
-    const inRange: PetMasterWithProfile[] = [];
-    const outOfRange: PetMasterWithProfile[] = [];
+    // Filtrar proveedores dentro de 50 km de la ubicación de búsqueda
+    const nearby = filteredProviders.filter(provider =>
+      provider.distance !== undefined && provider.distance <= 50
+    );
 
-    filteredProviders.forEach(provider => {
-      if (provider.distance !== undefined && provider.distance <= 50) {
-        inRange.push(provider);
-      } else if (provider.distance !== undefined && provider.distance > 50) {
-        outOfRange.push(provider);
-      } else {
-        inRange.push(provider);
-      }
-    });
+    // Determinar si está buscando lejos de su ubicación actual
+    let isAway = false;
+    let distanceAway = 0;
 
-    return { providersInRange: inRange, providersOutOfRange: outOfRange };
+    if (searchResultLocation && userLocation) {
+      distanceAway = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        searchResultLocation.lat,
+        searchResultLocation.lng
+      );
+      isAway = distanceAway > 50;
+    }
+
+    return {
+      providersToShow: nearby,
+      isSearchingAwayFromHome: isAway,
+      distanceFromHome: distanceAway
+    };
   }, [filteredProviders, userLocation, searchResultLocation]);
 
   return (
@@ -688,7 +698,7 @@ export default function SearchServices() {
               margin: '0 auto 16px'
             }} />
           </div>
-        ) : filteredProviders.length === 0 ? (
+        ) : providersToShow.length === 0 ? (
           <div style={{
             background: 'white',
             padding: '60px 40px',
@@ -703,120 +713,103 @@ export default function SearchServices() {
             </p>
             <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '8px' }}>
               {providers.length > 0
-                ? 'Intenta buscar en otra ubicación o cambiar los filtros'
+                ? 'No hay proveedores dentro de 50 km en esta ubicación. Intenta buscar en otra área.'
                 : 'No hay proveedores registrados en este momento'}
             </p>
           </div>
         ) : (
           <>
-            {providersInRange.length > 0 && (
-              <>
-                <div style={{
-                  background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
-                  padding: '20px 28px',
-                  borderRadius: '16px',
-                  marginBottom: '24px',
-                  color: 'white',
-                  boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '16px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ fontSize: '2rem' }}>📍</div>
-                    <div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
-                        {providersInRange.length} {providersInRange.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
-                      </div>
-                      <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                        Dentro de un radio de 50 km de tu ubicación
-                      </div>
+            {isSearchingAwayFromHome ? (
+              <div style={{
+                background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                padding: '20px 28px',
+                borderRadius: '16px',
+                marginBottom: '24px',
+                color: 'white',
+                boxShadow: '0 4px 16px rgba(255, 152, 0, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '2rem' }}>🚗</div>
+                  <div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+                      {providersToShow.length} {providersToShow.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                      Esta ubicación está a {distanceFromHome.toFixed(1)} km de tu ubicación actual
                     </div>
                   </div>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    padding: '10px 20px',
-                    borderRadius: '25px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    backdropFilter: 'blur(10px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span>🎯</span>
-                    Ordenados por distancia
-                  </div>
                 </div>
-
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                  gap: '24px',
-                  marginBottom: '32px'
-                }}>
-                  {providersInRange.map(provider => (
-                    <ProviderCard key={provider.id} provider={provider} />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {providersOutOfRange.length > 0 && (
-              <>
-                <div style={{
-                  background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
-                  padding: '20px 28px',
-                  borderRadius: '16px',
-                  marginBottom: '24px',
-                  color: 'white',
-                  boxShadow: '0 4px 16px rgba(255, 152, 0, 0.3)',
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  padding: '10px 20px',
+                  borderRadius: '25px',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  backdropFilter: 'blur(10px)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '16px'
+                  gap: '8px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ fontSize: '2rem' }}>🚗</div>
-                    <div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
-                        Proveedores fuera de tu ubicación habitual
-                      </div>
-                      <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                        {providersOutOfRange.length} {providersOutOfRange.length === 1 ? 'proveedor' : 'proveedores'} a más de 50 km de distancia
-                      </div>
+                  <span>⚠️</span>
+                  Lejos de tu ubicación
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                padding: '20px 28px',
+                borderRadius: '16px',
+                marginBottom: '24px',
+                color: 'white',
+                boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '2rem' }}>📍</div>
+                  <div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+                      {providersToShow.length} {providersToShow.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                      Dentro de un radio de 50 km de tu ubicación
                     </div>
                   </div>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    padding: '10px 20px',
-                    borderRadius: '25px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    backdropFilter: 'blur(10px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span>⚠️</span>
-                    Mayor distancia
-                  </div>
                 </div>
-
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                  gap: '24px'
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  padding: '10px 20px',
+                  borderRadius: '25px',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  {providersOutOfRange.map(provider => (
-                    <ProviderCard key={provider.id} provider={provider} />
-                  ))}
+                  <span>🎯</span>
+                  Ordenados por distancia
                 </div>
-              </>
+              </div>
             )}
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '24px'
+            }}>
+              {providersToShow.map(provider => (
+                <ProviderCard key={provider.id} provider={provider} />
+              ))}
+            </div>
           </>
         )}
       </div>

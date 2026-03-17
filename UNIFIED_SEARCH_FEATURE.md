@@ -1,4 +1,4 @@
-# Búsqueda Unificada - Actualización
+# Búsqueda Unificada - Actualización v2
 
 ## Cambios Implementados
 
@@ -14,19 +14,26 @@ Cuando se realiza una búsqueda:
 - Si es un proveedor, centra en su ubicación exacta
 - Si es una dirección, centra en las coordenadas geocodificadas
 
-### 3. Agrupación de Proveedores por Distancia
-Los proveedores se muestran en dos grupos:
+### 3. Búsqueda Inteligente por Ubicación
 
-#### Grupo 1: Dentro del Rango (≤ 50 km)
+#### Por Defecto (Ubicación Actual del Cliente)
 - Banner verde con icono 📍
-- Mensaje: "X proveedores encontrados dentro de un radio de 50 km"
-- Muestra proveedores cercanos a la ubicación de referencia
+- Mensaje: "X proveedores encontrados dentro de un radio de 50 km de tu ubicación"
+- Muestra SOLO proveedores dentro de 50 km de la ubicación actual del cliente
+- Ordenados por distancia desde la ubicación actual
 
-#### Grupo 2: Fuera del Rango (> 50 km)
+#### Al Buscar en Otra Ubicación (> 50 km de distancia)
 - Banner naranja con icono 🚗
-- Mensaje: "Proveedores fuera de tu ubicación habitual"
-- Indica claramente que estos proveedores están a más de 50 km
-- Solo se muestra si hay proveedores en esta categoría
+- Mensaje: "Esta ubicación está a X km de tu ubicación actual"
+- Badge: "Lejos de tu ubicación"
+- Muestra SOLO proveedores dentro de 50 km de la NUEVA ubicación buscada
+- Ordenados por distancia desde la ubicación de búsqueda
+- Alerta al cliente que está viendo resultados lejos de su ubicación habitual
+
+### 4. Lógica de Filtrado
+- **Siempre** muestra proveedores dentro de 50 km del punto de referencia (actual o buscado)
+- **Nunca** muestra todos los proveedores sin filtrar por distancia
+- Evita confusión sobre disponibilidad real de servicios
 
 ### 4. Funcionalidades Adicionales
 - Botón "Limpiar" para resetear la búsqueda
