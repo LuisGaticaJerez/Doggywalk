@@ -144,8 +144,22 @@ function Home() {
         marginBottom: '0.5rem',
         fontWeight: 'bold',
         textAlign: 'center',
-        textShadow: '0 2px 8px rgba(0,0,0,0.2)'
+        textShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '12px'
       }}>
+        <img
+          src="/Petify_huellitas.png"
+          alt="Petify Paws"
+          style={{
+            width: '48px',
+            height: '48px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+          }}
+        />
         Petify
       </h1>
       <p style={{

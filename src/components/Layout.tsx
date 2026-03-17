@@ -48,7 +48,16 @@ export default function Layout({ children }: LayoutProps) {
             alignItems: 'center',
             gap: '8px'
           }}>
-            <span>🐾</span> Petify
+            <img
+              src="/Petify_huellitas.png"
+              alt="Petify"
+              style={{
+                width: '32px',
+                height: '32px',
+                objectFit: 'contain'
+              }}
+            />
+            Petify
           </Link>
 
           {!user ? (
