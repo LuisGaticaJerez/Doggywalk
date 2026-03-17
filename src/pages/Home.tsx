@@ -125,10 +125,19 @@ function Home() {
       </div>
 
       <div style={{
-        fontSize: '5rem',
         marginBottom: '0.5rem',
         filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
-      }}>🐕</div>
+      }}>
+        <img
+          src="/petify_corazon_solo.png"
+          alt="Petify"
+          style={{
+            width: '120px',
+            height: '120px',
+            objectFit: 'contain'
+          }}
+        />
+      </div>
 
       <h1 style={{
         fontSize: '3rem',
