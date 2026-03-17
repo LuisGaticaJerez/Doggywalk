@@ -123,6 +123,7 @@ export default function SearchServices() {
   const handleUnifiedSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResultLocation(null);
+      setLocationError(null);
       return;
     }
 
@@ -130,62 +131,44 @@ export default function SearchServices() {
     setSearchTerm(query);
 
     try {
-      // Primero buscar proveedores por nombre o servicio
-      let foundProvider: PetMasterWithProfile | null = null;
-
-      for (const provider of providers) {
-        const name = provider.profiles?.full_name?.toLowerCase() || '';
-        const bio = provider.bio?.toLowerCase() || '';
-        const address = provider.address?.toLowerCase() || '';
-        const specialties = provider.specialties?.join(' ').toLowerCase() || '';
-        const queryLower = query.toLowerCase();
-
-        if (name.includes(queryLower) || bio.includes(queryLower) ||
-            address.includes(queryLower) || specialties.includes(queryLower)) {
-          foundProvider = provider;
-          break;
+      // Buscar como dirección usando geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Chile&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'DoggyWalk App'
+          }
         }
-      }
+      );
 
-      // Si se encontró un proveedor, centrar el mapa en su ubicación
-      if (foundProvider && foundProvider.latitude && foundProvider.longitude) {
-        const newLocation = {
-          lat: foundProvider.latitude,
-          lng: foundProvider.longitude
-        };
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        const newLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
+
+        // Establecer la ubicación de búsqueda
+        // Esto hará que el useMemo recalcule automáticamente:
+        // 1. Distancias desde este punto
+        // 2. Proveedores dentro de 50 km
+        // 3. Distancia desde ubicación inicial
+        // 4. Banner de alerta si está lejos
         setSearchResultLocation(newLocation);
         setLocationError(null);
+
+        console.log('Búsqueda exitosa:', {
+          query,
+          location: newLocation,
+          displayName: data[0].display_name
+        });
       } else {
-        // Si no se encontró proveedor, buscar como dirección
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Chile&limit=1`,
-            {
-              headers: {
-                'User-Agent': 'DoggyWalk App'
-              }
-            }
-          );
-
-          const data = await response.json();
-
-          if (data && data.length > 0) {
-            const { lat, lon } = data[0];
-            const newLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
-            setSearchResultLocation(newLocation);
-            setLocationError(null);
-          } else {
-            setLocationError('No se encontraron resultados para: ' + query);
-            setSearchResultLocation(null);
-          }
-        } catch (error) {
-          console.error('Error geocoding location:', error);
-          setLocationError('Error al buscar la ubicación');
-          setSearchResultLocation(null);
-        }
+        setLocationError('No se encontraron resultados para: ' + query);
+        setSearchResultLocation(null);
       }
     } catch (error) {
-      console.error('Error in unified search:', error);
+      console.error('Error geocoding location:', error);
+      setLocationError('Error al buscar la ubicación. Intenta con otro término.');
+      setSearchResultLocation(null);
     } finally {
       setIsSearching(false);
     }
@@ -284,30 +267,21 @@ export default function SearchServices() {
   };
 
   const filteredProviders = useMemo(() => {
+    // La ubicación desde donde calcular distancias: ubicación de búsqueda o ubicación actual
     const searchLocation = searchResultLocation || userLocation;
 
+    // Filtrar solo por disponibilidad (no por texto de búsqueda)
     let filtered = providers.filter(provider => {
-      const matchesSearch = (() => {
-        if (!searchTerm) return true;
-        const name = provider.profiles?.full_name?.toLowerCase() || '';
-        const bio = provider.bio?.toLowerCase() || '';
-        const address = provider.address?.toLowerCase() || '';
-        const specialties = provider.specialties?.join(' ').toLowerCase() || '';
-        const search = searchTerm.toLowerCase();
-        return name.includes(search) || bio.includes(search) ||
-               address.includes(search) || specialties.includes(search);
-      })();
-
       const matchesAvailability =
         provider.service_type === 'hotel' ||
         provider.service_type === 'vet' ||
         provider.service_type === 'grooming' ||
         provider.is_available === true;
 
-      return matchesSearch && matchesAvailability;
+      return matchesAvailability;
     });
 
-    // Recalcular distancias basadas en la ubicación de búsqueda si existe
+    // Recalcular distancias desde el punto de búsqueda
     if (searchLocation) {
       filtered = filtered.map(provider => {
         if (provider.latitude && provider.longitude) {
@@ -322,12 +296,12 @@ export default function SearchServices() {
         return { ...provider, distance: Infinity };
       });
 
-      // Ordenar por distancia
+      // Ordenar por distancia desde el punto de búsqueda
       filtered.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
     }
 
     return filtered;
-  }, [providers, searchTerm, userLocation, searchResultLocation]);
+  }, [providers, userLocation, searchResultLocation]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);
@@ -338,7 +312,11 @@ export default function SearchServices() {
   };
 
   const handleMapMove = (center: { lat: number; lng: number }) => {
-    setUserLocation(center);
+    // Solo actualizar la vista del mapa, no afectar búsquedas
+    // Si hay una búsqueda activa, mantenerla
+    if (!searchResultLocation) {
+      setUserLocation(center);
+    }
   };
 
   // Filtrar y agrupar proveedores según búsqueda activa
@@ -795,7 +773,9 @@ export default function SearchServices() {
                       {providersToShow.length} {providersToShow.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
                     </div>
                     <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                      Dentro de un radio de 50 km de tu ubicación
+                      {searchResultLocation
+                        ? 'Dentro de un radio de 50 km del punto de búsqueda'
+                        : 'Dentro de un radio de 50 km de tu ubicación'}
                     </div>
                   </div>
                 </div>
