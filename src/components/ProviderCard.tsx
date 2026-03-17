@@ -71,6 +71,23 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   const allServices = provider.provider_services?.map(ps => ps.service_type) || [provider.service_type];
   const uniqueServices = Array.from(new Set(allServices));
 
+  const handleBookingClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      const currentUrl = window.location.pathname + window.location.search;
+      const searchParams = new URLSearchParams(window.location.search);
+
+      const searchState = {
+        serviceType: searchParams.get('service') || 'all',
+        searchTerm: searchParams.get('address') || '',
+        from: currentUrl
+      };
+
+      sessionStorage.setItem('searchState', JSON.stringify(searchState));
+      window.location.href = `/login?redirect=/provider/${provider.id}/book`;
+    }
+  };
+
   useEffect(() => {
     isMountedRef.current = true;
     loadProviderDetails();
@@ -434,6 +451,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
 
         <Link
           to={user ? `/provider/${provider.id}/book` : `/login?redirect=/provider/${provider.id}/book`}
+          onClick={handleBookingClick}
           style={{
             display: 'flex',
             alignItems: 'center',

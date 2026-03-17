@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -11,6 +11,7 @@ export default function Login() {
   const { signIn } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +24,25 @@ export default function Login() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/dashboard');
+      const redirect = searchParams.get('redirect');
+      const searchState = sessionStorage.getItem('searchState');
+
+      if (redirect) {
+        navigate(redirect);
+      } else if (searchState) {
+        try {
+          const state = JSON.parse(searchState);
+          if (state.from) {
+            navigate(state.from);
+          } else {
+            navigate('/search');
+          }
+        } catch (e) {
+          navigate('/dashboard');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 

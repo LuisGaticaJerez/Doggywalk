@@ -47,7 +47,25 @@ export default function Register() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/dashboard');
+      const redirect = searchParams.get('redirect');
+      const searchState = sessionStorage.getItem('searchState');
+
+      if (redirect) {
+        navigate(redirect);
+      } else if (searchState) {
+        try {
+          const state = JSON.parse(searchState);
+          if (state.from) {
+            navigate(state.from);
+          } else {
+            navigate('/search');
+          }
+        } catch (e) {
+          navigate('/dashboard');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 

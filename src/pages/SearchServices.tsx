@@ -42,6 +42,25 @@ export default function SearchServices() {
     setUserLocation(defaultLocation);
     setInitialUserLocation(defaultLocation);
 
+    const savedSearchState = sessionStorage.getItem('searchState');
+    if (savedSearchState) {
+      try {
+        const state = JSON.parse(savedSearchState);
+        if (state.serviceType) setServiceType(state.serviceType);
+        if (state.searchTerm) {
+          setSearchTerm(state.searchTerm);
+          setTimeout(() => {
+            handleUnifiedSearch(state.searchTerm);
+          }, 800);
+        }
+        if (state.searchResultLocation) setSearchResultLocation(state.searchResultLocation);
+        sessionStorage.removeItem('searchState');
+        hasProcessedParams.current = true;
+      } catch (e) {
+        console.error('Error restoring search state:', e);
+      }
+    }
+
     return () => {
       isMountedRef.current = false;
     };
