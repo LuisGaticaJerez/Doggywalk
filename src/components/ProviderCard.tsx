@@ -65,6 +65,8 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   const [hotelAmenities, setHotelAmenities] = useState<HotelAmenities | null>(null);
   const [vetServices, setVetServices] = useState<VetServices | null>(null);
   const [todayHours, setTodayHours] = useState<ServiceHours | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const isMountedRef = useRef(true);
 
   const mainServiceColor = getServiceColor(provider.service_type);
@@ -91,11 +93,14 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
   useEffect(() => {
     isMountedRef.current = true;
     loadProviderDetails();
+    if (user) {
+      checkFavoriteStatus();
+    }
 
     return () => {
       isMountedRef.current = false;
     };
-  }, [provider.id, provider.service_type]);
+  }, [provider.id, provider.service_type, user]);
 
   const loadProviderDetails = async () => {
     const { data: photos } = await supabase
@@ -166,6 +171,58 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
     return serviceList.filter(s => s.value).slice(0, 3);
   };
 
+  const checkFavoriteStatus = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('favorite_providers')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('provider_id', provider.id)
+      .maybeSingle();
+
+    if (isMountedRef.current) {
+      setIsFavorite(!!data);
+    }
+  };
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      window.location.href = `/login?redirect=/provider/${provider.id}`;
+      return;
+    }
+
+    setFavoriteLoading(true);
+
+    try {
+      if (isFavorite) {
+        await supabase
+          .from('favorite_providers')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider_id', provider.id);
+
+        setIsFavorite(false);
+      } else {
+        await supabase
+          .from('favorite_providers')
+          .insert({
+            user_id: user.id,
+            provider_id: provider.id
+          });
+
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
   return (
     <div
       id={`provider-${provider.id}`}
@@ -197,6 +254,38 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
         position: 'relative'
       }}>
         {!coverPhoto && mainServiceColor.emoji}
+
+        <button
+          onClick={toggleFavorite}
+          disabled={favoriteLoading}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: 'none',
+            padding: '8px',
+            borderRadius: '50%',
+            cursor: favoriteLoading ? 'not-allowed' : 'pointer',
+            fontSize: '20px',
+            lineHeight: '1',
+            transition: 'transform 0.2s',
+            zIndex: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+          }}
+          onMouseEnter={(e) => {
+            if (!favoriteLoading) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          {favoriteLoading ? '⏳' : isFavorite ? '❤️' : '🤍'}
+        </button>
+
         {(provider.avg_rating && provider.avg_rating > 0) && (
           <div style={{
             position: 'absolute',
@@ -219,7 +308,7 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
           <div style={{
             position: 'absolute',
             top: '12px',
-            left: '12px',
+            left: user ? '56px' : '12px',
             background: 'rgba(255, 255, 255, 0.95)',
             padding: '6px 10px',
             borderRadius: '20px',

@@ -1051,24 +1051,52 @@ export default function ProviderDashboard() {
               </Link>
 
               <Link
-                to="/settings"
+                to="/manage-pricing"
                 style={{
-                  background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                  background: 'linear-gradient(135deg, #4CAF50 0%, #45A049 100%)',
                   color: 'white',
                   padding: '24px',
                   borderRadius: '16px',
                   textDecoration: 'none',
                   textAlign: 'center',
-                  boxShadow: '0 4px 16px rgba(139, 92, 246, 0.3)',
+                  boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
                   transition: 'transform 0.2s, box-shadow 0.2s',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(76, 175, 80, 0.4)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(139, 92, 246, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(76, 175, 80, 0.3)';
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💰</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '4px' }}>
+                  Precios Dinámicos
+                </h3>
+                <p style={{ fontSize: '13px', opacity: 0.9 }}>Ajusta precios por horario</p>
+              </Link>
+
+              <Link
+                to="/settings"
+                style={{
+                  background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
+                  color: 'white',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 16px rgba(156, 39, 176, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(156, 39, 176, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(156, 39, 176, 0.3)';
                 }}
               >
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👤</div>

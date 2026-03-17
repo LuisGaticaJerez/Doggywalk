@@ -424,6 +424,34 @@ export default function Dashboard() {
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>{t.dashboard.myPets}</h3>
                 <p style={{ fontSize: '14px', opacity: 0.9 }}>{t.dashboard.managePets}</p>
               </Link>
+
+              <Link
+                to="/favorites"
+                style={{
+                  background: 'linear-gradient(135deg, #E91E63 0%, #C2185B 100%)',
+                  color: 'white',
+                  padding: '32px 24px',
+                  borderRadius: '20px',
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  boxShadow: '0 8px 20px rgba(233, 30, 99, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(233, 30, 99, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(233, 30, 99, 0.3)';
+                }}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>❤️</div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '8px' }}>Favoritos</h3>
+                <p style={{ fontSize: '14px', opacity: 0.9 }}>Tus proveedores favoritos</p>
+              </Link>
             </div>
           </div>
       </div>

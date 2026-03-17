@@ -27,10 +27,12 @@ const ProviderOnboarding = lazy(() => import('./pages/ProviderOnboarding'))
 const ManageServices = lazy(() => import('./pages/ManageServices'))
 const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
 const ManageAvailability = lazy(() => import('./pages/ManageAvailability'))
+const ManagePricing = lazy(() => import('./pages/ManagePricing'))
 const IdentityVerificationPage = lazy(() => import('./pages/IdentityVerificationPage'))
 const Support = lazy(() => import('./pages/Support'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const RecurringSeries = lazy(() => import('./pages/RecurringSeries'))
+const Favorites = lazy(() => import('./pages/Favorites'))
 
 function App() {
   return (
@@ -156,9 +158,21 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/manage-pricing" element={
+            <ProtectedRoute requireRole="pet_master">
+              <ManagePricing />
+            </ProtectedRoute>
+          } />
+
           <Route path="/chat" element={
             <ProtectedRoute>
               <Chat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/favorites" element={
+            <ProtectedRoute>
+              <Favorites />
             </ProtectedRoute>
           } />
 

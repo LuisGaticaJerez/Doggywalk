@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import CalendarView from '../components/CalendarView';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -49,6 +50,10 @@ export default function ManageAvailability() {
     is_available: false,
     reason: ''
   });
+  const [bufferMinutes, setBufferMinutes] = useState(0);
+  const [maxConcurrentBookings, setMaxConcurrentBookings] = useState(1);
+  const [allowGroupBookings, setAllowGroupBookings] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(true);
 
   useEffect(() => {
     loadAvailability();
@@ -59,6 +64,18 @@ export default function ManageAvailability() {
 
     try {
       setLoading(true);
+
+      const { data: providerData } = await supabase
+        .from('pet_masters')
+        .select('buffer_minutes, max_concurrent_bookings, allow_group_bookings')
+        .eq('id', profile.id)
+        .single();
+
+      if (providerData) {
+        setBufferMinutes(providerData.buffer_minutes || 0);
+        setMaxConcurrentBookings(providerData.max_concurrent_bookings || 1);
+        setAllowGroupBookings(providerData.allow_group_bookings || false);
+      }
 
       const [hoursRes, exceptionsRes] = await Promise.all([
         supabase
@@ -202,6 +219,33 @@ export default function ManageAvailability() {
     }
   };
 
+  const saveAdvancedSettings = async () => {
+    if (!profile?.id) return;
+
+    try {
+      setSaving(true);
+
+      const { error } = await supabase
+        .from('pet_masters')
+        .update({
+          buffer_minutes: bufferMinutes,
+          max_concurrent_bookings: maxConcurrentBookings,
+          allow_group_bookings: allowGroupBookings,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      showToast('Configuración guardada exitosamente', 'success');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      showToast('Error al guardar configuración', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -255,6 +299,146 @@ export default function ManageAvailability() {
         }}>
           Configura tus horarios de atención y días disponibles
         </p>
+
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '24px',
+          flexWrap: 'wrap'
+        }}>
+          <button
+            onClick={() => setShowCalendar(!showCalendar)}
+            style={{
+              padding: '10px 20px',
+              background: showCalendar ? theme.colors.primary : theme.colors.background.light,
+              color: showCalendar ? 'white' : theme.colors.text.primary,
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            📅 Vista de Calendario
+          </button>
+        </div>
+
+        {showCalendar && (
+          <div style={{ marginBottom: '24px' }}>
+            <CalendarView providerId={profile!.id} />
+          </div>
+        )}
+
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          marginBottom: '24px',
+          boxShadow: theme.shadows.md
+        }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: theme.colors.text.primary,
+            marginBottom: '20px'
+          }}>
+            ⚙️ Configuración Avanzada
+          </h2>
+
+          <div style={{ display: 'grid', gap: '20px' }}>
+            <div>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '500',
+                color: theme.colors.text.primary
+              }}>
+                Tiempo de preparación entre citas (minutos)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="60"
+                value={bufferMinutes}
+                onChange={(e) => setBufferMinutes(parseInt(e.target.value) || 0)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: `1px solid ${theme.colors.border.default}`,
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+              <p style={{ fontSize: '12px', color: theme.colors.text.tertiary, marginTop: '4px' }}>
+                Tiempo adicional entre citas para preparación, limpieza, etc.
+              </p>
+            </div>
+
+            <div>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '500',
+                color: theme.colors.text.primary
+              }}>
+                Capacidad máxima de reservas simultáneas
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value={maxConcurrentBookings}
+                onChange={(e) => setMaxConcurrentBookings(parseInt(e.target.value) || 1)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: `1px solid ${theme.colors.border.default}`,
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+              <p style={{ fontSize: '12px', color: theme.colors.text.tertiary, marginTop: '4px' }}>
+                Número de reservas que puedes atender al mismo tiempo (útil para clases grupales)
+              </p>
+            </div>
+
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={allowGroupBookings}
+                  onChange={(e) => setAllowGroupBookings(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <span style={{ fontWeight: '500', color: theme.colors.text.primary }}>
+                  Permitir reservas grupales
+                </span>
+              </label>
+              <p style={{ fontSize: '12px', color: theme.colors.text.tertiary, marginTop: '4px', marginLeft: '26px' }}>
+                Permite que varios clientes reserven el mismo horario
+              </p>
+            </div>
+
+            <button
+              onClick={saveAdvancedSettings}
+              disabled={saving}
+              style={{
+                padding: '12px 24px',
+                background: theme.colors.secondary,
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.6 : 1,
+                boxShadow: theme.shadows.md
+              }}
+            >
+              {saving ? 'Guardando...' : 'Guardar Configuración'}
+            </button>
+          </div>
+        </div>
 
         {/* Weekly Schedule */}
         <div style={{

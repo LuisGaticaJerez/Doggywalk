@@ -6,6 +6,8 @@ interface TimeSlot {
   slot_start: string;
   slot_end: string;
   is_available: boolean;
+  price: number;
+  capacity_available: number;
 }
 
 interface AvailableTimeSlotsProps {
@@ -218,12 +220,22 @@ export default function AvailableTimeSlots({
               <div style={{ fontSize: '15px', marginBottom: '2px' }}>
                 {slot.slot_start.substring(0, 5)}
               </div>
+              {slot.price && (
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  marginBottom: '2px',
+                  color: isSelected ? 'white' : theme.colors.primary
+                }}>
+                  ${slot.price.toFixed(0)}
+                </div>
+              )}
               <div style={{
                 fontSize: '11px',
                 opacity: 0.8,
                 color: isSelected ? 'white' : theme.colors.text.tertiary
               }}>
-                {duration} min
+                {slot.capacity_available > 1 ? `${slot.capacity_available} spots` : `${duration} min`}
               </div>
             </button>
           );

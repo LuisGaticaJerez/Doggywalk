@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { Booking } from '../types';
 import { getStatusColor } from '../utils/statusColors';
 import { calculateCancellationRefund, cancelBookingWithRefund, CancellationResult } from '../utils/cancellationLogic';
+import { exportBookingsToCalendar } from '../utils/calendarExport';
 
 interface BookingWithDetails extends Booking {
   pets?: { name: string };
@@ -273,6 +274,32 @@ export default function Bookings() {
           border: '1px solid #e2e8f0',
           marginBottom: '24px'
         }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => exportBookingsToCalendar(filteredBookings)}
+                disabled={filteredBookings.length === 0}
+                style={{
+                  padding: '8px 16px',
+                  background: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: filteredBookings.length === 0 ? 'not-allowed' : 'pointer',
+                  opacity: filteredBookings.length === 0 ? 0.5 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title="Exportar a archivo iCalendar (.ics)"
+              >
+                📅 Exportar
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             {(['all', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled'] as const).map(status => (
               <button
