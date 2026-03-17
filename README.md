@@ -1,10 +1,10 @@
-# 🐾 DoggyWalk - Professional Pet Care Platform
+# 🐾 Petify - Professional Pet Care Platform
 
-**Version:** 2.1.0
+**Version:** 2.2.0
 **Status:** Production Ready ✅
-**Last Updated:** March 15, 2026
+**Last Updated:** March 17, 2026
 
-DoggyWalk is a comprehensive, full-featured platform connecting pet owners with professional pet care providers. Built with React, TypeScript, and Supabase, it offers walker services, pet hotels, veterinary care, and advanced features like multi-pet bookings, real-time GPS tracking, and multi-language support.
+Petify is a comprehensive, full-featured platform connecting pet owners with professional pet care providers. Built with React, TypeScript, and Supabase, it offers walker services, pet hotels, veterinary care, grooming services, and advanced features like multi-pet bookings, real-time GPS tracking, and multi-language support.
 
 ---
 
@@ -102,7 +102,7 @@ DoggyWalk is a comprehensive, full-featured platform connecting pet owners with 
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd doggywalk
+cd petify
 ```
 
 2. **Install dependencies**
@@ -154,7 +154,7 @@ Navigate to `http://localhost:5173`
 ## 📁 Project Structure
 
 ```
-doggywalk/
+petify/
 ├── src/
 │   ├── components/          # Reusable UI components
 │   │   ├── BackButton.tsx
@@ -1120,13 +1120,23 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 
 ---
 
-**DoggyWalk** - Connecting pets with the care they deserve 🐾
+**Petify** - Connecting pets with the care they deserve 🐾
 
-**Version:** 2.1.0 | **Status:** Production Ready ✅ | **Updated:** March 15, 2026
+**Version:** 2.2.0 | **Status:** Production Ready ✅ | **Updated:** March 17, 2026
 
 ---
 
-## 🆕 What's New in v2.1.0 (March 15, 2026)
+## 🆕 What's New in v2.2.0 (March 17, 2026)
+
+### Brand Refresh
+- **New Brand Identity:** Application rebranded from DoggyWalk to Petify
+- **Updated Logo:** New heart-shaped logo featuring a dog and cat together
+- **Visual Improvements:** Logo now displayed on home page and throughout the application
+- **Updated Documentation:** All documentation updated to reflect the new brand name
+
+---
+
+## What's New in v2.1.0 (March 15, 2026)
 
 ### Map-First Search Experience
 - **Dynamic Location-Based Search:** Map view is now the default when searching for providers

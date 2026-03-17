@@ -146,7 +146,7 @@ function Home() {
         textAlign: 'center',
         textShadow: '0 2px 8px rgba(0,0,0,0.2)'
       }}>
-        🐾 DoggyWalk
+        Petify
       </h1>
       <p style={{
         fontSize: '1.25rem',

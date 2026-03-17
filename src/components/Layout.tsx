@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
             alignItems: 'center',
             gap: '8px'
           }}>
-            <span>🐾</span> DoggyWalk
+            <span>🐾</span> Petify
           </Link>
 
           {!user ? (

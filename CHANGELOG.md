@@ -1,6 +1,64 @@
-# Changelog - DoggyWalk
+# Changelog - Petify
 
 All notable changes to this project will be documented in this file.
+
+---
+
+## [2.2.0] - 2026-03-17
+
+### 🎨 Brand Refresh - Petify Launch
+
+### ✨ New Brand Identity
+
+#### Rebranding
+- **New Name:** Application rebranded from DoggyWalk to Petify
+- **New Logo:** Heart-shaped logo featuring a dog and cat together
+- **Updated Visuals:** Logo displayed on home page (120x120px)
+- **Brand Colors:** Maintained warm orange, yellow gradients for consistency
+- **Mission:** Connecting pets with the care they deserve
+
+#### Visual Updates
+- Home page hero section now shows Petify logo
+- Navigation bar updated with Petify branding
+- HTML title updated to "Petify - Pet Services Platform"
+- Package name updated to "petify"
+
+### 📚 Documentation Updates
+
+#### New Documentation
+- **BRANDING.md** - Comprehensive brand guidelines including:
+  - Brand identity and mission
+  - Logo usage guidelines
+  - Color palette specifications
+  - Typography standards
+  - Design principles
+  - UI component guidelines
+  - Voice and tone guidelines
+  - Photography standards
+  - Multi-language considerations
+  - Accessibility requirements
+  - Animation principles
+
+#### Updated Documentation
+- **README.md** - Updated to v2.2.0 with Petify branding
+- **CHANGELOG.md** - Added v2.2.0 release notes
+- All documentation references updated from DoggyWalk to Petify
+- Version bumped to 2.2.0 across all documentation
+
+### 🔧 Technical Changes
+
+- Package name: `doggywalk` → `petify`
+- HTML title: "Doggywalk" → "Petify"
+- Home page branding updated
+- Navigation branding updated
+- Logo asset: `/public/petify_corazon_solo.png`
+
+### 📊 Metrics
+
+- Version: 2.1.0 → 2.2.0
+- Documentation Files: +1 (BRANDING.md)
+- Updated Files: 5+ (package.json, index.html, Home.tsx, Layout.tsx, README.md, CHANGELOG.md)
+- Logo Asset: Added petify_corazon_solo.png
 
 ---
 
@@ -567,7 +625,7 @@ src/
 
 ## Contributors
 
-DoggyWalk Platform Development Team
+Petify Platform Development Team
 
 ## License
 
@@ -577,5 +635,6 @@ Proprietary - All rights reserved
 
 **For detailed documentation, see:**
 - `README.md` - Complete overview
+- `BRANDING.md` - Brand guidelines
 - `APPLICATION_FLOW.md` - User journey diagrams
 - `CAPACIDADES.md` - Detailed features (Spanish)
