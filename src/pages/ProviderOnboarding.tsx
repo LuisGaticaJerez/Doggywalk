@@ -26,7 +26,7 @@ interface ServiceData {
 }
 
 export default function ProviderOnboarding() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, refreshProfile, signOut } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -139,6 +139,13 @@ export default function ProviderOnboarding() {
 
   const needsIdentityVerification = () => {
     return businessType === 'individual' && selectedServices.includes('walker');
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm('¿Estás seguro que deseas salir? Perderás el progreso actual.')) {
+      await signOut();
+      navigate('/login');
+    }
   };
 
   const handleSaveAndContinue = async () => {
@@ -279,7 +286,34 @@ export default function ProviderOnboarding() {
           padding: '40px',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ position: 'relative', textAlign: 'center', marginBottom: '32px' }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              padding: '8px 16px',
+              background: 'transparent',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#64748b',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#FF6B6B';
+              e.currentTarget.style.color = '#FF6B6B';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            Cerrar Sesión
+          </button>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>
             ¡Bienvenido a DoggyWalk! 👋
           </h1>
