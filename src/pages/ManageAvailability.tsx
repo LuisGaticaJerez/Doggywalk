@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import CalendarView from '../components/CalendarView';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -36,7 +36,6 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function ManageAvailability() {
-  const navigate = useNavigate();
   const { profile } = useAuth();
   const { showToast } = useToast();
   const { t } = useI18n();
@@ -269,20 +268,10 @@ export default function ManageAvailability() {
     <Layout>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
         <div style={{ marginBottom: '24px' }}>
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              padding: '8px 16px',
-              background: theme.colors.gray[100],
-              color: theme.colors.text.primary,
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
-            ← Volver
-          </button>
+          <BackButton
+            color="#FF8C42"
+            requireLogout={!profile?.onboarding_completed}
+          />
         </div>
 
         <h1 style={{

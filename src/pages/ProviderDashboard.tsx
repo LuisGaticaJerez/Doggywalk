@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useToast } from '../contexts/ToastContext';
@@ -306,36 +307,12 @@ export default function ProviderDashboard() {
     <Layout>
       <div>
         <div style={{ marginBottom: '16px' }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              background: 'white',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              color: '#64748b',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f8fafc';
-              e.currentTarget.style.borderColor = '#FF8C42';
-              e.currentTarget.style.color = '#FF8C42';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'white';
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.color = '#64748b';
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>←</span>
-            <span>Volver al Inicio</span>
-          </button>
+          <BackButton
+            to="/"
+            label="Volver al Inicio"
+            color="#FF8C42"
+            requireLogout={!profile?.onboarding_completed}
+          />
         </div>
 
         <div

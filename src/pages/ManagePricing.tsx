@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BackButton from '../components/BackButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
@@ -22,7 +22,6 @@ interface PriceModifier {
 const DAYS_OF_WEEK = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export default function ManagePricing() {
-  const navigate = useNavigate();
   const { profile } = useAuth();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -201,20 +200,10 @@ export default function ManagePricing() {
     <Layout>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
         <div style={{ marginBottom: '24px' }}>
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              padding: '8px 16px',
-              background: theme.colors.gray[100],
-              color: theme.colors.text.primary,
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
-            ← Volver
-          </button>
+          <BackButton
+            color="#FF8C42"
+            requireLogout={!profile?.onboarding_completed}
+          />
         </div>
 
         <h1 style={{

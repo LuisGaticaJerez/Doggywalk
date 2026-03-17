@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import IdentityVerification from '../components/IdentityVerification';
 import LoadingFallback from '../components/LoadingFallback';
+import BackButton from '../components/BackButton';
 
 export default function IdentityVerificationPage() {
   const { profile } = useAuth();
@@ -46,23 +47,13 @@ export default function IdentityVerificationPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)', padding: '40px 20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <button
-          onClick={() => navigate('/dashboard')}
-          style={{
-            marginBottom: '20px',
-            padding: '10px 20px',
-            background: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#FF8C42',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}
-        >
-          ← Volver al Dashboard
-        </button>
+        <div style={{ marginBottom: '20px' }}>
+          <BackButton
+            label="Volver"
+            color="#FF8C42"
+            requireLogout={!profile?.onboarding_completed}
+          />
+        </div>
 
         <div style={{
           background: 'white',

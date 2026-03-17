@@ -1,15 +1,26 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BackButtonProps {
   to?: string;
   label?: string;
   color?: string;
+  requireLogout?: boolean;
 }
 
-export default function BackButton({ to, label = 'Volver', color = '#64748b' }: BackButtonProps) {
+export default function BackButton({ to, label = 'Volver', color = '#64748b', requireLogout = false }: BackButtonProps) {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    if (requireLogout) {
+      if (window.confirm('Para salir de esta sección debes cerrar sesión. ¿Deseas continuar?')) {
+        await signOut();
+        navigate('/login');
+      }
+      return;
+    }
+
     if (to) {
       navigate(to);
     } else {
