@@ -27,9 +27,8 @@ export default function SearchServices() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [maxDistance, setMaxDistance] = useState<number>(50);
-  const [manualLocation, setManualLocation] = useState('');
-  const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResultLocation, setSearchResultLocation] = useState<{ lat: number; lng: number } | null>(null);
   const isLoadingRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -116,35 +115,74 @@ export default function SearchServices() {
     }
   };
 
-  const handleManualLocationSearch = async () => {
-    if (!manualLocation.trim()) return;
+  const handleUnifiedSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResultLocation(null);
+      return;
+    }
 
-    setIsGeocodingLocation(true);
+    setIsSearching(true);
+    setSearchTerm(query);
+
     try {
-      // Usar Nominatim (OpenStreetMap) para geocodificar
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocation)}&limit=1`,
-        {
-          headers: {
-            'User-Agent': 'DoggyWalk App'
-          }
+      // Primero buscar proveedores por nombre o servicio
+      let foundProvider: PetMasterWithProfile | null = null;
+
+      for (const provider of providers) {
+        const name = provider.profiles?.full_name?.toLowerCase() || '';
+        const bio = provider.bio?.toLowerCase() || '';
+        const address = provider.address?.toLowerCase() || '';
+        const specialties = provider.specialties?.join(' ').toLowerCase() || '';
+        const queryLower = query.toLowerCase();
+
+        if (name.includes(queryLower) || bio.includes(queryLower) ||
+            address.includes(queryLower) || specialties.includes(queryLower)) {
+          foundProvider = provider;
+          break;
         }
-      );
+      }
 
-      const data = await response.json();
-
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        setUserLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+      // Si se encontró un proveedor, centrar el mapa en su ubicación
+      if (foundProvider && foundProvider.latitude && foundProvider.longitude) {
+        const newLocation = {
+          lat: foundProvider.latitude,
+          lng: foundProvider.longitude
+        };
+        setSearchResultLocation(newLocation);
         setLocationError(null);
       } else {
-        setLocationError('No se pudo encontrar la ubicación');
+        // Si no se encontró proveedor, buscar como dirección
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Chile&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'DoggyWalk App'
+              }
+            }
+          );
+
+          const data = await response.json();
+
+          if (data && data.length > 0) {
+            const { lat, lon } = data[0];
+            const newLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
+            setSearchResultLocation(newLocation);
+            setLocationError(null);
+          } else {
+            setLocationError('No se encontraron resultados para: ' + query);
+            setSearchResultLocation(null);
+          }
+        } catch (error) {
+          console.error('Error geocoding location:', error);
+          setLocationError('Error al buscar la ubicación');
+          setSearchResultLocation(null);
+        }
       }
     } catch (error) {
-      console.error('Error geocoding location:', error);
-      setLocationError('Error al buscar la ubicación');
+      console.error('Error in unified search:', error);
     } finally {
-      setIsGeocodingLocation(false);
+      setIsSearching(false);
     }
   };
 
@@ -241,19 +279,18 @@ export default function SearchServices() {
   };
 
   const filteredProviders = useMemo(() => {
-    const filtered = providers.filter(provider => {
+    const searchLocation = searchResultLocation || userLocation;
+
+    let filtered = providers.filter(provider => {
       const matchesSearch = (() => {
         if (!searchTerm) return true;
         const name = provider.profiles?.full_name?.toLowerCase() || '';
         const bio = provider.bio?.toLowerCase() || '';
+        const address = provider.address?.toLowerCase() || '';
         const specialties = provider.specialties?.join(' ').toLowerCase() || '';
         const search = searchTerm.toLowerCase();
-        return name.includes(search) || bio.includes(search) || specialties.includes(search);
-      })();
-
-      const matchesDistance = (() => {
-        if (!userLocation || !provider.distance) return true;
-        return provider.distance <= maxDistance;
+        return name.includes(search) || bio.includes(search) ||
+               address.includes(search) || specialties.includes(search);
       })();
 
       const matchesAvailability =
@@ -262,11 +299,30 @@ export default function SearchServices() {
         provider.service_type === 'grooming' ||
         provider.is_available === true;
 
-      return matchesSearch && matchesDistance && matchesAvailability;
+      return matchesSearch && matchesAvailability;
     });
 
+    // Recalcular distancias basadas en la ubicación de búsqueda si existe
+    if (searchLocation) {
+      filtered = filtered.map(provider => {
+        if (provider.latitude && provider.longitude) {
+          const distance = calculateDistance(
+            searchLocation.lat,
+            searchLocation.lng,
+            provider.latitude,
+            provider.longitude
+          );
+          return { ...provider, distance };
+        }
+        return { ...provider, distance: Infinity };
+      });
+
+      // Ordenar por distancia
+      filtered.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+    }
+
     return filtered;
-  }, [providers, searchTerm, userLocation, maxDistance]);
+  }, [providers, searchTerm, userLocation, searchResultLocation]);
 
   const handleProviderClick = (providerId: string) => {
     const element = document.getElementById(`provider-${providerId}`);
@@ -279,6 +335,30 @@ export default function SearchServices() {
   const handleMapMove = (center: { lat: number; lng: number }) => {
     setUserLocation(center);
   };
+
+  // Separar proveedores en dos grupos: dentro y fuera del rango
+  const { providersInRange, providersOutOfRange } = useMemo(() => {
+    const referenceLocation = searchResultLocation || userLocation;
+
+    if (!referenceLocation) {
+      return { providersInRange: filteredProviders, providersOutOfRange: [] };
+    }
+
+    const inRange: PetMasterWithProfile[] = [];
+    const outOfRange: PetMasterWithProfile[] = [];
+
+    filteredProviders.forEach(provider => {
+      if (provider.distance !== undefined && provider.distance <= 50) {
+        inRange.push(provider);
+      } else if (provider.distance !== undefined && provider.distance > 50) {
+        outOfRange.push(provider);
+      } else {
+        inRange.push(provider);
+      }
+    });
+
+    return { providersInRange: inRange, providersOutOfRange: outOfRange };
+  }, [filteredProviders, userLocation, searchResultLocation]);
 
   return (
     <Layout>
@@ -321,72 +401,78 @@ export default function SearchServices() {
           boxShadow: '0 4px 12px rgba(255, 140, 66, 0.1)'
         }}>
           <div style={{ marginBottom: '20px' }}>
-            <input
-              type="text"
-              placeholder={`🔎 ${t.common.search}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '14px 18px',
-                border: '2px solid #FFE5B4',
-                borderRadius: '30px',
-                fontSize: '15px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                marginBottom: '12px'
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#FF8C42'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#FFE5B4'}
-            />
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
               <input
                 type="text"
-                placeholder="Buscar por ciudad o direccion"
-                value={manualLocation}
-                onChange={(e) => setManualLocation(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleManualLocationSearch()}
+                placeholder="🔎 Buscar por nombre, servicio o dirección..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleUnifiedSearch(searchTerm)}
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '2px solid #E0E0E0',
-                  borderRadius: '25px',
-                  fontSize: '14px',
+                  flex: 1,
+                  padding: '14px 18px',
+                  border: '2px solid #FFE5B4',
+                  borderRadius: '30px',
+                  fontSize: '15px',
                   outline: 'none',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
+                  transition: 'border-color 0.2s'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#4CAF50'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#E0E0E0'}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#FF8C42'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#FFE5B4'}
               />
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => handleUnifiedSearch(searchTerm)}
+                disabled={isSearching}
+                style={{
+                  padding: '10px 24px',
+                  background: isSearching ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '30px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: isSearching ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: isSearching ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isSearching ? '🔄' : '🔍 Buscar'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={getUserLocation}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '25px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Usar mi ubicación actual"
+              >
+                📍 Mi ubicación
+              </button>
+              {(searchTerm || searchResultLocation) && (
                 <button
-                  onClick={handleManualLocationSearch}
-                  disabled={isGeocodingLocation}
-                  style={{
-                    flex: 1,
-                    padding: '10px 16px',
-                    background: isGeocodingLocation ? '#CCC' : 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '25px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: isGeocodingLocation ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s',
-                    boxShadow: isGeocodingLocation ? 'none' : '0 4px 12px rgba(76, 175, 80, 0.3)',
-                    whiteSpace: 'nowrap'
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSearchResultLocation(null);
+                    setLocationError(null);
                   }}
-                >
-                  {isGeocodingLocation ? 'Buscando...' : 'Buscar'}
-                </button>
-                <button
-                  onClick={getUserLocation}
                   style={{
                     flex: 1,
                     padding: '10px 16px',
-                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                    background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '25px',
@@ -394,14 +480,13 @@ export default function SearchServices() {
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                    boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)',
                     whiteSpace: 'nowrap'
                   }}
-                  title="Usar mi ubicacion actual"
                 >
-                  Mi ubicacion
+                  ✕ Limpiar
                 </button>
-              </div>
+              )}
             </div>
           </div>
 
@@ -558,29 +643,6 @@ export default function SearchServices() {
               </button>
             </div>
 
-            {userLocation && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '250px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b', whiteSpace: 'nowrap' }}>
-                  {t.search.radiusLabel} {maxDistance}km
-                </span>
-                <input
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={maxDistance}
-                  onChange={(e) => setMaxDistance(Number(e.target.value))}
-                  style={{
-                    flex: 1,
-                    height: '6px',
-                    borderRadius: '3px',
-                    background: `linear-gradient(to right, #FF8C42 0%, #FF8C42 ${(maxDistance/50)*100}%, #e2e8f0 ${(maxDistance/50)*100}%, #e2e8f0 100%)`,
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                />
-              </div>
-            )}
-
             {locationError && (
               <div style={{
                 padding: '8px 16px',
@@ -607,54 +669,10 @@ export default function SearchServices() {
           }}>
             <ProvidersMap
               providers={filteredProviders}
-              userLocation={userLocation}
+              userLocation={searchResultLocation || userLocation}
               onProviderClick={handleProviderClick}
               onMapMove={handleMapMove}
             />
-          </div>
-        )}
-
-        {!loading && filteredProviders.length > 0 && (
-          <div style={{
-            background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
-            padding: '20px 28px',
-            borderRadius: '16px',
-            marginBottom: '24px',
-            color: 'white',
-            boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ fontSize: '2rem' }}>📍</div>
-              <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
-                  {filteredProviders.length} {filteredProviders.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                  Dentro de un radio de {maxDistance}km de tu ubicación
-                </div>
-              </div>
-            </div>
-            {userLocation && (
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.25)',
-                padding: '10px 20px',
-                borderRadius: '25px',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                backdropFilter: 'blur(10px)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>🎯</span>
-                Ordenados por distancia
-              </div>
-            )}
           </div>
         )}
 
@@ -685,20 +703,121 @@ export default function SearchServices() {
             </p>
             <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '8px' }}>
               {providers.length > 0
-                ? 'Intenta ampliar el radio de búsqueda o mover el mapa a otra ubicación'
+                ? 'Intenta buscar en otra ubicación o cambiar los filtros'
                 : 'No hay proveedores registrados en este momento'}
             </p>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '24px'
-          }}>
-            {filteredProviders.map(provider => (
-              <ProviderCard key={provider.id} provider={provider} />
-            ))}
-          </div>
+          <>
+            {providersInRange.length > 0 && (
+              <>
+                <div style={{
+                  background: 'linear-gradient(135deg, #4CAF50 0%, #45B049 100%)',
+                  padding: '20px 28px',
+                  borderRadius: '16px',
+                  marginBottom: '24px',
+                  color: 'white',
+                  boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ fontSize: '2rem' }}>📍</div>
+                    <div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+                        {providersInRange.length} {providersInRange.length === 1 ? 'proveedor encontrado' : 'proveedores encontrados'}
+                      </div>
+                      <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                        Dentro de un radio de 50 km de tu ubicación
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    padding: '10px 20px',
+                    borderRadius: '25px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>🎯</span>
+                    Ordenados por distancia
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                  gap: '24px',
+                  marginBottom: '32px'
+                }}>
+                  {providersInRange.map(provider => (
+                    <ProviderCard key={provider.id} provider={provider} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {providersOutOfRange.length > 0 && (
+              <>
+                <div style={{
+                  background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                  padding: '20px 28px',
+                  borderRadius: '16px',
+                  marginBottom: '24px',
+                  color: 'white',
+                  boxShadow: '0 4px 16px rgba(255, 152, 0, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ fontSize: '2rem' }}>🚗</div>
+                    <div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+                        Proveedores fuera de tu ubicación habitual
+                      </div>
+                      <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                        {providersOutOfRange.length} {providersOutOfRange.length === 1 ? 'proveedor' : 'proveedores'} a más de 50 km de distancia
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    padding: '10px 20px',
+                    borderRadius: '25px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>⚠️</span>
+                    Mayor distancia
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                  gap: '24px'
+                }}>
+                  {providersOutOfRange.map(provider => (
+                    <ProviderCard key={provider.id} provider={provider} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
     </Layout>

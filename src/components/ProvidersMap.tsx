@@ -50,6 +50,16 @@ function MapEventHandler({ onMapMove }: { onMapMove?: (center: { lat: number; ln
   return null;
 }
 
+function MapCenterController({ center }: { center: [number, number] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, 13, { animate: true });
+  }, [center[0], center[1], map]);
+
+  return null;
+}
+
 const createCustomIcon = (emoji: string, color: string, badges?: string[]) => {
   const badgesHtml = badges && badges.length > 0 ? `
     <div style="
@@ -176,6 +186,7 @@ export default function ProvidersMap({ providers, userLocation, onProviderClick,
         />
 
         <MapEventHandler onMapMove={onMapMove} />
+        <MapCenterController center={defaultCenter} />
 
         {userLocation && (
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
