@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import BackButton from '../components/BackButton';
 import ProvidersMap from '../components/ProvidersMap';
@@ -20,6 +21,7 @@ interface PetMasterWithProfile extends PetMaster {
 
 export default function SearchServices() {
   const { t } = useI18n();
+  const [searchParams] = useSearchParams();
   const [providers, setProviders] = useState<PetMasterWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceType, setServiceType] = useState<'all' | 'walker' | 'hotel' | 'vet' | 'grooming'>('all');
@@ -32,11 +34,10 @@ export default function SearchServices() {
   const [searchResultLocation, setSearchResultLocation] = useState<{ lat: number; lng: number } | null>(null);
   const isLoadingRef = useRef(false);
   const isMountedRef = useRef(true);
+  const hasProcessedParams = useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
-    // En Mac, es mejor no solicitar ubicación automáticamente al cargar
-    // Usar ubicación predeterminada y dejar que el usuario active manualmente
     const defaultLocation = { lat: -36.7225, lng: -73.1136 };
     setUserLocation(defaultLocation);
     setInitialUserLocation(defaultLocation);
@@ -45,6 +46,35 @@ export default function SearchServices() {
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!userLocation || hasProcessedParams.current) return;
+
+    const processUrlParams = async () => {
+      const useLocation = searchParams.get('useLocation');
+      const address = searchParams.get('address');
+      const service = searchParams.get('service');
+
+      if (service && service !== 'all') {
+        setServiceType(service as any);
+      }
+
+      if (useLocation === 'true') {
+        hasProcessedParams.current = true;
+        await getUserLocation();
+      } else if (address) {
+        hasProcessedParams.current = true;
+        setSearchTerm(address);
+        setTimeout(() => {
+          handleUnifiedSearch(address);
+        }, 500);
+      } else {
+        hasProcessedParams.current = true;
+      }
+    };
+
+    processUrlParams();
+  }, [userLocation, searchParams]);
 
   useEffect(() => {
     if (userLocation) {
