@@ -997,22 +997,22 @@ export default function ProviderDashboard() {
               <Link
                 to="/manage-services"
                 style={{
-                  background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8C42 100%)',
+                  background: 'linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%)',
                   color: 'white',
                   padding: '24px',
                   borderRadius: '16px',
                   textDecoration: 'none',
                   textAlign: 'center',
-                  boxShadow: '0 4px 16px rgba(255, 107, 107, 0.3)',
+                  boxShadow: '0 4px 16px rgba(0, 188, 212, 0.3)',
                   transition: 'transform 0.2s, box-shadow 0.2s',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 107, 107, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 188, 212, 0.4)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 107, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 188, 212, 0.3)';
                 }}
               >
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⚙️</div>
@@ -1020,6 +1020,34 @@ export default function ProviderDashboard() {
                   Gestión de Servicios
                 </h3>
                 <p style={{ fontSize: '13px', opacity: 0.9 }}>Administra tus servicios</p>
+              </Link>
+
+              <Link
+                to="/manage-availability"
+                style={{
+                  background: 'linear-gradient(135deg, #FF9800 0%, #FB8C00 100%)',
+                  color: 'white',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 16px rgba(255, 152, 0, 0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 152, 0, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 152, 0, 0.3)';
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🗓️</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '4px' }}>
+                  Disponibilidad
+                </h3>
+                <p style={{ fontSize: '13px', opacity: 0.9 }}>Configura tus horarios</p>
               </Link>
 
               <Link

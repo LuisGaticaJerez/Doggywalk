@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import { Pet, PetMaster } from '../types';
 import { createRecurringSeries, RecurringSeries } from '../utils/recurringBookings';
+import AvailableTimeSlots from '../components/AvailableTimeSlots';
 
 interface PetMasterWithProfile extends PetMaster {
   profiles?: {
@@ -150,6 +151,25 @@ export default function BookingForm() {
         navigate('/bookings');
       } else {
         const scheduledDateTime = `${formData.scheduled_date}T${formData.scheduled_time}:00`;
+        const durationMinutes = parseInt(formData.duration_minutes);
+
+        const endTime = new Date(scheduledDateTime);
+        endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+        const endTimeStr = endTime.toTimeString().substring(0, 5);
+
+        const { data: isAvailable } = await supabase
+          .rpc('is_time_slot_available', {
+            p_provider_id: providerId,
+            p_date: formData.scheduled_date,
+            p_start_time: formData.scheduled_time,
+            p_end_time: endTimeStr
+          });
+
+        if (!isAvailable) {
+          showToast('Este horario ya no está disponible. Por favor selecciona otro.', 'error');
+          setLoading(false);
+          return;
+        }
 
         const { data: booking, error: bookingError } = await supabase
           .from('bookings')
@@ -160,7 +180,7 @@ export default function BookingForm() {
             pet_count: selectedPetIds.length,
             scheduled_date: scheduledDateTime,
             booking_date: scheduledDateTime,
-            duration_minutes: parseInt(formData.duration_minutes),
+            duration_minutes: durationMinutes,
             pickup_address: formData.pickup_address,
             pickup_latitude: parseFloat(formData.pickup_latitude),
             pickup_longitude: parseFloat(formData.pickup_longitude),
@@ -174,6 +194,17 @@ export default function BookingForm() {
           .single();
 
         if (bookingError) throw bookingError;
+
+        await supabase
+          .from('time_slot_bookings')
+          .insert({
+            provider_id: providerId,
+            booking_id: booking.id,
+            slot_date: formData.scheduled_date,
+            start_time: formData.scheduled_time,
+            end_time: endTimeStr,
+            status: 'pending'
+          });
 
         const bookingPets = selectedPetIds.map(petId => ({
           booking_id: booking.id,
@@ -359,30 +390,29 @@ export default function BookingForm() {
               )}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              <div>
-                <label style={labelStyle}>{t.common.date}</label>
-                <input
-                  type="date"
-                  value={formData.scheduled_date}
-                  onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
-                  required
-                  min={new Date().toISOString().split('T')[0]}
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>{t.common.time}</label>
-                <input
-                  type="time"
-                  value={formData.scheduled_time}
-                  onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
-                  required
-                  style={inputStyle}
-                />
-              </div>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={labelStyle}>{t.common.date}</label>
+              <input
+                type="date"
+                value={formData.scheduled_date}
+                onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value, scheduled_time: '' })}
+                required
+                min={new Date().toISOString().split('T')[0]}
+                style={inputStyle}
+              />
             </div>
+
+            {formData.scheduled_date && (
+              <div style={{ marginBottom: '24px' }}>
+                <AvailableTimeSlots
+                  providerId={providerId!}
+                  selectedDate={formData.scheduled_date}
+                  selectedTime={formData.scheduled_time}
+                  duration={parseInt(formData.duration_minutes)}
+                  onTimeSelect={(time) => setFormData({ ...formData, scheduled_time: time })}
+                />
+              </div>
+            )}
 
             <div style={{ marginBottom: '24px' }}>
               <label style={labelStyle}>{t.bookings.durationMinutes}</label>

@@ -26,6 +26,7 @@ const Chat = lazy(() => import('./pages/Chat').then(module => ({ default: module
 const ProviderOnboarding = lazy(() => import('./pages/ProviderOnboarding'))
 const ManageServices = lazy(() => import('./pages/ManageServices'))
 const ManageOfferings = lazy(() => import('./pages/ManageOfferings'))
+const ManageAvailability = lazy(() => import('./pages/ManageAvailability'))
 const IdentityVerificationPage = lazy(() => import('./pages/IdentityVerificationPage'))
 const Support = lazy(() => import('./pages/Support'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
@@ -146,6 +147,12 @@ function App() {
           <Route path="/manage-offerings" element={
             <ProtectedRoute requireRole="pet_master">
               <ManageOfferings />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/manage-availability" element={
+            <ProtectedRoute requireRole="pet_master">
+              <ManageAvailability />
             </ProtectedRoute>
           } />
 
