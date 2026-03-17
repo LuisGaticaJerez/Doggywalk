@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 import IdentityVerification from '../components/IdentityVerification';
+import { formatRut, getRutError } from '../utils/rutValidation';
 
 type BusinessType = 'individual' | 'business';
 type ServiceType = 'walker' | 'hotel' | 'vet' | 'grooming';
@@ -50,6 +51,8 @@ export default function ProviderOnboarding() {
     business_name: '',
     business_tax_id: '',
   });
+
+  const [rutError, setRutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile?.onboarding_completed) {
@@ -233,6 +236,8 @@ export default function ProviderOnboarding() {
     switch (service) {
       case 'walker':
         return '🚶';
+      case 'grooming':
+        return '✂️';
       case 'hotel':
         return '🏨';
       case 'vet':
@@ -248,6 +253,8 @@ export default function ProviderOnboarding() {
         return 'Hotel para Mascotas';
       case 'vet':
         return 'Veterinaria';
+      case 'grooming':
+        return 'Peluquería Canina';
     }
   };
 
@@ -367,13 +374,14 @@ export default function ProviderOnboarding() {
                 <div style={{ display: 'grid', gap: '16px' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                      Nombre del Negocio
+                      Nombre del Negocio <span style={{ color: '#FF6B6B' }}>*</span>
                     </label>
                     <input
                       type="text"
                       value={businessData.business_name}
                       onChange={(e) => setBusinessData({ ...businessData, business_name: e.target.value })}
-                      placeholder="Hotel Canino Paradise"
+                      placeholder="Ej: Hotel Canino Paradise"
+                      required
                       style={{
                         width: '100%',
                         padding: '12px',
@@ -385,28 +393,67 @@ export default function ProviderOnboarding() {
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                      RUT o NIT
+                      RUT del Negocio <span style={{ color: '#FF6B6B' }}>*</span>
                     </label>
                     <input
                       type="text"
                       value={businessData.business_tax_id}
-                      onChange={(e) => setBusinessData({ ...businessData, business_tax_id: e.target.value })}
-                      placeholder="123456789-0"
+                      onChange={(e) => {
+                        const formatted = formatRut(e.target.value);
+                        setBusinessData({ ...businessData, business_tax_id: formatted });
+                        if (rutError) {
+                          const error = getRutError(formatted);
+                          setRutError(error);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (businessData.business_tax_id) {
+                          setRutError(getRutError(businessData.business_tax_id));
+                        }
+                      }}
+                      placeholder="12.345.678-9"
                       style={{
                         width: '100%',
                         padding: '12px',
-                        border: '2px solid #e2e8f0',
+                        border: `2px solid ${rutError ? '#FF6B6B' : '#e2e8f0'}`,
                         borderRadius: '8px',
                         fontSize: '14px',
                       }}
                     />
+                    {rutError && (
+                      <p style={{ color: '#FF6B6B', fontSize: '13px', marginTop: '6px' }}>
+                        {rutError}
+                      </p>
+                    )}
+                    <p style={{ color: '#64748b', fontSize: '12px', marginTop: '6px' }}>
+                      Formato: 12.345.678-9
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
             <button
-              onClick={() => setStep(2)}
+              onClick={() => {
+                if (businessType === 'business') {
+                  if (!businessData.business_name.trim()) {
+                    showToast('El nombre del negocio es obligatorio', 'error');
+                    return;
+                  }
+                  if (!businessData.business_tax_id.trim()) {
+                    showToast('El RUT del negocio es obligatorio', 'error');
+                    return;
+                  }
+                  const rutValidationError = getRutError(businessData.business_tax_id);
+                  if (rutValidationError) {
+                    setRutError(rutValidationError);
+                    showToast(rutValidationError, 'error');
+                    return;
+                  }
+                  setRutError(null);
+                }
+                setStep(2);
+              }}
               style={{
                 width: '100%',
                 padding: '14px',
