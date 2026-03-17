@@ -29,7 +29,7 @@ function Home() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #FF6B6B 0%, #FFA500 50%, #FFD93D 100%)',
+      background: 'linear-gradient(135deg, #00BCD4 0%, #FF9800 100%)',
       color: 'white',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '20px',
@@ -41,7 +41,7 @@ function Home() {
         top: '10%',
         left: '10%',
         fontSize: '4rem',
-        opacity: 0.2,
+        opacity: 0.15,
         animation: 'float 3s ease-in-out infinite'
       }}>🐶</div>
       <div style={{
@@ -49,7 +49,7 @@ function Home() {
         top: '20%',
         right: '15%',
         fontSize: '3rem',
-        opacity: 0.2,
+        opacity: 0.15,
         animation: 'float 4s ease-in-out infinite'
       }}>🐱</div>
       <div style={{
@@ -57,7 +57,7 @@ function Home() {
         bottom: '15%',
         left: '20%',
         fontSize: '3.5rem',
-        opacity: 0.2,
+        opacity: 0.15,
         animation: 'float 3.5s ease-in-out infinite'
       }}>🐾</div>
       <div style={{
@@ -65,7 +65,7 @@ function Home() {
         bottom: '25%',
         right: '10%',
         fontSize: '3rem',
-        opacity: 0.2,
+        opacity: 0.15,
         animation: 'float 4.5s ease-in-out infinite'
       }}>🦴</div>
 

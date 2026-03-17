@@ -21,12 +21,12 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom, #FFF9E6 0%, #f8fafc 100%)' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom, #E0F7FA 0%, #FAFAFA 100%)' }}>
       <nav style={{
         background: 'white',
-        borderBottom: '3px solid #FFD93D',
+        borderBottom: '3px solid #00BCD4',
         padding: '16px 0',
-        boxShadow: '0 2px 8px rgba(255, 140, 66, 0.1)'
+        boxShadow: '0 2px 8px rgba(0, 188, 212, 0.15)'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -39,7 +39,7 @@ export default function Layout({ children }: LayoutProps) {
           <Link to={user ? "/dashboard" : "/"} style={{
             fontSize: '1.75rem',
             fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+            background: 'linear-gradient(135deg, #00BCD4 0%, #FF9800 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -89,8 +89,8 @@ export default function Layout({ children }: LayoutProps) {
                 style={{
                   padding: '8px 16px',
                   background: 'white',
-                  color: '#FF8C42',
-                  border: '2px solid #FF8C42',
+                  color: '#00BCD4',
+                  border: '2px solid #00BCD4',
                   borderRadius: '25px',
                   fontSize: '13px',
                   fontWeight: '600',
@@ -100,7 +100,7 @@ export default function Layout({ children }: LayoutProps) {
                   whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#FFF7ED';
+                  e.currentTarget.style.background = '#E0F7FA';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'white';
@@ -113,25 +113,25 @@ export default function Layout({ children }: LayoutProps) {
                 to="/register"
                 style={{
                   padding: '8px 16px',
-                  background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+                  background: 'linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '25px',
                   fontSize: '13px',
                   fontWeight: '600',
                   textDecoration: 'none',
-                  boxShadow: '0 4px 12px rgba(255, 140, 66, 0.3)',
+                  boxShadow: '0 4px 12px rgba(0, 188, 212, 0.3)',
                   transition: 'all 0.2s',
                   display: 'inline-block',
                   whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 140, 66, 0.4)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 188, 212, 0.4)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 140, 66, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 188, 212, 0.3)';
                 }}
               >
                 {t.auth.register}

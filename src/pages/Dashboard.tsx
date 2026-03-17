@@ -75,13 +75,13 @@ export default function Dashboard() {
           <div style={{
             width: '48px',
             height: '48px',
-            border: '4px solid #FFE5B4',
-            borderTopColor: '#FF8C42',
+            border: '4px solid #B2EBF2',
+            borderTopColor: '#00BCD4',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px'
           }} />
-          <p style={{ color: '#64748b' }}>{t.common.loading}</p>
+          <p style={{ color: '#616161' }}>{t.common.loading}</p>
         </div>
       </Layout>
     );
@@ -91,16 +91,16 @@ export default function Dashboard() {
     <Layout>
       <div>
         <div style={{ marginBottom: '16px' }}>
-          <BackButton to="/" label="Volver al Inicio" color="#FF8C42" />
+          <BackButton to="/" label="Volver al Inicio" color="#00BCD4" />
         </div>
 
         <div style={{
-          background: 'linear-gradient(135deg, #FF8C42 0%, #FFA500 100%)',
+          background: 'linear-gradient(135deg, #00BCD4 0%, #FF9800 100%)',
           padding: '32px',
           borderRadius: '16px',
           marginBottom: '32px',
           color: 'white',
-          boxShadow: '0 8px 24px rgba(255, 140, 66, 0.3)',
+          boxShadow: '0 8px 24px rgba(0, 188, 212, 0.3)',
           position: 'relative',
           overflow: 'hidden'
         }}>
