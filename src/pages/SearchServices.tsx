@@ -26,6 +26,7 @@ export default function SearchServices() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [initialUserLocation, setInitialUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResultLocation, setSearchResultLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -36,7 +37,9 @@ export default function SearchServices() {
     isMountedRef.current = true;
     // En Mac, es mejor no solicitar ubicación automáticamente al cargar
     // Usar ubicación predeterminada y dejar que el usuario active manualmente
-    setUserLocation({ lat: -36.7225, lng: -73.1136 });
+    const defaultLocation = { lat: -36.7225, lng: -73.1136 };
+    setUserLocation(defaultLocation);
+    setInitialUserLocation(defaultLocation);
 
     return () => {
       isMountedRef.current = false;
@@ -72,10 +75,12 @@ export default function SearchServices() {
         (position) => {
           if (isMountedRef.current) {
             console.log('Location obtained:', position.coords.latitude, position.coords.longitude);
-            setUserLocation({
+            const newLocation = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
-            });
+            };
+            setUserLocation(newLocation);
+            setInitialUserLocation(newLocation);
             setLocationError(null);
           }
         },
@@ -353,22 +358,32 @@ export default function SearchServices() {
     let isAway = false;
     let distanceAway = 0;
 
-    if (searchResultLocation && userLocation) {
+    if (searchResultLocation && initialUserLocation) {
       distanceAway = calculateDistance(
-        userLocation.lat,
-        userLocation.lng,
+        initialUserLocation.lat,
+        initialUserLocation.lng,
         searchResultLocation.lat,
         searchResultLocation.lng
       );
       isAway = distanceAway > 50;
     }
 
+    console.log('DEBUG:', {
+      totalFiltered: filteredProviders.length,
+      nearbyProviders: nearby.length,
+      isSearchingAway: isAway,
+      distance: distanceAway,
+      hasSearchResult: !!searchResultLocation,
+      searchLocation,
+      initialLocation: initialUserLocation
+    });
+
     return {
       providersToShow: nearby,
       isSearchingAwayFromHome: isAway,
       distanceFromHome: distanceAway
     };
-  }, [filteredProviders, userLocation, searchResultLocation]);
+  }, [filteredProviders, initialUserLocation, searchResultLocation]);
 
   return (
     <Layout>
@@ -678,7 +693,7 @@ export default function SearchServices() {
             border: '3px solid #FFE5B4'
           }}>
             <ProvidersMap
-              providers={filteredProviders}
+              providers={providersToShow}
               userLocation={searchResultLocation || userLocation}
               onProviderClick={handleProviderClick}
               onMapMove={handleMapMove}
