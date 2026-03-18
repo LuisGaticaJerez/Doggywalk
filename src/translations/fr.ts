@@ -406,6 +406,13 @@ export const fr: Translations = {
     phonePlaceholder: '+33 1 23 45 67 89',
     avatarUrl: 'URL de l\'avatar',
     avatarPlaceholder: 'https://exemple.com/avatar.jpg',
+    pushNotifications: 'Notifications Push',
+    pushNotSupported: 'Votre navigateur ne prend pas en charge les notifications push',
+    pushEnabled: 'Activées',
+    pushEnabledDescription: 'Vous recevrez des notifications pour les réservations, messages et mises à jour',
+    pushDisabledDescription: 'Activez les notifications push pour rester informé de vos réservations et messages',
+    enableNotifications: 'Activer les Notifications',
+    enablingNotifications: 'Activation...',
   },
   languages: {
     en: 'English',

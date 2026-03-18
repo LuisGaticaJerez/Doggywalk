@@ -178,11 +178,11 @@ export default function Settings() {
             border: '1px solid #e2e8f0'
           }}>
             <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>
-              Push Notifications
+              {t.settings.pushNotifications}
             </h3>
             {!pushNotificationStatus.supported ? (
               <p style={{ fontSize: '14px', color: '#64748b' }}>
-                Your browser does not support push notifications
+                {t.settings.pushNotSupported}
               </p>
             ) : pushNotificationStatus.hasToken ? (
               <div>
@@ -194,17 +194,17 @@ export default function Settings() {
                     background: '#10b981'
                   }} />
                   <span style={{ fontSize: '14px', color: '#10b981', fontWeight: '500' }}>
-                    Enabled
+                    {t.settings.pushEnabled}
                   </span>
                 </div>
                 <p style={{ fontSize: '14px', color: '#64748b' }}>
-                  You will receive notifications for bookings, messages, and updates
+                  {t.settings.pushEnabledDescription}
                 </p>
               </div>
             ) : (
               <div>
                 <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>
-                  Enable push notifications to stay updated about your bookings and messages
+                  {t.settings.pushDisabledDescription}
                 </p>
                 <button
                   type="button"
@@ -221,7 +221,7 @@ export default function Settings() {
                     cursor: enablingPush ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {enablingPush ? 'Enabling...' : 'Enable Notifications'}
+                  {enablingPush ? t.settings.enablingNotifications : t.settings.enableNotifications}
                 </button>
               </div>
             )}

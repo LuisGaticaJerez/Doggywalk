@@ -406,6 +406,13 @@ export const zh: Translations = {
     phonePlaceholder: '+86 138 0000 0000',
     avatarUrl: '头像网址',
     avatarPlaceholder: 'https://example.com/avatar.jpg',
+    pushNotifications: '推送通知',
+    pushNotSupported: '您的浏览器不支持推送通知',
+    pushEnabled: '已启用',
+    pushEnabledDescription: '您将收到有关预订、消息和更新的通知',
+    pushDisabledDescription: '启用推送通知以及时了解您的预订和消息',
+    enableNotifications: '启用通知',
+    enablingNotifications: '正在启用...',
   },
   languages: {
     en: 'English',

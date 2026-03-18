@@ -404,6 +404,13 @@ export const en = {
     phonePlaceholder: '+1 (555) 123-4567',
     avatarUrl: 'Avatar URL',
     avatarPlaceholder: 'https://example.com/avatar.jpg',
+    pushNotifications: 'Push Notifications',
+    pushNotSupported: 'Your browser does not support push notifications',
+    pushEnabled: 'Enabled',
+    pushEnabledDescription: 'You will receive notifications for bookings, messages, and updates',
+    pushDisabledDescription: 'Enable push notifications to stay updated about your bookings and messages',
+    enableNotifications: 'Enable Notifications',
+    enablingNotifications: 'Enabling...',
   },
   languages: {
     en: 'English',

@@ -406,6 +406,13 @@ export const es: Translations = {
     phonePlaceholder: '+1 (555) 123-4567',
     avatarUrl: 'URL del Avatar',
     avatarPlaceholder: 'https://ejemplo.com/avatar.jpg',
+    pushNotifications: 'Notificaciones Push',
+    pushNotSupported: 'Tu navegador no soporta notificaciones push',
+    pushEnabled: 'Habilitadas',
+    pushEnabledDescription: 'Recibirás notificaciones sobre reservas, mensajes y actualizaciones',
+    pushDisabledDescription: 'Habilita las notificaciones push para estar al tanto de tus reservas y mensajes',
+    enableNotifications: 'Habilitar Notificaciones',
+    enablingNotifications: 'Habilitando...',
   },
   languages: {
     en: 'English',

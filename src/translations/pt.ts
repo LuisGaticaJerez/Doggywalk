@@ -406,6 +406,13 @@ export const pt: Translations = {
     phonePlaceholder: '+55 (11) 98765-4321',
     avatarUrl: 'URL do Avatar',
     avatarPlaceholder: 'https://exemplo.com/avatar.jpg',
+    pushNotifications: 'Notificações Push',
+    pushNotSupported: 'Seu navegador não suporta notificações push',
+    pushEnabled: 'Habilitadas',
+    pushEnabledDescription: 'Você receberá notificações sobre reservas, mensagens e atualizações',
+    pushDisabledDescription: 'Habilite as notificações push para se manter atualizado sobre suas reservas e mensagens',
+    enableNotifications: 'Habilitar Notificações',
+    enablingNotifications: 'Habilitando...',
   },
   languages: {
     en: 'English',
