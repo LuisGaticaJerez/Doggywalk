@@ -100,7 +100,7 @@ export default function Settings() {
     <Layout>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <div style={{ marginBottom: '16px' }}>
-          <BackButton color="#8B5CF6" />
+          <BackButton color="#00BCD4" />
         </div>
 
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>

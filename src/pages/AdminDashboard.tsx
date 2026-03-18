@@ -298,7 +298,7 @@ export default function AdminDashboard() {
     <Layout>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ marginBottom: '16px' }}>
-          <BackButton color="#8B5CF6" />
+          <BackButton color="#00BCD4" />
         </div>
 
         <div style={{ marginBottom: '32px' }}>
@@ -334,7 +334,7 @@ export default function AdminDashboard() {
           <MetricCard
             title="Active Bookings"
             value={metrics.activeBookings}
-            color="#8b5cf6"
+            color="#00BCD4"
           />
           <MetricCard
             title="Total Revenue"
@@ -360,9 +360,9 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('overview')}
               style={{
                 padding: '10px 20px',
-                background: activeTab === 'overview' ? '#8b5cf6' : 'white',
+                background: activeTab === 'overview' ? '#00BCD4' : 'white',
                 color: activeTab === 'overview' ? 'white' : '#64748b',
-                border: `1px solid ${activeTab === 'overview' ? '#8b5cf6' : '#e2e8f0'}`,
+                border: `1px solid ${activeTab === 'overview' ? '#00BCD4' : '#e2e8f0'}`,
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: '600',
@@ -375,9 +375,9 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('providers')}
               style={{
                 padding: '10px 20px',
-                background: activeTab === 'providers' ? '#8b5cf6' : 'white',
+                background: activeTab === 'providers' ? '#00BCD4' : 'white',
                 color: activeTab === 'providers' ? 'white' : '#64748b',
-                border: `1px solid ${activeTab === 'providers' ? '#8b5cf6' : '#e2e8f0'}`,
+                border: `1px solid ${activeTab === 'providers' ? '#00BCD4' : '#e2e8f0'}`,
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: '600',
@@ -390,9 +390,9 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('tickets')}
               style={{
                 padding: '10px 20px',
-                background: activeTab === 'tickets' ? '#8b5cf6' : 'white',
+                background: activeTab === 'tickets' ? '#00BCD4' : 'white',
                 color: activeTab === 'tickets' ? 'white' : '#64748b',
-                border: `1px solid ${activeTab === 'tickets' ? '#8b5cf6' : '#e2e8f0'}`,
+                border: `1px solid ${activeTab === 'tickets' ? '#00BCD4' : '#e2e8f0'}`,
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: '600',
