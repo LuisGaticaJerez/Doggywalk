@@ -6,6 +6,7 @@ import { ChatInput } from '../components/ChatInput';
 import { useChat } from '../hooks/useChat';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useI18n } from '../contexts/I18nContext';
 import { supabase } from '../lib/supabase';
 import type { Booking, Profile } from '../types';
 
@@ -14,6 +15,7 @@ export function Chat() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [otherUser, setOtherUser] = useState<Profile | null>(null);
@@ -54,13 +56,13 @@ export function Chat() {
 
         if (error) throw error;
         if (!data) {
-          showToast('Booking not found', 'error');
+          showToast(t.errors.bookingNotFound, 'error');
           navigate('/bookings');
           return;
         }
 
         if (data.owner_id !== user?.id && data.pet_master_id !== user?.id) {
-          showToast('You do not have access to this chat', 'error');
+          showToast(t.errors.accessDenied, 'error');
           navigate('/bookings');
           return;
         }
@@ -83,20 +85,20 @@ export function Chat() {
         }
       } catch (error) {
         console.error('Error loading booking:', error);
-        showToast('Failed to load booking', 'error');
+        showToast(t.errors.failedToLoadBooking, 'error');
       } finally {
         setLoadingBooking(false);
       }
     };
 
     loadBooking();
-  }, [bookingId, user?.id, navigate, showToast]);
+  }, [bookingId, user?.id, navigate, showToast, t.errors]);
 
   const handleSendMessage = async (message: string, photoFile?: File) => {
     try {
       await sendMessage(message, photoFile);
     } catch (error) {
-      showToast('Failed to send message', 'error');
+      showToast(t.errors.failedToSendMessage, 'error');
       throw error;
     }
   };
