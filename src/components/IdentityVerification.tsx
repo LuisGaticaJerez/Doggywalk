@@ -2,6 +2,13 @@ import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { useToast } from '../contexts/ToastContext';
+import {
+  validateAllDocumentData,
+  validateDocumentImage,
+  formatChileanRUT,
+  validateChileanRUT,
+} from '../utils/documentValidation';
 
 interface IdentityVerificationProps {
   onComplete: () => void;
@@ -20,9 +27,12 @@ interface VerificationData {
 export default function IdentityVerification({ onComplete, onSkip }: IdentityVerificationProps) {
   const { user } = useAuth();
   const { t } = useI18n();
+  const { showToast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [validating, setValidating] = useState(false);
 
   const [verificationData, setVerificationData] = useState<VerificationData>({
     documentType: 'national_id',
@@ -44,7 +54,16 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
   const fileInputFront = useRef<HTMLInputElement>(null);
   const fileInputBack = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (file: File, type: 'front' | 'back' | 'selfie') => {
+  const handleFileSelect = async (file: File, type: 'front' | 'back' | 'selfie') => {
+    setError('');
+
+    const validation = await validateDocumentImage(file, type);
+    if (!validation.valid) {
+      setError(validation.error || 'Imagen inválida');
+      showToast(validation.error || 'Imagen inválida', 'error');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       if (type === 'front') {
@@ -88,12 +107,25 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
       return;
     }
 
+    const dataValidation = validateAllDocumentData(verificationData);
+    if (!dataValidation.isValid) {
+      setError(dataValidation.errors.join('. '));
+      return;
+    }
+
+    if (dataValidation.warnings.length > 0) {
+      setWarnings(dataValidation.warnings);
+    }
+
     setLoading(true);
+    setValidating(true);
     setError('');
 
     try {
       const timestamp = Date.now();
       const userId = user.id;
+
+      showToast('Subiendo documentos...', 'info');
 
       const documentFrontUrl = await uploadFile(
         documentFront,
@@ -116,6 +148,28 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
         `${userId}/selfie-${timestamp}.jpg`
       );
 
+      showToast('Validando documentos...', 'info');
+
+      const validationResult = await validateDocumentsWithAI(
+        documentFrontUrl,
+        documentBackUrl,
+        selfieUrl,
+        verificationData
+      );
+
+      if (!validationResult.isValid) {
+        setError(validationResult.errors.join('. '));
+        setLoading(false);
+        setValidating(false);
+        return;
+      }
+
+      if (validationResult.warnings.length > 0) {
+        setWarnings([...warnings, ...validationResult.warnings]);
+      }
+
+      showToast('Guardando verificación...', 'info');
+
       const { error: dbError } = await supabase
         .from('identity_verifications')
         .insert({
@@ -129,17 +183,74 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
           date_of_birth: verificationData.dateOfBirth,
           nationality: verificationData.nationality,
           expiry_date: verificationData.expiryDate || null,
-          status: 'pending'
+          status: validationResult.confidence >= 80 ? 'pending' : 'pending',
+          verification_notes: JSON.stringify({
+            confidence: validationResult.confidence,
+            warnings: validationResult.warnings,
+            extractedData: validationResult.extractedData,
+          })
         });
 
       if (dbError) throw dbError;
 
+      showToast('Verificación enviada exitosamente', 'success');
       onComplete();
     } catch (err: any) {
       console.error('Error submitting verification:', err);
       setError(err.message || t.identityVerification.errorSubmitting);
+      showToast(err.message || t.identityVerification.errorSubmitting, 'error');
     } finally {
       setLoading(false);
+      setValidating(false);
+    }
+  };
+
+  const validateDocumentsWithAI = async (
+    documentFrontUrl: string,
+    documentBackUrl: string | null,
+    selfieUrl: string,
+    documentData: VerificationData
+  ) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-document`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            documentFrontUrl,
+            documentBackUrl,
+            selfieUrl,
+            documentData: {
+              documentType: documentData.documentType,
+              documentNumber: documentData.documentNumber,
+              fullName: documentData.fullName,
+              dateOfBirth: documentData.dateOfBirth,
+              nationality: documentData.nationality,
+            }
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error en la validación del documento');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error calling validation function:', error);
+      return {
+        isValid: true,
+        errors: [],
+        warnings: ['No se pudo realizar la validación automática. Un administrador revisará tu solicitud manualmente.'],
+        confidence: 50,
+      };
     }
   };
 
@@ -206,7 +317,35 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
             <input
               type="text"
               value={verificationData.documentNumber}
-              onChange={(e) => setVerificationData({ ...verificationData, documentNumber: e.target.value })}
+              onChange={(e) => {
+                let value = e.target.value;
+                if (
+                  verificationData.documentType === 'national_id' &&
+                  (verificationData.nationality.toLowerCase().includes('chil') ||
+                   verificationData.nationality.toLowerCase() === 'cl')
+                ) {
+                  value = value.replace(/[^0-9kK.-]/g, '');
+                  if (value.length > 12) value = value.slice(0, 12);
+                }
+                setVerificationData({ ...verificationData, documentNumber: value });
+              }}
+              onBlur={() => {
+                if (
+                  verificationData.documentType === 'national_id' &&
+                  (verificationData.nationality.toLowerCase().includes('chil') ||
+                   verificationData.nationality.toLowerCase() === 'cl') &&
+                  verificationData.documentNumber
+                ) {
+                  const formatted = formatChileanRUT(verificationData.documentNumber);
+                  setVerificationData({ ...verificationData, documentNumber: formatted });
+
+                  if (!validateChileanRUT(formatted)) {
+                    setError('RUT chileno inválido. Verifica el formato: 12.345.678-9');
+                  } else {
+                    setError('');
+                  }
+                }
+              }}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -214,8 +353,21 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
                 borderRadius: '8px',
                 fontSize: '16px'
               }}
-              placeholder="123456789"
+              placeholder={
+                verificationData.documentType === 'national_id' &&
+                (verificationData.nationality.toLowerCase().includes('chil') ||
+                 verificationData.nationality.toLowerCase() === 'cl')
+                  ? "12.345.678-9"
+                  : "123456789"
+              }
             />
+            {verificationData.documentType === 'national_id' &&
+             (verificationData.nationality.toLowerCase().includes('chil') ||
+              verificationData.nationality.toLowerCase() === 'cl') && (
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Formato: 12.345.678-9 o 12345678-9
+              </p>
+            )}
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -315,9 +467,26 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
 
       {step === 2 && (
         <div>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '10px' }}>
             {t.identityVerification.uploadDocuments}
           </h3>
+          <div style={{
+            padding: '12px',
+            backgroundColor: '#f0f9ff',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '13px',
+            color: '#1e40af'
+          }}>
+            <strong>📋 Requisitos de las fotos:</strong>
+            <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+              <li>Imagen clara y bien iluminada</li>
+              <li>Todo el documento visible sin cortes</li>
+              <li>Texto legible sin reflejos ni borrosidad</li>
+              <li>Tamaño mínimo: 600x400 píxeles</li>
+              <li>Formato: JPG, PNG o HEIC</li>
+            </ul>
+          </div>
 
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
@@ -539,6 +708,43 @@ export default function IdentityVerification({ onComplete, onSkip }: IdentityVer
               </div>
             )}
           </div>
+
+          {validating && (
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#dbeafe',
+              color: '#1e40af',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              <div style={{ marginBottom: '8px' }}>
+                🔍 Validando documentos...
+              </div>
+              <div style={{ fontSize: '12px', color: '#3b82f6' }}>
+                Esto puede tomar unos segundos
+              </div>
+            </div>
+          )}
+
+          {warnings.length > 0 && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#fef3c7',
+              color: '#92400e',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              fontSize: '14px'
+            }}>
+              <strong>⚠️ Advertencias:</strong>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                {warnings.map((warning, idx) => (
+                  <li key={idx}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {error && (
             <div style={{
